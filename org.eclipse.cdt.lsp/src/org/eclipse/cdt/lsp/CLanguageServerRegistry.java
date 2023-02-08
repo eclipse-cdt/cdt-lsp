@@ -35,7 +35,7 @@ public class CLanguageServerRegistry {
 		AbstractCEditorPropertyTester result = (AbstractCEditorPropertyTester) getInstanceFromExtension(ELEMENT_CONTENT_TESTER,
 				AbstractCEditorPropertyTester.class);
 		if (result == null) {
-			LspPlugin.logError("No C/C++ editor input tester defined");
+			LspPlugin.logWarning("No C/C++ editor input tester defined");
 			return new DefaultCEditorPropertyTester();
 		}
 		return result;
@@ -46,7 +46,7 @@ public class CLanguageServerRegistry {
 				ICLanguageServerCommandProvider.class);
 
 		if (result == null) {
-			LspPlugin.logError("No C/C++ language server defined");
+			LspPlugin.logWarning("No C/C++ language server defined");
 		}
 		return result;
 	}

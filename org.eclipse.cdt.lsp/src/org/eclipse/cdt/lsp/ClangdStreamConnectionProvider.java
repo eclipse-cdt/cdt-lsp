@@ -25,7 +25,7 @@ public class ClangdStreamConnectionProvider extends ProcessStreamConnectionProvi
 	public static final String BACKGROUND_INDEX = "--background-index";
 	public static final String COMPLETION_STYLE = "--completion-style=detailed";
 	public static final String PRETTY = "--pretty";
-	public static final String QUERY_DRIVER = "--query-driver";
+	public static final String QUERY_DRIVER = "--query-driver=";
 	
 	public ClangdStreamConnectionProvider() {
 		var commandProvider = new CLanguageServerRegistry().createCLanguageServerCommandProvider();
@@ -50,7 +50,7 @@ public class ClangdStreamConnectionProvider extends ProcessStreamConnectionProvi
 			// clangd will execute drivers and fetch necessary include paths to compile your code:
 			IPath compilerLocation = PathUtil.findProgramLocation("gcc", null);
 			if (compilerLocation != null) {
-				commands.add(QUERY_DRIVER + "=" + compilerLocation.removeLastSegments(1).append(IPath.SEPARATOR + "*"));
+				commands.add(QUERY_DRIVER + compilerLocation.removeLastSegments(1).append(IPath.SEPARATOR + "*"));
 			}
 		}
 		return commands;
