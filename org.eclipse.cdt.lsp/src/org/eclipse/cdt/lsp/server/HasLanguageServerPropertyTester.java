@@ -8,21 +8,24 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp;
+package org.eclipse.cdt.lsp.server;
 
-import org.eclipse.cdt.lsp.editor.AbstractCEditorPropertyTester;
+import org.eclipse.cdt.lsp.CLanguageServerRegistry;
 import org.eclipse.core.expressions.PropertyTester;
 
 public class HasLanguageServerPropertyTester extends PropertyTester {
-	private final AbstractCEditorPropertyTester cEditorInputTester;
+	private final EnableExpression cEnableExpression;
 
 	public HasLanguageServerPropertyTester() {
-		cEditorInputTester = new CLanguageServerRegistry().createCEditorPropertyTester();
+		cEnableExpression = new CLanguageServerRegistry().getEnablementExpression();
 	}
 
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-		return cEditorInputTester.test(receiver, property, args, expectedValue);
+		if (cEnableExpression != null) {
+			return cEnableExpression.evaluate(receiver);
+		}
+		return true;
 	}
 
 }

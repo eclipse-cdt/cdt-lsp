@@ -26,10 +26,10 @@ import org.eclipse.ui.part.FileEditorInput;
 public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	private static final String LSP_CEDITOR_ID = "org.eclipse.cdt.lsp.CEditor";
 	private static final String C_EDITOR_ID = "org.eclipse.cdt.ui.editor.CEditor";
-	private final ICEditorTest cEditorInputTester;
+	private final ICEditorTest cCEditorTest;
 
 	public CEditorAssociationOverride() {
-		cEditorInputTester = new CLanguageServerRegistry().createCEditorPropertyTester();
+		cCEditorTest = new CLanguageServerRegistry().createCEditorTest();
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType)) {
 			return editorDescriptors;
 		}
-		if (cEditorInputTester.useLanguageServerEditor(editorInput)) {
+		if (cCEditorTest.useLanguageServerEditor(editorInput)) {
 			return editorFilter(C_EDITOR_ID, editorDescriptors); // remove CDT C-Editor
 		}
 		return editorFilter(LSP_CEDITOR_ID, editorDescriptors); // remove LSP based C-Editor
@@ -98,7 +98,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType))
 			return null;
 
-		if (cEditorInputTester.useLanguageServerEditor(editorInput)) {
+		if (cCEditorTest.useLanguageServerEditor(editorInput)) {
 			return getLspCEditor(editorInput, contentType);
 		}
 		return null;

@@ -53,17 +53,17 @@ public class LspPlugin extends AbstractUIPlugin {
 	public static LspPlugin getDefault() {
 		return plugin;
 	}
-
-	public static void logError(String message) {
-		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message));
+	
+	public static void logError(String message, Throwable throwable) {
+		getDefault().getLog().error(message, throwable);
 	}
 	
 	public static void logWarning(String message) {
-		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, message));
+		getDefault().getLog().warn(message);
 	}
-
-	public static void logError(String message, Throwable throwable) {
-		getDefault().getLog().error(message, throwable);
+	
+	public static void logWarning(String message, Throwable throwable) {
+		getDefault().getLog().warn(message, throwable);
 	}
 
 }

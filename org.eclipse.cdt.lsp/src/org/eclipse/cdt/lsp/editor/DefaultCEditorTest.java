@@ -10,13 +10,13 @@
 
 package org.eclipse.cdt.lsp.editor;
 
-import org.eclipse.core.expressions.PropertyTester;
+import org.eclipse.ui.IEditorInput;
 
-/**
- * This class can be used in the serverProvider extension point to add a property test to the language server enabler.
- * The test method can be used to distinguish whether a file shall be opened by a LSP based editor or not.
- * This can be necessary when there is more than one editor for a content type.
- */
-public abstract class AbstractCEditorPropertyTester extends PropertyTester implements ICEditorTest {
+public class DefaultCEditorTest implements ICEditorTest {
+
+	@Override
+	public boolean useLanguageServerEditor(IEditorInput editorInput) {
+		return false;
+	}
 
 }

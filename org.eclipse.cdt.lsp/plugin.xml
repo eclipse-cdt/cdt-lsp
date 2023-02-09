@@ -186,7 +186,7 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="org.eclipse.cdt.lsp.HasLanguageServerPropertyTester"
+            class="org.eclipse.cdt.lsp.server.HasLanguageServerPropertyTester"
             id="org.eclipse.cdt.lsp.hasLanguageServerPropertyTester"
             namespace="org.eclipse.cdt.lsp"
             properties="hasLanguageServer"
@@ -197,18 +197,10 @@
          point="org.eclipse.core.expressions.definitions">
       <definition
             id="org.eclipse.cdt.lsp.editorHasLanguageServer">
-         <or>
-            <with
-                  variable="activeEditorId">
-               <equals
-                     value="org.eclipse.cdt.lsp.CEditor">
-               </equals>
-            </with>
             <test
                   forcePluginActivation="true"
                   property="org.eclipse.cdt.lsp.hasLanguageServer">
             </test>
-         </or>
       </definition>
    </extension>   
 </plugin>

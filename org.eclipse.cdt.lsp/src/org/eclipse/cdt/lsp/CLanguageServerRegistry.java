@@ -10,53 +10,88 @@
 
 package org.eclipse.cdt.lsp;
 
-import org.eclipse.cdt.lsp.editor.AbstractCEditorPropertyTester;
-import org.eclipse.cdt.lsp.editor.DefaultCEditorPropertyTester;
+import java.util.Optional;
+
+import org.eclipse.cdt.lsp.editor.DefaultCEditorTest;
+import org.eclipse.cdt.lsp.editor.ICEditorTest;
+import org.eclipse.cdt.lsp.server.EnableExpression;
 import org.eclipse.cdt.lsp.server.ICLanguageServerCommandProvider;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.IHandlerService;
 
 public class CLanguageServerRegistry {
 	private static final String EXTENSION_ID = LspPlugin.PLUGIN_ID + ".serverProvider"; //$NON-NLS-1$
 	private static final String SERVER_ELEMENT = "server"; //$NON-NLS-1$
 	private static final String ELEMENT_CONTENT_TESTER = "contentTester"; //$NON-NLS-1$
-	private static final String CLASS = "class";
-	private final IExtensionPoint extension;
+	private static final String CLASS = "class"; //$NON-NLS-1$
+	private static final String ENABLED_WHEN_ATTRIBUTE = "enabledWhen"; //$NON-NLS-1$
+	private final IExtensionPoint cExtensionPoint;
 
 	public CLanguageServerRegistry() {
-		extension = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_ID);
+		cExtensionPoint = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_ID);
 	}
 
-	public AbstractCEditorPropertyTester createCEditorPropertyTester() throws InvalidRegistryObjectException {
-		AbstractCEditorPropertyTester result = (AbstractCEditorPropertyTester) getInstanceFromExtension(ELEMENT_CONTENT_TESTER,
-				AbstractCEditorPropertyTester.class);
-		if (result == null) {
+	public ICEditorTest createCEditorTest() throws InvalidRegistryObjectException {
+		ICEditorTest propertyTester = (ICEditorTest) getInstanceFromExtension(ELEMENT_CONTENT_TESTER,ICEditorTest.class);
+		if (propertyTester == null) {
 			LspPlugin.logWarning("No C/C++ editor input tester defined");
-			return new DefaultCEditorPropertyTester();
+			return new DefaultCEditorTest();
 		}
-		return result;
+		return propertyTester;
 	}
 
 	public ICLanguageServerCommandProvider createCLanguageServerCommandProvider() {
-		ICLanguageServerCommandProvider result = (ICLanguageServerCommandProvider) getInstanceFromExtension(SERVER_ELEMENT,
+		ICLanguageServerCommandProvider provider = (ICLanguageServerCommandProvider) getInstanceFromExtension(SERVER_ELEMENT,
 				ICLanguageServerCommandProvider.class);
 
-		if (result == null) {
+		if (provider == null) {
 			LspPlugin.logWarning("No C/C++ language server defined");
 		}
-		return result;
+				
+		return provider;
+	}
+	
+	public EnableExpression getEnablementExpression() {
+		EnableExpression enableExpression = null;
+		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
+			if (SERVER_ELEMENT.equals(configurationElement.getName())) {
+				if (configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE) != null) {
+					IConfigurationElement[] enabledWhenElements = configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE);
+					if (enabledWhenElements.length == 1) {
+						IConfigurationElement enabledWhen = enabledWhenElements[0];
+						IConfigurationElement[] enabledWhenChildren = enabledWhen.getChildren();
+						if (enabledWhenChildren.length == 1) {
+							try {
+								enableExpression = new EnableExpression(this::getEvaluationContext, ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
+							} catch (CoreException e) {
+								LspPlugin.logWarning(e.getMessage(), e);
+							}
+						}
+					}
+				}
+			}
+		}
+		return enableExpression;
+	}
+	
+	private IEvaluationContext getEvaluationContext() {
+		return Optional.ofNullable(PlatformUI.getWorkbench().getService(IHandlerService.class)).map(IHandlerService::getCurrentState).orElse(null);
 	}
 
 	private <T> Object getInstanceFromExtension(String configurationElementName, Class<T> clazz) {
 		Object result = null;
-		for (IConfigurationElement config : extension.getConfigurationElements()) {
-			if (configurationElementName.equals(config.getName())) {
+		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
+			if (configurationElementName.equals(configurationElement.getName())) {
 				try {
-					Object obj = config.createExecutableExtension(CLASS);
+					Object obj = configurationElement.createExecutableExtension(CLASS);
 					result = Adapters.adapt(obj, clazz);
 				} catch (CoreException e) {
 					LspPlugin.logError(e.getMessage(), e);

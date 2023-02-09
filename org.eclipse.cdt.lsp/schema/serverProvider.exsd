@@ -10,6 +10,8 @@
       </documentation>
    </annotation>
 
+   <include schemaLocation="schema://org.eclipse.core.expressions/schema/expressionLanguage.exsd"/>
+
    <element name="extension">
       <annotation>
          <appinfo>
@@ -50,6 +52,9 @@
 
    <element name="server">
       <complexType>
+         <sequence>
+            <element ref="enabledWhen" minOccurs="0" maxOccurs="1"/>
+         </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -73,13 +78,38 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  Class extending AbstractCEditorPropertyTester
+                  Class implementing ICEditorTest
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.cdt.lsp.editor.AbstractCEditorPropertyTester:"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.cdt.lsp.editor.ICEditorTest"/>
                </appinfo>
             </annotation>
          </attribute>
+      </complexType>
+   </element>
+
+   <element name="enabledWhen">
+      <annotation>
+         <documentation>
+            A core Expression that controls the enablement of the server
+         </documentation>
+      </annotation>
+      <complexType>
+         <choice minOccurs="0" maxOccurs="1">
+            <element ref="not"/>
+            <element ref="or"/>
+            <element ref="and"/>
+            <element ref="instanceof"/>
+            <element ref="test"/>
+            <element ref="systemTest"/>
+            <element ref="equals"/>
+            <element ref="count"/>
+            <element ref="with"/>
+            <element ref="resolve"/>
+            <element ref="adapt"/>
+            <element ref="iterate"/>
+            <element ref="reference"/>
+         </choice>
       </complexType>
    </element>
 

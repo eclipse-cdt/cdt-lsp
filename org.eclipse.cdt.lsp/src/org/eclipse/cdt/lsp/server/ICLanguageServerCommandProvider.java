@@ -19,6 +19,6 @@ public interface ICLanguageServerCommandProvider {
 	 * 
 	 * @return Command list to run language server
 	 */
-	List<String> getCommands();
+	public List<String> getCommands();
 
 }
