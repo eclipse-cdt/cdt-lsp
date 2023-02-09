@@ -21,7 +21,7 @@
       <complexType>
          <sequence>
             <element ref="server"/>
-            <element ref="contentTester" minOccurs="0" maxOccurs="1"/>
+            <element ref="editorTest" minOccurs="0" maxOccurs="1"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -68,10 +68,10 @@
       </complexType>
    </element>
 
-   <element name="contentTester">
+   <element name="editorTest">
       <annotation>
          <documentation>
-            Test if the content should be opened by the C/C++ LSP based editor
+            Test whether the editor input should be opened by the C/C++ LSP based editor
          </documentation>
       </annotation>
       <complexType>

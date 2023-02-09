@@ -4,9 +4,7 @@
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
  * SPDX-License-Identifier: EPL-2.0
- * 
  * Contributors:
- * 
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
@@ -22,16 +20,16 @@ import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.CoreException;
 
 public final class EnableExpression {
-	private final Expression expression;
-	private final Supplier<IEvaluationContext> parent;
+	private final Expression cExpression;
+	private final Supplier<IEvaluationContext> cParent;
 
 	public EnableExpression(Supplier<IEvaluationContext> parent, Expression expression) {
-		this.expression = expression;
-		this.parent = parent;
+		this.cExpression = expression;
+		this.cParent = parent;
 	}
 
 	/**
-	 * Evaluates enable expression with the given context. The context defualtVariable can be set by the input document.
+	 * Evaluates enable expression with the given context and document.
 	 *
 	 * @return true if expression evaluates to true, false otherwise
 	 */
@@ -40,9 +38,9 @@ public final class EnableExpression {
 			if (document == null) {
 				document = new Object();
 			}
-			final var context = new EvaluationContext(parent.get(), document);
+			final var context = new EvaluationContext(cParent.get(), document);
 			context.setAllowPluginActivation(true);
-			return expression.evaluate(context).equals(EvaluationResult.TRUE);
+			return cExpression.evaluate(context).equals(EvaluationResult.TRUE);
 		} catch (CoreException e) {
 			LspPlugin.logError("Error occured during evaluation of enablement expression", e); //$NON-NLS-1$
 		}

@@ -30,7 +30,7 @@ import org.eclipse.ui.handlers.IHandlerService;
 public class CLanguageServerRegistry {
 	private static final String EXTENSION_ID = LspPlugin.PLUGIN_ID + ".serverProvider"; //$NON-NLS-1$
 	private static final String SERVER_ELEMENT = "server"; //$NON-NLS-1$
-	private static final String ELEMENT_CONTENT_TESTER = "contentTester"; //$NON-NLS-1$
+	private static final String ELEMENT_EDITOR_TEST = "editorTest"; //$NON-NLS-1$
 	private static final String CLASS = "class"; //$NON-NLS-1$
 	private static final String ENABLED_WHEN_ATTRIBUTE = "enabledWhen"; //$NON-NLS-1$
 	private final IExtensionPoint cExtensionPoint;
@@ -40,7 +40,7 @@ public class CLanguageServerRegistry {
 	}
 
 	public ICEditorTest createCEditorTest() throws InvalidRegistryObjectException {
-		ICEditorTest propertyTester = (ICEditorTest) getInstanceFromExtension(ELEMENT_CONTENT_TESTER,ICEditorTest.class);
+		ICEditorTest propertyTester = (ICEditorTest) getInstanceFromExtension(ELEMENT_EDITOR_TEST, ICEditorTest.class);
 		if (propertyTester == null) {
 			LspPlugin.logWarning("No C/C++ editor input tester defined");
 			return new DefaultCEditorTest();
@@ -55,10 +55,10 @@ public class CLanguageServerRegistry {
 		if (provider == null) {
 			LspPlugin.logWarning("No C/C++ language server defined");
 		}
-				
+
 		return provider;
 	}
-	
+
 	public EnableExpression getEnablementExpression() {
 		EnableExpression enableExpression = null;
 		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
@@ -70,7 +70,8 @@ public class CLanguageServerRegistry {
 						IConfigurationElement[] enabledWhenChildren = enabledWhen.getChildren();
 						if (enabledWhenChildren.length == 1) {
 							try {
-								enableExpression = new EnableExpression(this::getEvaluationContext, ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
+								enableExpression = new EnableExpression(this::getEvaluationContext,
+										ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
 							} catch (CoreException e) {
 								LspPlugin.logWarning(e.getMessage(), e);
 							}
@@ -81,7 +82,7 @@ public class CLanguageServerRegistry {
 		}
 		return enableExpression;
 	}
-	
+
 	private IEvaluationContext getEvaluationContext() {
 		return Optional.ofNullable(PlatformUI.getWorkbench().getService(IHandlerService.class)).map(IHandlerService::getCurrentState).orElse(null);
 	}
