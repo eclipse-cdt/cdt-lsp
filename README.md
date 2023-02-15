@@ -32,7 +32,7 @@ The `org.eclipse.cdt.lsp.editor.ui` plugin provides an activation for the LSP ba
 ![image](https://user-images.githubusercontent.com/123444711/219040726-75207ad7-2dbe-465f-9a65-160e537e8bbf.png)
 
 
-If enabled on workspace level. Newly created C/C++ projects use the LSP based C/C++ editor as default. This can be changed in the project properties:
+If enabled on workspace level, newly created C/C++ projects use the LSP based C/C++ editor as default. This can be changed in the project properties:
 
 ![image](https://user-images.githubusercontent.com/123444711/219040315-b11dd8e2-f7ba-437e-9b51-ac4d22f14e53.png)
 
