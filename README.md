@@ -44,4 +44,5 @@ To use these plugins import them in your CDT sources.
 - Support type/call hierarchy and include browser
 - Fetch outline informations from language server
 - Remove indexer from projects using LSP
+- Add tests
 ...
