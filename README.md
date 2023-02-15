@@ -35,6 +35,8 @@ If enabled on workspace level. Newly created C/C++ projects use the LSP based C/
 
 ![image](https://user-images.githubusercontent.com/123444711/219040315-b11dd8e2-f7ba-437e-9b51-ac4d22f14e53.png)
 
+Different C/C++ projects using the old and new editor as default can be mixed in one workspace. The linked include files will be opened with the same editor.
+
 To use these plugins import them in your CDT sources.
 
 
