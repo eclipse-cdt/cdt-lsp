@@ -3,26 +3,27 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
  * SPDX-License-Identifier: EPL-2.0
+ * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp;
 
+import java.util.HashMap;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.editor.DefaultCEditorTest;
-import org.eclipse.cdt.lsp.editor.ICEditorTest;
+import org.eclipse.cdt.lsp.server.DefaultLanguageServerProvider;
 import org.eclipse.cdt.lsp.server.EnableExpression;
-import org.eclipse.cdt.lsp.server.ICLanguageServerCommandProvider;
+import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.ExpressionConverter;
 import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.IHandlerService;
@@ -30,77 +31,80 @@ import org.eclipse.ui.handlers.IHandlerService;
 public class CLanguageServerRegistry {
 	private static final String EXTENSION_ID = LspPlugin.PLUGIN_ID + ".serverProvider"; //$NON-NLS-1$
 	private static final String SERVER_ELEMENT = "server"; //$NON-NLS-1$
-	private static final String ELEMENT_EDITOR_TEST = "editorTest"; //$NON-NLS-1$
 	private static final String CLASS = "class"; //$NON-NLS-1$
+	private static final String PRIORITY = "priority"; //$NON-NLS-1$
 	private static final String ENABLED_WHEN_ATTRIBUTE = "enabledWhen"; //$NON-NLS-1$
 	private final IExtensionPoint cExtensionPoint;
+	private ICLanguageServerProvider prioritizedProvider = null;
+	private Priority highestPrio = Priority.low;
+	
+	private enum Priority{
+		low,
+		normal,
+		high
+	}
 
 	public CLanguageServerRegistry() {
 		cExtensionPoint = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_ID);
 	}
 
-	public ICEditorTest createCEditorTest() throws InvalidRegistryObjectException {
-		ICEditorTest propertyTester = (ICEditorTest) getInstanceFromExtension(ELEMENT_EDITOR_TEST, ICEditorTest.class);
-		if (propertyTester == null) {
-			LspPlugin.logWarning("No C/C++ editor input tester defined");
-			return new DefaultCEditorTest();
-		}
-		return propertyTester;
-	}
-
-	public ICLanguageServerCommandProvider createCLanguageServerCommandProvider() {
-		ICLanguageServerCommandProvider provider = (ICLanguageServerCommandProvider) getInstanceFromExtension(SERVER_ELEMENT,
-				ICLanguageServerCommandProvider.class);
-
-		if (provider == null) {
-			LspPlugin.logWarning("No C/C++ language server defined");
-		}
-
-		return provider;
-	}
-
-	public EnableExpression getEnablementExpression() {
-		EnableExpression enableExpression = null;
+	public ICLanguageServerProvider createCLanguageServerProvider() {
+		prioritizedProvider = null;
+		highestPrio = Priority.low;
+		HashMap<Priority, ICLanguageServerProvider> providers = new HashMap<Priority, ICLanguageServerProvider>();
 		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
 			if (SERVER_ELEMENT.equals(configurationElement.getName())) {
-				if (configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE) != null) {
-					IConfigurationElement[] enabledWhenElements = configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE);
-					if (enabledWhenElements.length == 1) {
-						IConfigurationElement enabledWhen = enabledWhenElements[0];
-						IConfigurationElement[] enabledWhenChildren = enabledWhen.getChildren();
-						if (enabledWhenChildren.length == 1) {
-							try {
-								enableExpression = new EnableExpression(this::getEvaluationContext,
-										ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
-							} catch (CoreException e) {
-								LspPlugin.logWarning(e.getMessage(), e);
+				ICLanguageServerProvider provider = (ICLanguageServerProvider) getInstanceFromExtension(configurationElement, ICLanguageServerProvider.class);		
+				if (provider != null) {
+					// set enable expression:
+					EnableExpression enableExpression = null;
+					if (configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE) != null) {
+						IConfigurationElement[] enabledWhenElements = configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE);
+						if (enabledWhenElements.length == 1) {
+							IConfigurationElement enabledWhen = enabledWhenElements[0];
+							IConfigurationElement[] enabledWhenChildren = enabledWhen.getChildren();
+							if (enabledWhenChildren.length == 1) {
+								try {
+									enableExpression = new EnableExpression(this::getEvaluationContext,
+											ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
+								} catch (CoreException e) {
+									LspPlugin.logWarning(e.getMessage(), e);
+								}
 							}
 						}
 					}
+					provider.setEnableExpression(enableExpression);
+					// save priority attribute:
+					providers.put(Priority.valueOf(configurationElement.getAttribute(PRIORITY)),provider);
 				}
 			}
 		}
-		return enableExpression;
+		if (providers.isEmpty()) {
+			LspPlugin.logWarning("No C/C++ language server defined");
+			prioritizedProvider = new DefaultLanguageServerProvider();
+		} else {
+			// get provider with highest priority:
+			providers.forEach((key, value) -> {
+				if (key.compareTo(highestPrio) >= 0) {
+					highestPrio = key;
+					prioritizedProvider = value;
+				}
+			});
+		}
+		return prioritizedProvider;
 	}
 
 	private IEvaluationContext getEvaluationContext() {
 		return Optional.ofNullable(PlatformUI.getWorkbench().getService(IHandlerService.class)).map(IHandlerService::getCurrentState).orElse(null);
 	}
 
-	private <T> Object getInstanceFromExtension(String configurationElementName, Class<T> clazz) {
+	private <T> Object getInstanceFromExtension(IConfigurationElement configurationElement, Class<T> clazz) {
 		Object result = null;
-		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
-			if (configurationElementName.equals(configurationElement.getName())) {
-				try {
-					Object obj = configurationElement.createExecutableExtension(CLASS);
-					result = Adapters.adapt(obj, clazz);
-				} catch (CoreException e) {
-					LspPlugin.logError(e.getMessage(), e);
-				}
-				if (result != null) {
-					break;
-				}
-			}
+		try {
+			Object obj = configurationElement.createExecutableExtension(CLASS);
+			result = Adapters.adapt(obj, clazz);
+		} catch (CoreException e) {
+			LspPlugin.logError(e.getMessage(), e);
 		}
 		return result;
 	}

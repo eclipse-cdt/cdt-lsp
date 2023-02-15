@@ -17,11 +17,13 @@
          <appinfo>
             <meta.element />
          </appinfo>
+         <documentation>
+            Defines a C/C++ language server.
+         </documentation>
       </annotation>
       <complexType>
          <sequence>
             <element ref="server"/>
-            <element ref="editorTest" minOccurs="0" maxOccurs="1"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -58,32 +60,29 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  Class implementing ICLanguageServerCommandProvider
+                  Class implementing ICLanguageServerProvider
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.cdt.lsp.server.ICLanguageServerCommandProvider"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.cdt.lsp.server.ICLanguageServerProvider"/>
                </appinfo>
             </annotation>
          </attribute>
-      </complexType>
-   </element>
-
-   <element name="editorTest">
-      <annotation>
-         <documentation>
-            Test whether the editor input should be opened by the C/C++ LSP based editor
-         </documentation>
-      </annotation>
-      <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="priority" use="default" value="low">
             <annotation>
                <documentation>
-                  Class implementing ICEditorTest
+                  Priority of this language server.  Priorities are used to solve conflicts (when more than one language server has been defined)
                </documentation>
-               <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.cdt.lsp.editor.ICEditorTest"/>
-               </appinfo>
             </annotation>
+            <simpleType>
+               <restriction base="string">
+                  <enumeration value="low">
+                  </enumeration>
+                  <enumeration value="normal">
+                  </enumeration>
+                  <enumeration value="high">
+                  </enumeration>
+               </restriction>
+            </simpleType>
          </attribute>
       </complexType>
    </element>

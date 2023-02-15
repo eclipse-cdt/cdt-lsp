@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -10,38 +11,35 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp;
+package org.eclipse.cdt.lsp.editor.ui;
 
-import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-@SuppressWarnings("restriction")
-public class LspPlugin extends AbstractUIPlugin {
+public class Activator extends AbstractUIPlugin {
+	private IPreferenceStore preferenceStore;
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.editor.ui"; //$NON-NLS-1$
 
 	// The shared instance
-	private static LspPlugin plugin;
+	private static Activator plugin;
 	
-	private ICLanguageServerProvider cLanguageServerProvider;
-
 	/**
 	 * The constructor
 	 */
-	public LspPlugin() {
+	public Activator() {
 	}
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
 		plugin = this;
 	}
 
@@ -56,24 +54,15 @@ public class LspPlugin extends AbstractUIPlugin {
 	 *
 	 * @return the shared instance
 	 */
-	public static LspPlugin getDefault() {
+	public static Activator getDefault() {
 		return plugin;
 	}
 	
-	public ICLanguageServerProvider getCLanguageServerProvider() {
-		return cLanguageServerProvider;
-	}
-	
-	public static void logError(String message, Throwable throwable) {
-		getDefault().getLog().error(message, throwable);
-	}
-	
-	public static void logWarning(String message) {
-		getDefault().getLog().warn(message);
-	}
-	
-	public static void logWarning(String message, Throwable throwable) {
-		getDefault().getLog().warn(message, throwable);
+	public IPreferenceStore getLspEditorPreferences() {
+		if (preferenceStore == null) {
+			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, Activator.PLUGIN_ID);
+		}
+		return preferenceStore;
 	}
 
 }

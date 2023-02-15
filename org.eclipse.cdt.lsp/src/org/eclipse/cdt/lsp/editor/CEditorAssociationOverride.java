@@ -3,7 +3,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
  * SPDX-License-Identifier: EPL-2.0
+ * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -12,6 +14,8 @@ package org.eclipse.cdt.lsp.editor;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.lsp.CLanguageServerRegistry;
+import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -26,10 +30,10 @@ import org.eclipse.ui.part.FileEditorInput;
 public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	private static final String LSP_CEDITOR_ID = "org.eclipse.cdt.lsp.CEditor";
 	private static final String C_EDITOR_ID = "org.eclipse.cdt.ui.editor.CEditor";
-	private final ICEditorTest cCEditorTest;
+	private final ICLanguageServerProvider cLanguageServerProvider;
 
 	public CEditorAssociationOverride() {
-		cCEditorTest = new CLanguageServerRegistry().createCEditorTest();
+		cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 	}
 
 	/**
@@ -40,7 +44,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType)) {
 			return editorDescriptors;
 		}
-		if (cCEditorTest.useLanguageServerEditor(editorInput)) {
+		if (cLanguageServerProvider.isEnabled(editorInput)) {
 			return editorFilter(C_EDITOR_ID, editorDescriptors); // remove CDT C-Editor
 		}
 		return editorFilter(LSP_CEDITOR_ID, editorDescriptors); // remove LSP based C-Editor
@@ -98,7 +102,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType))
 			return null;
 
-		if (cCEditorTest.useLanguageServerEditor(editorInput)) {
+		if (cLanguageServerProvider.isEnabled(editorInput)) {
 			return getLspCEditor(editorInput, contentType);
 		}
 		return null;

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
+            class="org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferencePage"
+            id="org.eclipse.cdt.lsp.editor.ui.preference.page"
+            name="Editor (LSP)">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            category="org.eclipse.cdt.ui.newui.Page_head_general"
+            class="org.eclipse.cdt.lsp.editor.ui.properties.LspEditorPropertiesPage"
+            id="org.eclipse.cdt.lsp.editor.ui.properties.page"
+            name="Editor (LSP)">
+         <filter
+               name="projectNature"
+               value="org.eclipse.cdt.core.cnature">
+         </filter>
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+            </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferencesTester"
+            id="org.eclipse.cdt.lsp.editor.ui.lspEditorPreference"
+            namespace="org.eclipse.cdt.lsp.editor.ui"
+            properties="LspEditorPreference"
+            type="java.lang.Object">
+      </propertyTester>
+   </extension>
+   <extension
+         point="org.eclipse.cdt.lsp.serverProvider">
+      <server
+            class="org.eclipse.cdt.lsp.editor.ui.CdtLanguageServerProvider"
+            priority="low">
+         <enabledWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.eclipse.cdt.lsp.editor.ui.LspEditorPreference">
+            </test>
+         </enabledWhen>
+      </server>
+   </extension>
+
+</plugin>
