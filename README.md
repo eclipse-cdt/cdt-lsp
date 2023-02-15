@@ -39,5 +39,8 @@ Different C/C++ projects using the old and new editor as default can be mixed in
 
 To use these plugins import them in your CDT sources.
 
-
-
+**TODO:**
+- Support type/call hierarchy and include browser
+- Fetch outline informations from language server
+- Remove indexer from projects using LSP
+...
