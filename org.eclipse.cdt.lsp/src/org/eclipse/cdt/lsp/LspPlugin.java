@@ -41,8 +41,8 @@ public class LspPlugin extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
 		plugin = this;
+		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
 	}
 
 	@Override
