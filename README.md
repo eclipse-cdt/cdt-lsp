@@ -28,6 +28,7 @@ Not supported (yet):
 - Include browser (Eclipse CDT speciality)
 
 The `org.eclipse.cdt.lsp.editor.ui` plugin provides an activation for the LSP based C/C++ Editor on project and workspace level:
+
 ![image](https://user-images.githubusercontent.com/123444711/219040726-75207ad7-2dbe-465f-9a65-160e537e8bbf.png)
 
 
