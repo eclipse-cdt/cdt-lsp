@@ -68,7 +68,7 @@ public class CLanguageServerRegistry {
 									enableExpression = new EnableExpression(this::getEvaluationContext,
 											ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
 								} catch (CoreException e) {
-									LspPlugin.logWarning(e.getMessage(), e);
+									LspPlugin.logWarning("Failed to create enable expression for " + configurationElement.getNamespaceIdentifier(), e);
 								}
 							}
 						}
