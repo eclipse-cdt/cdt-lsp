@@ -84,14 +84,15 @@ This file may be hidden by default, therefore to see the file uncheck the *.\* r
 
 ### Open a file
 
-The LSP based editor builds on top of the *Generic Text Editor*, therefore open the C++ file with that editor:
-
-![open-with.png](images/open-with.png "open-with.png")
-
 By default C/C++ will be opened with the standard CEditor.
 The default can be changed per project or per workspace with the *C/C++ General* -> *Editor (LSP)* -> *Prefer C/C++ Editor (LSP)* checkbox in the project setting or preferences.
 
-With the *Generic Text Editor* open, the presentation of the C++ file will follow the LSP4E conventions augmented by the information returned from clangd.
+Alternatively, you can choose which editor to open the file by using *Open With*:
+
+![open-with.png](images/open-with.png "open-with.png")
+
+
+With the *C/C++ Editor (LSP)* open, the presentation of the C++ file will follow the LSP4E conventions augmented by the information returned from clangd.
 
 ![hello-world.png](images/hello-world.png "hello-world.png")
 
