@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -43,31 +43,29 @@ public class LspEditorPreferencePage extends FieldEditorPreferencePage implement
 	@Override
 	public void init(IWorkbench workbench) {
 	}
-	
 
 	@Override
 	public void createFieldEditors() {
 		PreferenceMetadata<Boolean> prefer = LspEditorPreferences.getPreferenceMetadata();
 		var booleanFieldEditor = new BooleanFieldEditor(prefer.identifer(), prefer.name(), getFieldEditorParent());
 		addField(booleanFieldEditor);
-		
+
 		serverPath = new FileFieldEditor(LspEditorPreferences.SERVER_PATH,
 				LspEditorUiMessages.LspEditorPreferencePage_server_path, getFieldEditorParent());
 		addField(serverPath);
 
-		
 		serverOptions = new MultiLineTextFieldEditor(LspEditorPreferences.SERVER_OPTIONS,
 				LspEditorUiMessages.LspEditorPreferencePage_server_options, getFieldEditorParent());
 		addField(serverOptions);
 	}
-		
+
 	@Override
 	public boolean performOk() {
 		writeServerPathToProvider(serverPath.getStringValue());
 		writeServerOptionsToProvider(serverOptions.getStringValue());
 		return super.performOk();
 	}
-	
+
 	private void writeServerPathToProvider(String path) {
 		if (path == null || path.isBlank()) {
 			return;
@@ -81,7 +79,7 @@ public class LspEditorPreferencePage extends FieldEditorPreferencePage implement
 		}
 		LspPlugin.getDefault().getCLanguageServerProvider().setCommands(commands);
 	}
-	
+
 	private void writeServerOptionsToProvider(String options) {
 		if (options == null) {
 			return;

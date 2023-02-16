@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -35,7 +35,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.prefs.BackingStoreException;
 
 public class LspEditorPropertiesPage extends PropertyPage {
-	
+
 	private Button preferLspEditorCheckbox;
 
 	@Override
@@ -50,7 +50,7 @@ public class LspEditorPropertiesPage extends PropertyPage {
 		load();
 		return composite;
 	}
-	
+
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
@@ -62,7 +62,8 @@ public class LspEditorPropertiesPage extends PropertyPage {
 		Optional<IProject> project = project();
 		if (project.isPresent()) {
 			IEclipsePreferences node = new ProjectScope(project.get()).getNode(LspEditorUiPlugin.PLUGIN_ID);
-			node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), preferLspEditorCheckbox.getSelection());
+			node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(),
+					preferLspEditorCheckbox.getSelection());
 			try {
 				node.flush();
 				return true;
@@ -86,13 +87,14 @@ public class LspEditorPropertiesPage extends PropertyPage {
 		Optional<IProject> project = project();
 		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
 		if (project.isPresent()) {
-			preferLspEditorCheckbox.setSelection(Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
-					option.defaultValue(), new IScopeContext[] { new ProjectScope(project.get()) }));
+			preferLspEditorCheckbox.setSelection(
+					Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
+							option.defaultValue(), new IScopeContext[] { new ProjectScope(project.get()) }));
 		} else {
 			preferLspEditorCheckbox.setSelection(option.defaultValue());
 		}
 	}
-	
+
 	private Composite createDefaultComposite(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
@@ -101,7 +103,7 @@ public class LspEditorPropertiesPage extends PropertyPage {
 		composite.setLayoutData(GridDataFactory.fillDefaults().create());
 		return composite;
 	}
-	
+
 	private Optional<IProject> project() {
 		return Optional.ofNullable(getElement())//
 				.filter(IProject.class::isInstance)//

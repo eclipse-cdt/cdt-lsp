@@ -3,9 +3,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  * Alexander Fedorov (ArSysOp) - use Platform for logging
@@ -39,11 +39,9 @@ public class CLanguageServerRegistry {
 	private final IExtensionPoint cExtensionPoint;
 	private ICLanguageServerProvider prioritizedProvider = null;
 	private Priority highestPrio = Priority.low;
-	
-	private enum Priority{
-		low,
-		normal,
-		high
+
+	private enum Priority {
+		low, normal, high
 	}
 
 	public CLanguageServerRegistry() {
@@ -56,12 +54,14 @@ public class CLanguageServerRegistry {
 		HashMap<Priority, ICLanguageServerProvider> providers = new HashMap<Priority, ICLanguageServerProvider>();
 		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
 			if (SERVER_ELEMENT.equals(configurationElement.getName())) {
-				ICLanguageServerProvider provider = (ICLanguageServerProvider) getInstanceFromExtension(configurationElement, ICLanguageServerProvider.class);		
+				ICLanguageServerProvider provider = (ICLanguageServerProvider) getInstanceFromExtension(
+						configurationElement, ICLanguageServerProvider.class);
 				if (provider != null) {
 					// set enable expression:
 					EnableExpression enableExpression = null;
 					if (configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE) != null) {
-						IConfigurationElement[] enabledWhenElements = configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE);
+						IConfigurationElement[] enabledWhenElements = configurationElement
+								.getChildren(ENABLED_WHEN_ATTRIBUTE);
 						if (enabledWhenElements.length == 1) {
 							IConfigurationElement enabledWhen = enabledWhenElements[0];
 							IConfigurationElement[] enabledWhenChildren = enabledWhen.getChildren();
@@ -70,14 +70,15 @@ public class CLanguageServerRegistry {
 									enableExpression = new EnableExpression(this::getEvaluationContext,
 											ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
 								} catch (CoreException e) {
-									Platform.getLog(getClass()).warn("Failed to create enable expression for " + configurationElement.getNamespaceIdentifier(), e);
+									Platform.getLog(getClass()).warn("Failed to create enable expression for "
+											+ configurationElement.getNamespaceIdentifier(), e);
 								}
 							}
 						}
 					}
 					provider.setEnableExpression(enableExpression);
 					// save priority attribute:
-					providers.put(Priority.valueOf(configurationElement.getAttribute(PRIORITY)),provider);
+					providers.put(Priority.valueOf(configurationElement.getAttribute(PRIORITY)), provider);
 				}
 			}
 		}
@@ -97,7 +98,8 @@ public class CLanguageServerRegistry {
 	}
 
 	private IEvaluationContext getEvaluationContext() {
-		return Optional.ofNullable(PlatformUI.getWorkbench().getService(IHandlerService.class)).map(IHandlerService::getCurrentState).orElse(null);
+		return Optional.ofNullable(PlatformUI.getWorkbench().getService(IHandlerService.class))
+				.map(IHandlerService::getCurrentState).orElse(null);
 	}
 
 	private <T> Object getInstanceFromExtension(IConfigurationElement configurationElement, Class<T> clazz) {

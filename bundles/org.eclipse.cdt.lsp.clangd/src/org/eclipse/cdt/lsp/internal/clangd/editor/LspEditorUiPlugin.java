@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  * Alexander Fedorov (ArSysOp) - use Platform for logging
@@ -38,7 +38,7 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 
 	// The shared instance
 	private static LspEditorUiPlugin plugin;
-	
+
 	/**
 	 * The constructor
 	 */
@@ -72,14 +72,14 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 	public static LspEditorUiPlugin getDefault() {
 		return plugin;
 	}
-	
+
 	public IPreferenceStore getLsPreferences() {
 		if (preferenceStore == null) {
 			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, LspEditorUiPlugin.PLUGIN_ID);
 		}
 		return preferenceStore;
 	}
-	
+
 	public IWorkspace getWorkspace() {
 		return workspace;
 	}

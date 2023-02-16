@@ -3,9 +3,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  * Alexander Fedorov (ArSysOp) - use Platform for logging
@@ -38,12 +38,10 @@ import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
-
-
 public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	protected final SymbolsModel symbolsModel = new SymbolsModel();
 	private volatile CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> symbols;
-	
+
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void getPipelinedChildren(Object parent, Set currentChildren) {
@@ -57,7 +55,7 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 			}
 		}
 	}
-	
+
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof DocumentSymbolWithFile) {
@@ -70,7 +68,7 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 		}
 		return NO_CHILDREN;
 	}
-	
+
 	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) throws CModelException {
 		if (unit.getResource() instanceof IFile) {
 			refreshTreeContentFromLS((IFile) unit.getResource());
@@ -78,18 +76,19 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 		}
 		return NO_CHILDREN;
 	}
-	
+
 	protected void refreshTreeContentFromLS(IFile file) {
 		if (symbols != null) {
 			symbols.cancel(true);
 		}
 
 		final var params = new DocumentSymbolParams(LSPEclipseUtils.toTextDocumentIdentifier(file.getLocationURI()));
-		
+
 		IDocument document = LSPEclipseUtils.getDocument(file);
 		if (document != null) {
 			CompletableFuture<Optional<LanguageServerWrapper>> languageServer = LanguageServers.forDocument(document)
-					.withFilter(capabilities -> LSPEclipseUtils.hasCapability(capabilities.getDocumentSymbolProvider())).computeFirst((w,ls) -> CompletableFuture.completedFuture(w));
+					.withFilter(capabilities -> LSPEclipseUtils.hasCapability(capabilities.getDocumentSymbolProvider()))
+					.computeFirst((w, ls) -> CompletableFuture.completedFuture(w));
 			try {
 				symbols = languageServer.get(500, TimeUnit.MILLISECONDS).filter(Objects::nonNull)
 						.filter(LanguageServerWrapper::isActive)
@@ -112,5 +111,5 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 		}
 
 	}
-	
+
 }

@@ -3,9 +3,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  * Alexander Fedorov (ArSysOp) - use Platform for logging
@@ -61,7 +61,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 				}
 			}
 		}
-		
+
 		@Override
 		protected boolean updateSelection(IStructuredSelection selection) {
 			fOpenElement = null;
@@ -77,7 +77,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 		public IWorkbenchPage getPage() {
 			return page;
 		}
-		
+
 		private void revealInEditor(IEditorPart part, DocumentSymbolWithFile element) {
 			if (element == null) {
 				return;
@@ -88,14 +88,13 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 					var document = LSPEclipseUtils.getDocument(element.file);
 					int startOffset = document.getLineOffset(range.getStart().getLine())
 							+ range.getStart().getCharacter();
-					int endOffset = document.getLineOffset(range.getEnd().getLine())
-							+ range.getEnd().getCharacter();
+					int endOffset = document.getLineOffset(range.getEnd().getLine()) + range.getEnd().getCharacter();
 					((ITextEditor) part).selectAndReveal(startOffset, endOffset - startOffset);
 				} catch (BadLocationException exc) {
 					Platform.getLog(getClass()).error(exc.getMessage(), exc);
 				}
 			}
-		}	
+		}
 	}
 
 	private OpenCFileAction openCFileAction;
@@ -122,7 +121,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 			actionBars.updateActionBars();
 		}
 	}
-	
+
 	@Override
 	public void updateActionBars() {
 		if (openCFileAction != null) {
@@ -135,7 +134,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 	public void fillContextMenu(IMenuManager menu) {
 		if (openCFileAction != null) {
 			IStructuredSelection celements = (IStructuredSelection) getContext().getSelection();
-			
+
 			openCFileAction.selectionChanged(celements);
 			if (openCFileAction.isEnabled()) {
 				menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, openCFileAction);

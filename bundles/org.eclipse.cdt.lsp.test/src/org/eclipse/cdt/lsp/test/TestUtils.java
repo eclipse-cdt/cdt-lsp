@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -32,7 +32,7 @@ import org.eclipse.ui.ide.IDE;
 import org.junit.jupiter.api.TestInfo;
 
 public class TestUtils {
-		
+
 	public static IProject createCProject(String projectName) throws CoreException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		if (project.exists()) {
@@ -43,49 +43,50 @@ public class TestUtils {
 		// configure C nature
 		IProjectDescription description = project.getDescription();
 		if (description != null) {
-			String[] natureIds = {"org.eclipse.cdt.core.cnature"};
+			String[] natureIds = { "org.eclipse.cdt.core.cnature" };
 			description.setNatureIds(natureIds);
 			project.setDescription(description, null);
 		}
 		return project;
 	}
-	
+
 	public static void deleteProject(IProject project) throws CoreException {
 		if (project != null) {
 			project.delete(true, new NullProgressMonitor());
 		}
 	}
-	
+
 	public static String getName(TestInfo testInfo) {
 		String displayName = testInfo.getDisplayName();
 		String replaceFirst = displayName.replaceFirst("\\(.*\\)", "");
 		return replaceFirst;
 	}
-	
+
 	public static IEditorPart openInEditor(URI uri, String editorID) throws PartInitException {
-		IEditorPart part = IDE.openEditor(getWorkbenchPage(), uri, editorID, true);		
+		IEditorPart part = IDE.openEditor(getWorkbenchPage(), uri, editorID, true);
 		part.setFocus();
 		return part;
 	}
-	
+
 	public static IEditorPart openInEditor(IFile file) throws PartInitException {
 		IEditorPart part = IDE.openEditor(getWorkbenchPage(), file);
 		part.setFocus();
 		return part;
 	}
-	
+
 	public static boolean closeEditor(IEditorPart editor, boolean save) {
 		IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page = workbenchWindow.getActivePage();
 		return page.closeEditor(editor, save);
 	}
-	
-	public static IFile createFile(IProject p, String name, String content) throws CoreException, UnsupportedEncodingException {
+
+	public static IFile createFile(IProject p, String name, String content)
+			throws CoreException, UnsupportedEncodingException {
 		IFile testFile = p.getFile(name);
 		testFile.create(new ByteArrayInputStream(content.getBytes(testFile.getCharset())), true, null);
 		return testFile;
 	}
-	
+
 	private static IWorkbenchPage getWorkbenchPage() {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
