@@ -21,6 +21,10 @@ import org.eclipse.core.expressions.Expression;
 import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.CoreException;
 
+/**
+ * Checks whether the LSP based C/C++ Editor and language server shall be enabled
+ * 
+ */
 public final class EnableExpression {
 	private final Expression cExpression;
 	private final Supplier<IEvaluationContext> cParent;
@@ -31,16 +35,16 @@ public final class EnableExpression {
 	}
 
 	/**
-	 * Evaluates enable expression with the given context and document.
+	 * Evaluates enable expression from enabledWhen element in extension point with the given default variable.
 	 *
 	 * @return true if expression evaluates to true, false otherwise
 	 */
-	public boolean evaluate(Object document) {
+	public boolean evaluate(Object defaultVariable) {
 		try {
-			if (document == null) {
-				document = new Object();
+			if (defaultVariable == null) {
+				defaultVariable = new Object();
 			}
-			final var context = new EvaluationContext(cParent.get(), document);
+			final var context = new EvaluationContext(cParent.get(), defaultVariable);
 			context.setAllowPluginActivation(true);
 			return cExpression.evaluate(context).equals(EvaluationResult.TRUE);
 		} catch (CoreException e) {
