@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *     Alexander Fedorov (ArSysOp) - extract headless part
@@ -27,7 +27,7 @@ import org.eclipse.ui.ide.IDE;
 public final class EditorTestUtils {
 
 	public static IEditorPart openInEditor(URI uri, String editorID) throws PartInitException {
-		IEditorPart part = IDE.openEditor(EditorTestUtils.getWorkbenchPage(), uri, editorID, true);		
+		IEditorPart part = IDE.openEditor(EditorTestUtils.getWorkbenchPage(), uri, editorID, true);
 		part.setFocus();
 		return part;
 	}
@@ -47,5 +47,5 @@ public final class EditorTestUtils {
 	private static IWorkbenchPage getWorkbenchPage() {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
-	
+
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 COSEDA Technologies GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *******************************************************************************/
@@ -122,13 +122,13 @@ public class CompileCommandsMonitor {
 		ITextViewer textViewer = Adapters.adapt(editor, ITextViewer.class);
 
 		// Notify clangd about the file change --> doesn't seem to work
-//		org.eclipse.lsp4e.LanguageServers.forDocument(textViewer.getDocument()).computeFirst(server -> {
-//			server.getWorkspaceService()
-//					.didChangeWatchedFiles(new DidChangeWatchedFilesParams(Arrays.asList(new FileEvent(
-//							file.getProject().getFile(CDBF_SPECIFICATION_JSON_FILE).getLocationURI().toASCIIString(),
-//							FileChangeType.Changed))));
-//			return new CompletableFuture<>();
-//		});
+		//		org.eclipse.lsp4e.LanguageServers.forDocument(textViewer.getDocument()).computeFirst(server -> {
+		//			server.getWorkspaceService()
+		//					.didChangeWatchedFiles(new DidChangeWatchedFilesParams(Arrays.asList(new FileEvent(
+		//							file.getProject().getFile(CDBF_SPECIFICATION_JSON_FILE).getLocationURI().toASCIIString(),
+		//							FileChangeType.Changed))));
+		//			return new CompletableFuture<>();
+		//		});
 
 		// Refresh the editors after 5 seconds -> see https://reviews.llvm.org/D92663
 		UIJob.create("Refresh Editors", monitor -> {

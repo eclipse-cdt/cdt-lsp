@@ -1,19 +1,14 @@
-## no archives
-*.jar
-*.zip
-*.gz
-
-## no derived resources
-*.class
-bin/
-target/
-workspace/
-
-## various other file types we don't want to have in the repository:
+/*/*/bin
+/*/*/index
+/*/*/target
+/workspace/
 .DS_Store
-*~
-*#
-*.licensed
-*.aux
-*_trace
+.nfs*
 .polyglot.*
+check_code_cleanliness_workspace/
+.META-INF_MANIFEST.MF
+*.takari_issue_192
+*.log
+.tycho-consumer-pom.xml
+/eclipse/
+/*~

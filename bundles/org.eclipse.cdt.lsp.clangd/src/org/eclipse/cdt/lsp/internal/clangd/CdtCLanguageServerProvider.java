@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -23,12 +23,10 @@ import org.eclipse.cdt.lsp.server.DefaultCLanguageServerProvider;
 import org.eclipse.cdt.utils.CommandLineUtil;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-
 public class CdtCLanguageServerProvider extends DefaultCLanguageServerProvider {
 	//FIXME: AF: rework to core preferences
 	private static final IPreferenceStore preferenceStore = LspEditorUiPlugin.getDefault().getLsPreferences();
 
-	
 	@Override
 	protected List<String> createCommands() {
 		List<String> commands = super.createCommands();
@@ -39,20 +37,20 @@ public class CdtCLanguageServerProvider extends DefaultCLanguageServerProvider {
 		}
 		return commandsFromStore;
 	}
-	
+
 	private void setPreferenceStoreDefaults(List<String> commands) {
 		if (!commands.isEmpty()) {
 			//set values in preference store:
 			preferenceStore.setDefault(LspEditorPreferences.SERVER_PATH, commands.get(0));
 			String args = "";
-			for (int i=1; i<commands.size(); i++) {
+			for (int i = 1; i < commands.size(); i++) {
 				args = args + " " + commands.get(i);
 			}
 			preferenceStore.setDefault(LspEditorPreferences.SERVER_OPTIONS, args);
 		}
 	}
-	
-	private List<String> getCommandsFromStore(){
+
+	private List<String> getCommandsFromStore() {
 		List<String> commands = new ArrayList<>();
 		String serverPath = preferenceStore.getString(LspEditorPreferences.SERVER_PATH);
 		if (serverPath.isBlank()) {

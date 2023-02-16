@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *     Alexander Fedorov (ArSysOp) - extract headless part
@@ -30,17 +30,17 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.junit.jupiter.api.TestInfo;
 
 public final class TestUtils {
-	
+
 	public static void setLspPreferred(IProject project, boolean value) {
 		IEclipsePreferences node = new ProjectScope(project).getNode(LspEditorUiPlugin.PLUGIN_ID);
-		node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), value);		
+		node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), value);
 	}
-	
+
 	public static boolean isLspPreferred(IProject project) {
 		IEclipsePreferences node = new ProjectScope(project).getNode(LspEditorUiPlugin.PLUGIN_ID);
 		return node.getBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), false);
 	}
-	
+
 	public static IProject createCProject(String projectName) throws CoreException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		if (project.exists()) {
@@ -51,25 +51,26 @@ public final class TestUtils {
 		// configure C nature
 		IProjectDescription description = project.getDescription();
 		if (description != null) {
-			String[] natureIds = {"org.eclipse.cdt.core.cnature"};
+			String[] natureIds = { "org.eclipse.cdt.core.cnature" };
 			description.setNatureIds(natureIds);
 			project.setDescription(description, null);
 		}
 		return project;
 	}
-	
+
 	public static void deleteProject(IProject project) throws CoreException {
 		if (project != null) {
 			project.delete(true, new NullProgressMonitor());
 		}
 	}
-	
-	public static IFile createFile(IProject p, String name, String content) throws CoreException, UnsupportedEncodingException {
+
+	public static IFile createFile(IProject p, String name, String content)
+			throws CoreException, UnsupportedEncodingException {
 		IFile testFile = p.getFile(name);
 		testFile.create(new ByteArrayInputStream(content.getBytes(testFile.getCharset())), true, null);
 		return testFile;
 	}
-	
+
 	public static String getName(TestInfo testInfo) {
 		String displayName = testInfo.getDisplayName();
 		String replaceFirst = displayName.replaceFirst("\\(.*\\)", "");

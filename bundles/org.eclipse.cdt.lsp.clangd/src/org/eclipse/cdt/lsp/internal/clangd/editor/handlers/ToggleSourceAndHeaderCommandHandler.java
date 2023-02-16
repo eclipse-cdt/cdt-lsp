@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 COSEDA Technologies GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *******************************************************************************/
@@ -67,7 +67,7 @@ public class ToggleSourceAndHeaderCommandHandler extends AbstractHandler impleme
 	/**
 	 * Returns the URI of the given editor depending on the type of its
 	 * {@link IEditorPart#getEditorInput()}.
-	 * 
+	 *
 	 * @return the URI or an empty {@link Optional} if the URI couldn't be
 	 *         determined.
 	 */

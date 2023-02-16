@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -30,16 +30,16 @@ public class ClangdConfigurationManager {
 	private static final String COMPILE_FLAGS = "CompileFlags";
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase";
 	private static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}";
-	
+
 	/**
-	 * Set the <code>CompilationDatabase</code> entry in the .clangd file in the given project root. 
+	 * Set the <code>CompilationDatabase</code> entry in the .clangd file in the given project root.
 	 * The file will be created, if it's not existing.
 	 * A ScannerException will be thrown if the configuration file contains invalid yaml syntax.
-	 * 
+	 *
 	 * @param configFileDirectory
 	 * @param databasePath
 	 * @throws IOException, ScannerException
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	@SuppressWarnings("unchecked")
 	public static void setCompilationDatabase(IProject project, String databasePath) throws IOException, CoreException {
@@ -72,12 +72,14 @@ public class ClangdConfigurationManager {
 				yaml.dump(data, yamlWriter);
 			}
 		}
-		
+
 	}
-	
-	private static boolean createClangdConfigFile(IFile configFile, String charset, String databasePath, boolean overwriteContent) throws IOException, CoreException {		
-		if (!configFile.exists() || overwriteContent) {			
-			try (final var data = new ByteArrayInputStream(String.format(SET_COMPILATION_DB, databasePath).getBytes(charset))) {
+
+	private static boolean createClangdConfigFile(IFile configFile, String charset, String databasePath,
+			boolean overwriteContent) throws IOException, CoreException {
+		if (!configFile.exists() || overwriteContent) {
+			try (final var data = new ByteArrayInputStream(
+					String.format(SET_COMPILATION_DB, databasePath).getBytes(charset))) {
 				if (overwriteContent) {
 					configFile.setContents(data, IResource.KEEP_HISTORY, new NullProgressMonitor());
 				} else {

@@ -3,9 +3,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -25,25 +25,25 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 	public static final String COMPLETION_STYLE = "--completion-style=detailed";
 	public static final String PRETTY = "--pretty";
 	public static final String QUERY_DRIVER = "--query-driver=";
-	
+
 	protected List<String> commands;
-	
+
 	protected EnableExpression enableExpression;
-	
+
 	public DefaultCLanguageServerProvider() {
 		commands = createCommands();
 	}
-	
+
 	@Override
 	public List<String> getCommands() {
 		return commands;
 	}
-	
+
 	@Override
 	public void setCommands(List<String> commands) {
-		this.commands = commands;		
+		this.commands = commands;
 	}
-	
+
 	protected List<String> createCommands() {
 		List<String> commands = new ArrayList<>();
 		IPath clangdLocation = PathUtil.findProgramLocation("clangd", null); //in case pathStr is null environment variable ${PATH} is inspected
@@ -64,7 +64,7 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 
 	@Override
 	public void setEnableExpression(EnableExpression enableExpression) {
-		this.enableExpression= enableExpression;
+		this.enableExpression = enableExpression;
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 		if (enableExpression != null) {
 			return enableExpression.evaluate(project);
 		}
-		//language server is always enabled when no enable expression has been defined in the extension point: 
+		//language server is always enabled when no enable expression has been defined in the extension point:
 		return true;
 	}
 }

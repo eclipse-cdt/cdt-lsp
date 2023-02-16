@@ -3,9 +3,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
@@ -37,7 +37,8 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	 * Remove not appropriate C Editor
 	 */
 	@Override
-	public IEditorDescriptor[] overrideEditors(IEditorInput editorInput, IContentType contentType, IEditorDescriptor[] editorDescriptors) {
+	public IEditorDescriptor[] overrideEditors(IEditorInput editorInput, IContentType contentType,
+			IEditorDescriptor[] editorDescriptors) {
 		if (isNoCElement(contentType)) {
 			return editorDescriptors;
 		}
@@ -48,7 +49,8 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	}
 
 	@Override
-	public IEditorDescriptor[] overrideEditors(String fileName, IContentType contentType, IEditorDescriptor[] editorDescriptors) {
+	public IEditorDescriptor[] overrideEditors(String fileName, IContentType contentType,
+			IEditorDescriptor[] editorDescriptors) {
 		IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(fileName);
 		if (resource != null && resource instanceof IFile) {
 			return overrideEditors(new FileEditorInput((IFile) resource), contentType, editorDescriptors);
@@ -57,20 +59,22 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	}
 
 	@Override
-	public IEditorDescriptor overrideDefaultEditor(IEditorInput editorInput, IContentType contentType, IEditorDescriptor editorDescriptor) {
+	public IEditorDescriptor overrideDefaultEditor(IEditorInput editorInput, IContentType contentType,
+			IEditorDescriptor editorDescriptor) {
 		IEditorDescriptor descriptor = getEditorDescriptor(editorInput, contentType);
 		return descriptor != null ? descriptor : editorDescriptor;
 	}
 
 	@Override
-	public IEditorDescriptor overrideDefaultEditor(String fileName, IContentType contentType, IEditorDescriptor editorDescriptor) {
+	public IEditorDescriptor overrideDefaultEditor(String fileName, IContentType contentType,
+			IEditorDescriptor editorDescriptor) {
 		IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(fileName);
 		if (resource != null && resource instanceof IFile) {
 			return overrideDefaultEditor(new FileEditorInput((IFile) resource), contentType, editorDescriptor);
 		}
 		return editorDescriptor;
 	}
-	
+
 	private boolean isEnabledFor(IEditorInput editorInput) {
 		IResource resource = editorInput.getAdapter(IResource.class);
 		if (resource != null) {
@@ -108,8 +112,8 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 
 		if (isEnabledFor(editorInput)) {
 			return getEditorDescriptorById(editorInput.getName(), LspPlugin.LSP_C_EDITOR_ID, contentType); // return LSP based C/C++ Editor
-		} 
-		// TODO: return null; when either https://github.com/eclipse-cdt/cdt/pull/310 or 
+		}
+		// TODO: return null; when either https://github.com/eclipse-cdt/cdt/pull/310 or
 		// https://github.com/eclipse/tm4e/pull/500 has been merged.
 		return getEditorDescriptorById(editorInput.getName(), LspPlugin.C_EDITOR_ID, contentType); // return C/C++ Editor
 	}

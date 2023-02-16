@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Bachmann electronic GmbH and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *     Alexander Fedorov (ArSysOp) - extract headless part
@@ -35,7 +35,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
 
 public final class LspEditorPreferencesTesterTest {
-	
+
 	private static final String FILE_CONTENT = "// sample file content";
 	private static final String MAIN_CPP = "main.cpp";
 	private static final String HEADER_HPP = "header.hpp";
@@ -43,23 +43,23 @@ public final class LspEditorPreferencesTesterTest {
 	private static final String HEADER_H = "header.h";
 	private static final String EXTERNAL_HEADER_HPP = "ExternalHeader.hpp";
 	private IProject project;
-	
+
 	@TempDir
 	private static File TEMP_DIR;
-	
+
 	@BeforeEach
 	public void setUp(TestInfo testInfo) throws CoreException {
 		project = TestUtils.createCProject(TestUtils.getName(testInfo));
 	}
-	
+
 	@AfterEach
 	public void cleanUp() throws CoreException {
 		TestUtils.deleteProject(project);
 	}
-	
+
 	/**
 	 * Tests whether the LS enable returns true on a resource whose project has "Prefer C/C++ Editor (LSP)" enabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
 	public void testLsEnableByUriTest_WITH_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
@@ -72,12 +72,12 @@ public final class LspEditorPreferencesTesterTest {
 		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
 		//THEN the LspEditorPreferencesTester.test returns TRUE for the given project:
-		assertTrue(cLanguageServerProvider.isEnabledFor(project));		
+		assertTrue(cLanguageServerProvider.isEnabledFor(project));
 	}
-	
+
 	/**
 	 * Tests whether LS enable returns false on a resource whose project has "Prefer C/C++ Editor (LSP)" disabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
 	public void testLsEnableByUriTest_WITHOUT_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
@@ -90,15 +90,16 @@ public final class LspEditorPreferencesTesterTest {
 		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
 		//THEN the LspEditorPreferencesTester.test returns FALSE for the given project:
-		assertTrue(!cLanguageServerProvider.isEnabledFor(project));		
+		assertTrue(!cLanguageServerProvider.isEnabledFor(project));
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor is used for a C++ source file to open whose project has "Prefer C/C++ Editor (LSP)" disabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testEditorUsedToOpenCppFile_WITHOUT_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
+	public void testEditorUsedToOpenCppFile_WITHOUT_LsEditorPreferred()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, false);
 		//AND a file exits in the given project:
@@ -109,13 +110,14 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor (LSP) is used for a C++ source file to open whose project has "Prefer C/C++ Editor (LSP)" enabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testEditorUsedToOpenCppFile_WITH_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
+	public void testEditorUsedToOpenCppFile_WITH_LsEditorPreferred()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, true);
 		//AND a file exits in the given project:
@@ -126,13 +128,14 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor is used for a C++ header file to open whose project has "Prefer C/C++ Editor (LSP)" disabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testEditorUsedToOpenCppHeaderFile_WITHOUT_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
+	public void testEditorUsedToOpenCppHeaderFile_WITHOUT_LsEditorPreferred()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, false);
 		//AND a file exits in the given project:
@@ -143,13 +146,14 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor (LSP) is used for a C++ header file to open whose project has "Prefer C/C++ Editor (LSP)" enabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testEditorUsedToOpenCppHeaderFile_WITH_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
+	public void testEditorUsedToOpenCppHeaderFile_WITH_LsEditorPreferred()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, true);
 		//AND a file exits in the given project:
@@ -160,13 +164,14 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor is used for a C source file to open whose project has "Prefer C/C++ Editor (LSP)" disabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testEditorUsedToOpenCFile_WITHOUT_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
+	public void testEditorUsedToOpenCFile_WITHOUT_LsEditorPreferred()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, false);
 		//AND a file exits in the given project:
@@ -177,10 +182,10 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor (LSP) is used for a C source file to open whose project has "Prefer C/C++ Editor (LSP)" enabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
 	public void testEditorUsedToOpenCFile_WITH_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
@@ -194,13 +199,14 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor is used for a C header file to open whose project has "Prefer C/C++ Editor (LSP)" disabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testEditorUsedToOpenCHeaderFile_WITHOUT_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
+	public void testEditorUsedToOpenCHeaderFile_WITHOUT_LsEditorPreferred()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, false);
 		//AND a file exits in the given project:
@@ -211,13 +217,14 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	/**
 	 * Tests whether the C/C++ Editor (LSP) is used for a C header file to open whose project has "Prefer C/C++ Editor (LSP)" enabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testEditorUsedToOpenCHeaderFile_WITH_LsEditorPreferred() throws CoreException, UnsupportedEncodingException {
+	public void testEditorUsedToOpenCHeaderFile_WITH_LsEditorPreferred()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, true);
 		//AND a file exits in the given project:
@@ -228,18 +235,19 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
 		EditorTestUtils.closeEditor(editorPart, false);
 	}
-	
+
 	//**********************************************************************************************************************************
 	// The following test
 	//**********************************************************************************************************************************
-	
+
 	/**
-	 * Tests whether the LS is NOT enabled when switching from a tab with a project file with LS enabled 
+	 * Tests whether the LS is NOT enabled when switching from a tab with a project file with LS enabled
 	 * to a project file without LS enabled.
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testLsNotEnabledByTabSwitchFromLspToNonLspProjectFile() throws CoreException, UnsupportedEncodingException {
+	public void testLsNotEnabledByTabSwitchFromLspToNonLspProjectFile()
+			throws CoreException, UnsupportedEncodingException {
 		//GIVEN is a project with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		TestUtils.setLspPreferred(project, true);
 		//AND a file exists in the given project:
@@ -259,15 +267,15 @@ public final class LspEditorPreferencesTesterTest {
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, lspEditorPart.getEditorSite().getId());
 		//THEN the file from the project with disabled "Prefer C/C++ Editor (LSP)" has been opened in the C/C++ Editor:
 		assertEquals(LspPlugin.C_EDITOR_ID, nonLspEditorPart.getEditorSite().getId());
-		
+
 		//clean-up:
 		EditorTestUtils.closeEditor(lspEditorPart, false);
 		EditorTestUtils.closeEditor(nonLspEditorPart, false);
 		TestUtils.deleteProject(nonLspProject);
 	}
-	
+
 	/**
-	 * Tests whether the LS is enabled for an external header file when a LSP based editor is in focus 
+	 * Tests whether the LS is enabled for an external header file when a LSP based editor is in focus
 	 * and an external header file shall be opened. (hyperlink test)
 	 * @throws UnsupportedEncodingException, IOException
 	 */
@@ -284,7 +292,7 @@ public final class LspEditorPreferencesTesterTest {
 		externalFile.createNewFile();
 		//THEN the LS will be enabled for the external file, because we assume that is opened via hyperlink from the opened main.c:
 		assertTrue(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
-	
+
 		//clean-up:
 		EditorTestUtils.closeEditor(lspEditorPart, false);
 		externalFile.delete();

@@ -3,9 +3,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *   See git history
  *******************************************************************************/
@@ -30,19 +30,20 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 
 public class LspUtils {
-	
+
 	/**
 	 * Checks if given ContentType id matches the content types for C/C++ files.
-	 * 
+	 *
 	 * @param id ContentType id
 	 * @return {@code true} if C/C++ content type
 	 */
 	public static boolean isCContentType(String id) {
-		// TODO: The content type definition from TM4E "lng.cpp" can be omitted if either https://github.com/eclipse-cdt/cdt/pull/310 or 
+		// TODO: The content type definition from TM4E "lng.cpp" can be omitted if either https://github.com/eclipse-cdt/cdt/pull/310 or
 		// https://github.com/eclipse/tm4e/pull/500 has been merged.
-		return ( id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header")) ) || "lng.cpp".equals(id);
+		return (id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header")))
+				|| "lng.cpp".equals(id);
 	}
-	
+
 	/**
 	 * Show error dialog to user
 	 * @param title
@@ -61,13 +62,13 @@ public class LspUtils {
 		job.setSystem(true);
 		job.schedule();
 	}
-	
+
 	private static Shell getActiveShell() {
 		if (PlatformUI.getWorkbench() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null)
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		return null;
 	}
-	
+
 	public static boolean isFileOpenedInLspEditor(URI uri) {
 		if (uri == null) {
 			return false;
@@ -83,7 +84,7 @@ public class LspUtils {
 					Platform.getLog(LspUtils.class).error(e.getMessage(), e);
 					continue;
 				}
-				
+
 				if (editorInput instanceof IURIEditorInput) {
 					editorUnputURI = ((IURIEditorInput) editorInput).getURI();
 				} else if (editorInput instanceof FileEditorInput) {
@@ -91,9 +92,10 @@ public class LspUtils {
 				}
 
 				if (uri.equals(editorUnputURI)) {
-					// should return false when an external header file with same URI is opened in a LSP editor 
+					// should return false when an external header file with same URI is opened in a LSP editor
 					// and non LSP editor and tab switching from a non LSP editor to the tab with the file in the non LSP editor:
-					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId()) && isLspEditorActive();
+					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId())
+							&& isLspEditorActive();
 				}
 			}
 			// the file has not been opened yet -> goto definition/declaration case
@@ -101,7 +103,7 @@ public class LspUtils {
 		}
 		return false;
 	}
-	
+
 	public static boolean isFileOpenedInLspEditor(IEditorInput editorInput) {
 		if (editorInput == null) {
 			return false;
@@ -125,7 +127,7 @@ public class LspUtils {
 		}
 		return false;
 	}
-	
+
 	public static List<IEditorReference> getEditors() {
 		List<IEditorReference> editorsList = new ArrayList<>();
 		for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
@@ -137,7 +139,7 @@ public class LspUtils {
 		}
 		return editorsList;
 	}
-	
+
 	private static boolean isLspEditorActive() {
 		var activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (activeWorkbenchWindow != null && activeWorkbenchWindow.getActivePage() != null) {
