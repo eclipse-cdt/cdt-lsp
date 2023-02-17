@@ -64,7 +64,7 @@ public class DefaultLanguageServerProvider implements ICLanguageServerProvider {
 	}
 
 	@Override
-	public boolean isEnabled(Object document) {
+	public boolean isEnabledFor(Object document) {
 		// check if server has been found:
 		if (getCommands().isEmpty()) {
 			return false;

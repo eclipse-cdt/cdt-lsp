@@ -25,7 +25,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 		if (cLanguageServerProvider != null) {
-			return cLanguageServerProvider.isEnabled(receiver);
+			return cLanguageServerProvider.isEnabledFor(receiver);
 		}
 		return true;
 	}

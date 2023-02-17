@@ -13,17 +13,20 @@
 
 package org.eclipse.cdt.lsp.editor.ui;
 
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class Activator extends AbstractUIPlugin {
 	private IPreferenceStore preferenceStore;
+	private IWorkspace workspace;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.editor.ui"; //$NON-NLS-1$
@@ -41,6 +44,9 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		ServiceTracker<IWorkspace, IWorkspace> workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
+		workspaceTracker.open();
+		workspace = workspaceTracker.getService();
 	}
 
 	@Override
@@ -63,6 +69,14 @@ public class Activator extends AbstractUIPlugin {
 			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, Activator.PLUGIN_ID);
 		}
 		return preferenceStore;
+	}
+	
+	public static void logError(String message, Throwable throwable) {
+		getDefault().getLog().error(message, throwable);
+	}
+	
+	public IWorkspace getWorkspace() {
+		return workspace;
 	}
 
 }

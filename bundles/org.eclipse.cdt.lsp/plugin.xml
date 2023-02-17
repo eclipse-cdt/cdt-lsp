@@ -31,7 +31,7 @@
             contentType="org.eclipse.cdt.core.cSource"
             id="org.eclipse.cdt.lsp.server">
          <enabledWhen
-               description="CCEditor active">
+               description="LSP Editor active">
             <reference
                   definitionId="org.eclipse.cdt.lsp.editorHasLanguageServer">
             </reference>
@@ -41,7 +41,7 @@
             contentType="org.eclipse.cdt.core.cxxSource"
             id="org.eclipse.cdt.lsp.server">
          <enabledWhen
-         	description="CCEditor active">
+         	description="LSP Editor active">
             <reference
                   definitionId="org.eclipse.cdt.lsp.editorHasLanguageServer">
             </reference>
@@ -51,7 +51,7 @@
             contentType="org.eclipse.cdt.core.cxxHeader"
             id="org.eclipse.cdt.lsp.server">
          <enabledWhen
-               description="CCEditor active">
+               description="LSP Editor active">
             <reference
                   definitionId="org.eclipse.cdt.lsp.editorHasLanguageServer">
             </reference>
@@ -197,10 +197,14 @@
          point="org.eclipse.core.expressions.definitions">
       <definition
             id="org.eclipse.cdt.lsp.editorHasLanguageServer">
-            <test
-                  forcePluginActivation="true"
-                  property="org.eclipse.cdt.lsp.hasLanguageServer">
-            </test>
+	            <with
+	                  variable="activeEditor"> <!-- TODO: replace activeEditor with uri when LSPE fix for #393 has been done  -->
+		            <test
+	                forcePluginActivation="true"
+	                property="org.eclipse.cdt.lsp.hasLanguageServer"
+	                value="true">
+		            </test>
+	            </with>        
       </definition>
    </extension>   
 </plugin>

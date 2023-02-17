@@ -44,7 +44,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType)) {
 			return editorDescriptors;
 		}
-		if (cLanguageServerProvider.isEnabled(editorInput)) {
+		if (cLanguageServerProvider.isEnabledFor(editorInput)) {
 			return editorFilter(C_EDITOR_ID, editorDescriptors); // remove CDT C-Editor
 		}
 		return editorFilter(LSP_CEDITOR_ID, editorDescriptors); // remove LSP based C-Editor
@@ -102,7 +102,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType))
 			return null;
 
-		if (cLanguageServerProvider.isEnabled(editorInput)) {
+		if (cLanguageServerProvider.isEnabledFor(editorInput)) {
 			return getLspCEditor(editorInput, contentType);
 		}
 		return null;
