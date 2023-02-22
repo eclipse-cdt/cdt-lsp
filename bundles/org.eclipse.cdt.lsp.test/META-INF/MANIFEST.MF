@@ -6,6 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse.org
 Fragment-Host: org.eclipse.cdt.lsp
 Require-Bundle: org.junit,
- junit-jupiter-api
+ org.junit.jupiter.api
 Automatic-Module-Name: org.eclipse.cdt.lsp.test
 Bundle-RequiredExecutionEnvironment: JavaSE-11
