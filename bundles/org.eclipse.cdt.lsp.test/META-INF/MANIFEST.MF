@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for CDT language server bundle (Incubation)
+Bundle-SymbolicName: org.eclipse.cdt.lsp.test;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse.org
+Fragment-Host: org.eclipse.cdt.lsp
+Require-Bundle: org.junit,
+ junit-jupiter-api
+Automatic-Module-Name: org.eclipse.cdt.lsp.test
+Bundle-RequiredExecutionEnvironment: JavaSE-11
