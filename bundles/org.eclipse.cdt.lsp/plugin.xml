@@ -22,9 +22,9 @@
    <extension
          point="org.eclipse.lsp4e.languageServer">
       <server
-            class="org.eclipse.cdt.lsp.ClangdStreamConnectionProvider"
+            class="org.eclipse.cdt.lsp.internal.server.CLanguageServerStreamConnectionProvider"
             id="org.eclipse.cdt.lsp.server"
-            label="org.eclipse.cdt.lsp.Server"
+            label="C/C++ Language Server"
             singleton="true">
       </server>
       <contentTypeMapping
@@ -33,7 +33,7 @@
          <enabledWhen
                description="LSP Editor active">
             <reference
-                  definitionId="org.eclipse.cdt.lsp.editorHasLanguageServer">
+                  definitionId="org.eclipse.cdt.lsp.server.enable.editorHasLanguageServer">
             </reference>
          </enabledWhen>
       </contentTypeMapping>
@@ -43,7 +43,7 @@
          <enabledWhen
          	description="LSP Editor active">
             <reference
-                  definitionId="org.eclipse.cdt.lsp.editorHasLanguageServer">
+                  definitionId="org.eclipse.cdt.lsp.server.enable.editorHasLanguageServer">
             </reference>
          </enabledWhen>
       </contentTypeMapping>
@@ -53,7 +53,7 @@
          <enabledWhen
                description="LSP Editor active">
             <reference
-                  definitionId="org.eclipse.cdt.lsp.editorHasLanguageServer">
+                  definitionId="org.eclipse.cdt.lsp.server.enable.editorHasLanguageServer">
             </reference>
          </enabledWhen>
       </contentTypeMapping>
@@ -186,9 +186,9 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="org.eclipse.cdt.lsp.server.HasLanguageServerPropertyTester"
-            id="org.eclipse.cdt.lsp.hasLanguageServerPropertyTester"
-            namespace="org.eclipse.cdt.lsp"
+            class="org.eclipse.cdt.lsp.server.enable.HasLanguageServerPropertyTester"
+            id="org.eclipse.cdt.lsp.server.enable.hasLanguageServerPropertyTester"
+            namespace="org.eclipse.cdt.lsp.server.enable"
             properties="hasLanguageServer"
             type="java.lang.Object">
       </propertyTester>
@@ -196,12 +196,12 @@
    <extension
          point="org.eclipse.core.expressions.definitions">
       <definition
-            id="org.eclipse.cdt.lsp.editorHasLanguageServer">
+            id="org.eclipse.cdt.lsp.server.enable.editorHasLanguageServer">
 	            <with
 	                  variable="activeEditor"> <!-- TODO: replace activeEditor with uri when LSPE fix for #393 has been done  -->
 		            <test
 	                forcePluginActivation="true"
-	                property="org.eclipse.cdt.lsp.hasLanguageServer"
+	                property="org.eclipse.cdt.lsp.server.enable.hasLanguageServer"
 	                value="true">
 		            </test>
 	            </with>        

@@ -18,7 +18,7 @@ import java.util.List;
 import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.runtime.IPath;
 
-public class DefaultLanguageServerProvider implements ICLanguageServerProvider {
+public class DefaultCLanguageServerProvider implements ICLanguageServerProvider {
 	public static final String CLANG_TIDY = "--clang-tidy";
 	public static final String BACKGROUND_INDEX = "--background-index";
 	public static final String COMPLETION_STYLE = "--completion-style=detailed";
@@ -29,7 +29,7 @@ public class DefaultLanguageServerProvider implements ICLanguageServerProvider {
 	
 	protected EnableExpression enableExpression;
 	
-	public DefaultLanguageServerProvider() {
+	public DefaultCLanguageServerProvider() {
 		commands = createCommands();
 	}
 	

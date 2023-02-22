@@ -10,12 +10,13 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp;
+package org.eclipse.cdt.lsp.internal.server;
 
 import java.util.HashMap;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.server.DefaultLanguageServerProvider;
+import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.server.DefaultCLanguageServerProvider;
 import org.eclipse.cdt.lsp.server.EnableExpression;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.ExpressionConverter;
@@ -81,7 +82,7 @@ public class CLanguageServerRegistry {
 		}
 		if (providers.isEmpty()) {
 			LspPlugin.logWarning("No C/C++ language server defined");
-			prioritizedProvider = new DefaultLanguageServerProvider();
+			prioritizedProvider = new DefaultCLanguageServerProvider();
 		} else {
 			// get provider with highest priority:
 			providers.forEach((key, value) -> {

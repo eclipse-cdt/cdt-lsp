@@ -12,16 +12,14 @@
 
 package org.eclipse.cdt.lsp;
 
+import org.eclipse.cdt.lsp.internal.server.CLanguageServerRegistry;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-@SuppressWarnings("restriction")
 public class LspPlugin extends AbstractUIPlugin {
 
 	// The plug-in ID

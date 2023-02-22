@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.editor.ui.properties;
 
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.editor.ui.Activator;
+import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferences;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -61,7 +61,7 @@ public class LspEditorPropertiesPage extends PropertyPage {
 	public boolean performOk() {
 		Optional<IProject> project = project();
 		if (project.isPresent()) {
-			IEclipsePreferences node = new ProjectScope(project.get()).getNode(Activator.PLUGIN_ID);
+			IEclipsePreferences node = new ProjectScope(project.get()).getNode(LspEditorUiPlugin.PLUGIN_ID);
 			node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), preferLspEditorCheckbox.getSelection());
 			try {
 				node.flush();
@@ -86,7 +86,7 @@ public class LspEditorPropertiesPage extends PropertyPage {
 		Optional<IProject> project = project();
 		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
 		if (project.isPresent()) {
-			preferLspEditorCheckbox.setSelection(Platform.getPreferencesService().getBoolean(Activator.PLUGIN_ID, option.identifer(),
+			preferLspEditorCheckbox.setSelection(Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
 					option.defaultValue(), new IScopeContext[] { new ProjectScope(project.get()) }));
 		} else {
 			preferLspEditorCheckbox.setSelection(option.defaultValue());

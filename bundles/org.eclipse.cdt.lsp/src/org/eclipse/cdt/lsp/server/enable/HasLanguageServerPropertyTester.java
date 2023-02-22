@@ -10,9 +10,10 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.server;
+package org.eclipse.cdt.lsp.server.enable;
 
 import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.PropertyTester;
 
 public class HasLanguageServerPropertyTester extends PropertyTester {

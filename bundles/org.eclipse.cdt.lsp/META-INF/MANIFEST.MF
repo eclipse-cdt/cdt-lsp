@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Language Server based C/C++ Editor
 Bundle-SymbolicName: org.eclipse.cdt.lsp;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Export-Package: org.eclipse.cdt.lsp.editor,
+Export-Package: org.eclipse.cdt.lsp,
  org.eclipse.cdt.lsp.server
 Bundle-Activator: org.eclipse.cdt.lsp.LspPlugin
 Bundle-Vendor: Eclipse.org

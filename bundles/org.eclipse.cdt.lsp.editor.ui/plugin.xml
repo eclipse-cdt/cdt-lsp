@@ -41,7 +41,7 @@
    <extension
          point="org.eclipse.cdt.lsp.serverProvider">
       <server
-            class="org.eclipse.cdt.lsp.editor.ui.CdtLanguageServerProvider"
+            class="org.eclipse.cdt.lsp.editor.ui.CdtCLanguageServerProvider"
             priority="low">
          <enabledWhen>
             <test

@@ -13,7 +13,6 @@
 package org.eclipse.cdt.lsp.editor;
 
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.lsp.CLanguageServerRegistry;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IFile;

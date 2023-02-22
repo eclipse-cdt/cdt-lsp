@@ -14,12 +14,12 @@
 package org.eclipse.cdt.lsp.editor.ui;
 
 
-import org.eclipse.cdt.lsp.server.DefaultLanguageServerProvider;
+import org.eclipse.cdt.lsp.server.DefaultCLanguageServerProvider;
 
 
-public class CdtLanguageServerProvider extends DefaultLanguageServerProvider {
+public class CdtCLanguageServerProvider extends DefaultCLanguageServerProvider {
 
-	public CdtLanguageServerProvider() {
+	public CdtCLanguageServerProvider() {
 		// TODO Auto-generated constructor stub
 	}
 

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Language Server based C/C++ Editor UI
 Bundle-SymbolicName: org.eclipse.cdt.lsp.editor.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: org.eclipse.cdt.lsp.editor.ui.Activator
+Bundle-Activator: org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin
 Bundle-Vendor: Eclipse.org
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
