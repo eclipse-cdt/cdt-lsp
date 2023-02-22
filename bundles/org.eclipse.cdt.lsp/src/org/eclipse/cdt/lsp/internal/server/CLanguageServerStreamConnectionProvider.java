@@ -10,18 +10,19 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp;
+package org.eclipse.cdt.lsp.internal.server;
 
+import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
 import org.eclipse.lsp4e.server.StreamConnectionProvider;
 
-public class ClangdStreamConnectionProvider extends ProcessStreamConnectionProvider implements StreamConnectionProvider {
+public class CLanguageServerStreamConnectionProvider extends ProcessStreamConnectionProvider implements StreamConnectionProvider {
 	
-	public ClangdStreamConnectionProvider() {
+	public CLanguageServerStreamConnectionProvider() {
 		var cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		setCommands(cLanguageServerProvider.getCommands());
 		
-		// set the working directory for the Java process which runs clangd:
+		// set the working directory for the Java process which runs the C/C++ language server:
 		setWorkingDirectory(System.getProperty("user.dir"));
 	}
 

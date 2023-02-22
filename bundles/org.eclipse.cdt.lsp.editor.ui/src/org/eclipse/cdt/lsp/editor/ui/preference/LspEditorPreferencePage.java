@@ -13,7 +13,7 @@
 
 package org.eclipse.cdt.lsp.editor.ui.preference;
 
-import org.eclipse.cdt.lsp.editor.ui.Activator;
+import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiMessages;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -25,7 +25,7 @@ public class LspEditorPreferencePage extends FieldEditorPreferencePage implement
 
 	public LspEditorPreferencePage() {
 		super(GRID);
-		setPreferenceStore(Activator.getDefault().getLspEditorPreferences());
+		setPreferenceStore(LspEditorUiPlugin.getDefault().getLspEditorPreferences());
 		setDescription(LspEditorUiMessages.LspEditorPreferencePage_description);
 	}
 

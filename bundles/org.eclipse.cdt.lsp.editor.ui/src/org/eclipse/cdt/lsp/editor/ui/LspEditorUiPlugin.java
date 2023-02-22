@@ -24,7 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * The activator class controls the plug-in life cycle
  */
-public class Activator extends AbstractUIPlugin {
+public class LspEditorUiPlugin extends AbstractUIPlugin {
 	private IPreferenceStore preferenceStore;
 	private IWorkspace workspace;
 
@@ -32,12 +32,12 @@ public class Activator extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.editor.ui"; //$NON-NLS-1$
 
 	// The shared instance
-	private static Activator plugin;
+	private static LspEditorUiPlugin plugin;
 	
 	/**
 	 * The constructor
 	 */
-	public Activator() {
+	public LspEditorUiPlugin() {
 	}
 
 	@Override
@@ -60,13 +60,13 @@ public class Activator extends AbstractUIPlugin {
 	 *
 	 * @return the shared instance
 	 */
-	public static Activator getDefault() {
+	public static LspEditorUiPlugin getDefault() {
 		return plugin;
 	}
 	
 	public IPreferenceStore getLspEditorPreferences() {
 		if (preferenceStore == null) {
-			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, Activator.PLUGIN_ID);
+			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, LspEditorUiPlugin.PLUGIN_ID);
 		}
 		return preferenceStore;
 	}

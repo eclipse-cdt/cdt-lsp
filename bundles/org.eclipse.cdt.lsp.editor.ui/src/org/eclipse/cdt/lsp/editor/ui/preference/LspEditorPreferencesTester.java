@@ -16,7 +16,7 @@ package org.eclipse.cdt.lsp.editor.ui.preference;
 import java.net.URI;
 
 import org.eclipse.cdt.internal.ui.editor.CEditor;
-import org.eclipse.cdt.lsp.editor.ui.Activator;
+import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -70,7 +70,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 	protected boolean preferLspEditor(IProject project) {
 		// check project properties:
 		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
-		return Platform.getPreferencesService().getBoolean(Activator.PLUGIN_ID, option.identifer(),
+		return Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
 				option.defaultValue(), new IScopeContext[] { new ProjectScope(project) });
 	}
 	
@@ -90,7 +90,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 			return null;
 		}
 		if (FILE_SCHEME.equals(uri.getScheme())) {
-			IFile[] files = Activator.getDefault().getWorkspace().getRoot().findFilesForLocationURI(uri);
+			IFile[] files = LspEditorUiPlugin.getDefault().getWorkspace().getRoot().findFilesForLocationURI(uri);
 			if (files.length > 0) {
 				return files[0];
 			}
@@ -112,7 +112,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 				try {
 					editorInput = editor.getEditorInput();
 				} catch (PartInitException e) {
-					Activator.logError(e.getMessage(), e);
+					LspEditorUiPlugin.logError(e.getMessage(), e);
 					continue;
 				}
 				
@@ -142,7 +142,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 			try {
 				editorInputFromEditor = editor.getEditorInput();
 			} catch (PartInitException e) {
-				Activator.logError(e.getMessage(), e);
+				LspEditorUiPlugin.logError(e.getMessage(), e);
 				continue;
 			}
 			if (editorInput.equals(editorInputFromEditor)) {
