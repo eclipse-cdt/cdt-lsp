@@ -12,7 +12,7 @@
 
 package org.eclipse.cdt.lsp.test.server;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
