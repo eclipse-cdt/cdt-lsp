@@ -27,6 +27,22 @@
          <artifactId>tycho-p2-director-plugin</artifactId>
          <version>${tycho.version}</version>
        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-surefire-plugin</artifactId>
+          <version>${tycho.version}</version>
+          <configuration>
+            <useUIHarness>true</useUIHarness>
+            <useUIThread>true</useUIThread>
+            <dependencies>
+              <dependency>
+                <type>p2-installable-unit</type>
+                <artifactId>org.eclipse.platform.feature.group</artifactId>
+              </dependency>
+            </dependencies>
+            <product>org.eclipse.platform.ide</product>
+          </configuration>
+        </plugin>
      </plugins>
    </pluginManagement>
   <plugins>
