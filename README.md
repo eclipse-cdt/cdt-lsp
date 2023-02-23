@@ -1,6 +1,6 @@
 # Eclipse CDT LSP - LSP based C/C++ Editor
 
-**Target audience** are Eclipse plugin developers who wants to use/develope a LSP based C/C++ Editor.
+**Target audience** are Eclipse plugin developers who want to use/develop a LSP based C/C++ Editor.
 
 This plugin is based on the [LSP4E](https://github.com/eclipse/lsp4e) and [TM4E](https://github.com/eclipse/tm4e) Eclipse projects. The editor is based on the `ExtensionBasedTextEditor` in Eclipse.
 
