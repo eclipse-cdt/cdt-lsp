@@ -16,6 +16,7 @@ package org.eclipse.cdt.lsp.editor.ui.preference;
 import java.net.URI;
 
 import org.eclipse.cdt.internal.ui.editor.CEditor;
+import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IFile;
@@ -36,7 +37,6 @@ import org.eclipse.ui.part.FileEditorInput;
 @SuppressWarnings("restriction")
 public class LspEditorPreferencesTester extends PropertyTester {
 	private static final String FILE_SCHEME = "file"; //$NON-NLS-1$
-	private static final String LSP_CEDITOR_ID = "org.eclipse.cdt.lsp.CEditor"; //$NON-NLS-1$
 	
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
@@ -79,7 +79,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 		if (activeWorkbenchWindow != null && activeWorkbenchWindow.getActivePage() != null) {
 			var activeEditor = activeWorkbenchWindow.getActivePage().getActiveEditor();
 			if (activeEditor != null) {
-				return LSP_CEDITOR_ID.equals(activeEditor.getEditorSite().getId());
+				return LspPlugin.LSP_C_EDITOR_ID.equals(activeEditor.getEditorSite().getId());
 			}
 		}
 		return false;
@@ -123,7 +123,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 				}
 
 				if (uri.equals(editorUnputURI)) {
-					return LSP_CEDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId());
+					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId());
 				}
 			}
 		}
@@ -146,7 +146,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 				continue;
 			}
 			if (editorInput.equals(editorInputFromEditor)) {
-				return LSP_CEDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId());
+				return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId());
 			}
 		}
 	}

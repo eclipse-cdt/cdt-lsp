@@ -19,8 +19,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 
 public class LspEditorPreferencesTesterTest {
-	private static final String LSP_CEDITOR_ID = "org.eclipse.cdt.lsp.CEditor"; //$NON-NLS-1$
-	private static final String C_EDITOR_ID = "org.eclipse.cdt.ui.editor.CEditor"; //$NON-NLS-1$
 	private static final String FILE_CONTENT = "// sample file content";
 	private static final String MAIN_CPP = "main.cpp";
 	private static final String EXTERNAL_HEADER_HPP = "ExternalHeader.hpp";
@@ -95,7 +93,7 @@ public class LspEditorPreferencesTesterTest {
 		//WHEN this file will be opened:
 		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor:
-		assertEquals(C_EDITOR_ID, editorPart.getEditorSite().getId());
+		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
 	}
 	
 	/**
@@ -111,7 +109,7 @@ public class LspEditorPreferencesTesterTest {
 		//WHEN this file will be opened:
 		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor (LSP):
-		assertEquals(LSP_CEDITOR_ID, editorPart.getEditorSite().getId());
+		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
 	}
 	
 	/**
@@ -138,7 +136,7 @@ public class LspEditorPreferencesTesterTest {
 		File externalFile = new File(tempDir, EXTERNAL_HEADER_HPP);
 		externalFile.createNewFile();
 		//AND it's opened in the LSP based C/C++ Editor:
-		var editor = TestUtils.openInEditor(externalFile.toURI(), LSP_CEDITOR_ID);
+		var editor = TestUtils.openInEditor(externalFile.toURI(), LspPlugin.LSP_C_EDITOR_ID);
 		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
 		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
@@ -156,7 +154,7 @@ public class LspEditorPreferencesTesterTest {
 		File externalFile = new File(tempDir, EXTERNAL_HEADER_HPP);
 		externalFile.createNewFile();
 		//AND it's opened in the C/C++ Editor:
-		var editor = TestUtils.openInEditor(externalFile.toURI(), C_EDITOR_ID);
+		var editor = TestUtils.openInEditor(externalFile.toURI(), LspPlugin.C_EDITOR_ID);
 		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
 		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
