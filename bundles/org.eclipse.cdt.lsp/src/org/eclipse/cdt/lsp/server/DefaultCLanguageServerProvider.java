@@ -25,7 +25,7 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 	public static final String PRETTY = "--pretty";
 	public static final String QUERY_DRIVER = "--query-driver=";
 	
-	protected final List<String> commands;
+	protected List<String> commands;
 	
 	protected EnableExpression enableExpression;
 	
@@ -38,21 +38,24 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 		return commands;
 	}
 	
-	private List<String> createCommands() {
+	@Override
+	public void setCommands(List<String> commands) {
+		this.commands = commands;		
+	}
+	
+	protected List<String> createCommands() {
 		List<String> commands = new ArrayList<>();
-		if (commands.isEmpty()) {
-			IPath clangdLocation = PathUtil.findProgramLocation("clangd", null); //in case pathStr is null environment variable ${PATH} is inspected
-			if (clangdLocation != null) {
-				commands.add(clangdLocation.toOSString());
-				commands.add(CLANG_TIDY);
-				commands.add(BACKGROUND_INDEX);
-				commands.add(COMPLETION_STYLE);
-				commands.add(PRETTY);
-				// clangd will execute drivers and fetch necessary include paths to compile your code:
-				IPath compilerLocation = PathUtil.findProgramLocation("gcc", null);
-				if (compilerLocation != null) {
-					commands.add(QUERY_DRIVER + compilerLocation.removeLastSegments(1).append(IPath.SEPARATOR + "*"));
-				}
+		IPath clangdLocation = PathUtil.findProgramLocation("clangd", null); //in case pathStr is null environment variable ${PATH} is inspected
+		if (clangdLocation != null) {
+			commands.add(clangdLocation.toOSString());
+			commands.add(CLANG_TIDY);
+			commands.add(BACKGROUND_INDEX);
+			commands.add(COMPLETION_STYLE);
+			commands.add(PRETTY);
+			// clangd will execute drivers and fetch necessary include paths to compile your code:
+			IPath compilerLocation = PathUtil.findProgramLocation("gcc", null);
+			if (compilerLocation != null) {
+				commands.add(QUERY_DRIVER + compilerLocation.removeLastSegments(1).append(IPath.SEPARATOR + "*"));
 			}
 		}
 		return commands;
@@ -76,5 +79,4 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 		//language server is always enabled when no enable expression has been defined in the extension point: 
 		return true;
 	}
-
 }

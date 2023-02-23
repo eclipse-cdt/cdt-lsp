@@ -47,6 +47,7 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 		ServiceTracker<IWorkspace, IWorkspace> workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
 		workspaceTracker.open();
 		workspace = workspaceTracker.getService();
+		//getLsPreferences();
 	}
 
 	@Override
@@ -64,7 +65,7 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 	
-	public IPreferenceStore getLspEditorPreferences() {
+	public IPreferenceStore getLsPreferences() {
 		if (preferenceStore == null) {
 			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, LspEditorUiPlugin.PLUGIN_ID);
 		}
