@@ -95,7 +95,7 @@ public class LspEditorPreferencesTesterTest {
 		//WHEN this file will be opened:
 		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor:
-		assertEquals(editorPart.getEditorSite().getId(), C_EDITOR_ID);
+		assertEquals(C_EDITOR_ID, editorPart.getEditorSite().getId());
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class LspEditorPreferencesTesterTest {
 		//WHEN this file will be opened:
 		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor (LSP):
-		assertEquals(editorPart.getEditorSite().getId(), LSP_CEDITOR_ID);
+		assertEquals(LSP_CEDITOR_ID, editorPart.getEditorSite().getId());
 	}
 	
 	/**
