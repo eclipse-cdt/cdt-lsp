@@ -23,6 +23,13 @@ public interface ICLanguageServerProvider {
 	 */
 	public List<String> getCommands();
 	
+	
+	/**
+	 * The command list includes the location of the language server followed by its calling arguments.
+	 * 
+	 */
+	public void setCommands(List<String> commands);
+	
 	/**
 	 * The enable expression is used to determine if the language server should be enabled. 
 	 * 

@@ -17,9 +17,12 @@ import org.eclipse.cdt.lsp.editor.ui.LspEditorUiMessages;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
 public final class LspEditorPreferences {
+	public static final String PREFER_LSP_EDITOR = "prefer_lsp_editor";
+	public static final String SERVER_PATH = "server_path";
+	public static final String SERVER_OPTIONS = "server_options";
 	
 	public static PreferenceMetadata<Boolean> getPreferenceMetadata() {
-		return new PreferenceMetadata<>(Boolean.class, "prefer_lsp_editor", false, //$NON-NLS-1$
+		return new PreferenceMetadata<>(Boolean.class, PREFER_LSP_EDITOR, false, //$NON-NLS-1$
 				LspEditorUiMessages.LspEditorPreferencePage_preferLspEditor,
 				LspEditorUiMessages.LspEditorPreferencePage_preferLspEditor_description);
 	}

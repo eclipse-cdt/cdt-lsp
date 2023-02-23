@@ -12,30 +12,8 @@
 
 package org.eclipse.cdt.lsp.test.server;
 
-import java.util.List;
+import org.eclipse.cdt.lsp.server.DefaultCLanguageServerProvider;
 
-import org.eclipse.cdt.lsp.server.EnableExpression;
-import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
-
-public class MockCLanguageServerProvider implements ICLanguageServerProvider {
+public class MockCLanguageServerProvider extends DefaultCLanguageServerProvider {
 	
-	protected EnableExpression enableExpression;
-
-	@Override
-	public List<String> getCommands() {
-		return null;
-	}
-
-	@Override
-	public void setEnableExpression(EnableExpression enableExpression) {
-		this.enableExpression = enableExpression;
-	}
-
-	@Override
-	public boolean isEnabledFor(Object receiver) {
-		if (enableExpression != null)
-			return enableExpression.evaluate(receiver);			
-		return false;
-	}
-
 }
