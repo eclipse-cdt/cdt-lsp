@@ -27,8 +27,6 @@ import org.eclipse.ui.ide.IEditorAssociationOverride;
 import org.eclipse.ui.part.FileEditorInput;
 
 public class CEditorAssociationOverride implements IEditorAssociationOverride {
-	private static final String LSP_CEDITOR_ID = "org.eclipse.cdt.lsp.CEditor";
-	private static final String C_EDITOR_ID = "org.eclipse.cdt.ui.editor.CEditor";
 	private final ICLanguageServerProvider cLanguageServerProvider;
 
 	public CEditorAssociationOverride() {
@@ -44,9 +42,9 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 			return editorDescriptors;
 		}
 		if (cLanguageServerProvider.isEnabledFor(editorInput)) {
-			return editorFilter(C_EDITOR_ID, editorDescriptors); // remove CDT C-Editor
+			return editorFilter(LspPlugin.C_EDITOR_ID, editorDescriptors); // remove CDT C-Editor
 		}
-		return editorFilter(LSP_CEDITOR_ID, editorDescriptors); // remove LSP based C-Editor
+		return editorFilter(LspPlugin.LSP_C_EDITOR_ID, editorDescriptors); // remove LSP based C-Editor
 	}
 
 	@Override
@@ -110,7 +108,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	private IEditorDescriptor getLspCEditor(IEditorInput editorInput, IContentType contentType) {
 		IEditorRegistry registry = PlatformUI.getWorkbench().getEditorRegistry();
 		for (IEditorDescriptor descriptor : registry.getEditors(editorInput.getName(), contentType)) {
-			if (LSP_CEDITOR_ID.equals(descriptor.getId())) {
+			if (LspPlugin.LSP_C_EDITOR_ID.equals(descriptor.getId())) {
 				return descriptor;
 			}
 		}
