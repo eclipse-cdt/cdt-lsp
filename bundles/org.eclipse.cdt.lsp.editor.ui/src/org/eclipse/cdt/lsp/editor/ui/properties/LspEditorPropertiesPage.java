@@ -15,6 +15,7 @@ package org.eclipse.cdt.lsp.editor.ui.properties;
 
 import java.util.Optional;
 
+import org.eclipse.cdt.lsp.editor.ui.LspEditorUiMessages;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferences;
 import org.eclipse.core.resources.IProject;
@@ -24,6 +25,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,8 +37,11 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.prefs.BackingStoreException;
 
 public class LspEditorPropertiesPage extends PropertyPage {
+	public static final String COMPILE_COMMANDS_DIR = "compile_commands_dir";
+	public static final String DEFAULT_COMPILE_COMMANDS_DIR = "build/default";
 	
 	private Button preferLspEditorCheckbox;
+	private StringFieldEditor compileCommandsDir;
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -55,6 +60,7 @@ public class LspEditorPropertiesPage extends PropertyPage {
 	protected void performDefaults() {
 		super.performDefaults();
 		preferLspEditorCheckbox.setSelection(LspEditorPreferences.getPreferenceMetadata().defaultValue());
+		compileCommandsDir.setStringValue("build/default");
 	}
 
 	@Override
@@ -63,6 +69,7 @@ public class LspEditorPropertiesPage extends PropertyPage {
 		if (project.isPresent()) {
 			IEclipsePreferences node = new ProjectScope(project.get()).getNode(LspEditorUiPlugin.PLUGIN_ID);
 			node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), preferLspEditorCheckbox.getSelection());
+			node.put(COMPILE_COMMANDS_DIR, compileCommandsDir.getStringValue());
 			try {
 				node.flush();
 				return true;
@@ -75,11 +82,15 @@ public class LspEditorPropertiesPage extends PropertyPage {
 
 	private void addSettingsSection(Composite parent) {
 		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
-		Composite composite = createDefaultComposite(parent);
-		preferLspEditorCheckbox = new Button(composite, SWT.CHECK);
+		Composite compositeCheckbox = createDefaultComposite(parent);
+		preferLspEditorCheckbox = new Button(compositeCheckbox, SWT.CHECK);
 		preferLspEditorCheckbox.setLayoutData(new GridData());
 		preferLspEditorCheckbox.setText(option.name());
 		preferLspEditorCheckbox.setToolTipText(option.description());
+			
+		Composite compositeCompileCommandsDir = createDefaultComposite(parent);
+		compileCommandsDir = new StringFieldEditor(COMPILE_COMMANDS_DIR,
+				LspEditorUiMessages.LspEditorPreferencePage_compile_commands_dir, compositeCompileCommandsDir);
 	}
 
 	private void load() {
@@ -88,8 +99,12 @@ public class LspEditorPropertiesPage extends PropertyPage {
 		if (project.isPresent()) {
 			preferLspEditorCheckbox.setSelection(Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
 					option.defaultValue(), new IScopeContext[] { new ProjectScope(project.get()) }));
+			
+			compileCommandsDir.setStringValue(Platform.getPreferencesService().getString(LspEditorUiPlugin.PLUGIN_ID, COMPILE_COMMANDS_DIR, 
+					DEFAULT_COMPILE_COMMANDS_DIR, new IScopeContext[] { new ProjectScope(project.get()) }));
 		} else {
 			preferLspEditorCheckbox.setSelection(option.defaultValue());
+			compileCommandsDir.setStringValue(DEFAULT_COMPILE_COMMANDS_DIR);
 		}
 	}
 	

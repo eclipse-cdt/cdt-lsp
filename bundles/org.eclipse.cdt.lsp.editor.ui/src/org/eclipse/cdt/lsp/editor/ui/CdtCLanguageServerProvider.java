@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferences;
+import org.eclipse.cdt.lsp.editor.ui.properties.LspEditorPropertiesPage;
 import org.eclipse.cdt.lsp.server.DefaultCLanguageServerProvider;
 import org.eclipse.cdt.utils.CommandLineUtil;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -26,28 +27,25 @@ import org.eclipse.jface.preference.IPreferenceStore;
 public class CdtCLanguageServerProvider extends DefaultCLanguageServerProvider {
 	private static final IPreferenceStore preferenceStore = LspEditorUiPlugin.getDefault().getLsPreferences();
 
-	
 	@Override
 	protected List<String> createCommands() {
-		List<String> commands = super.createCommands();
-		setPreferenceStoreDefaults(commands); // use the server provider settings as default
+		List<String> retCommands = new ArrayList<>();
+		List<String> defaultCommands = super.createCommands();
 		List<String> commandsFromStore = getCommandsFromStore();
-		if (commandsFromStore.isEmpty()) {
-			return commands;
-		}
-		return commandsFromStore;
-	}
-	
-	private void setPreferenceStoreDefaults(List<String> commands) {
-		if (!commands.isEmpty()) {
-			//set values in preference store:
-			preferenceStore.setDefault(LspEditorPreferences.SERVER_PATH, commands.get(0));
-			String args = "";
-			for (int i=1; i<commands.size(); i++) {
-				args = args + " " + commands.get(i);
+		if (!commandsFromStore.isEmpty()) {
+			retCommands.add(commandsFromStore.get(0)); //add server path
+			if (commandsFromStore.size() > 1) {
+				for (int i=1; i<commandsFromStore.size(); i++) {
+					retCommands.add(commandsFromStore.get(i));
+				}
+			} else {
+				for (int i=1; i<defaultCommands.size(); i++) {
+					retCommands.add(defaultCommands.get(i));
+				}				
 			}
-			preferenceStore.setDefault(LspEditorPreferences.SERVER_OPTIONS, args);
+			return retCommands;
 		}
+		return defaultCommands;
 	}
 	
 	private List<String> getCommandsFromStore(){

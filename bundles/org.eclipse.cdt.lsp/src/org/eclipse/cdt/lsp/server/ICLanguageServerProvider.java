@@ -21,15 +21,21 @@ public interface ICLanguageServerProvider {
 	 * 
 	 * @return Command list to run language server
 	 */
-	public List<String> getCommands();
-	
+	public List<String> getCommands();	
 	
 	/**
 	 * The command list includes the location of the language server followed by its calling arguments.
 	 * 
 	 */
 	public void setCommands(List<String> commands);
-	
+
+	/**
+	 * This command list includes the default location of the language server followed by its default calling arguments.
+	 * 
+	 * @return Command list to run language server
+	 */
+	public List<String> getDefaultCommands();
+
 	/**
 	 * The enable expression is used to determine if the language server should be enabled. 
 	 * 
@@ -45,5 +51,35 @@ public interface ICLanguageServerProvider {
 	 * @return true if LSP based C/C++ Editor and language server shall be enabled for the given object
 	 */
 	public boolean isEnabledFor(Object receiver);
+	
+	/**
+	 * C/C++ language server path
+	 * 
+	 * @return absolute path to C/C++ language server binary or empty String
+	 */
+	public String getServerPath();
+	
+	
+	/**
+	 * Command options in a String
+	 * 
+	 * @return command options as string separated by space or empty String
+	 */
+	public String getOptionsAsString();
+	
+	/**
+	 * Default C/C++ language server path
+	 * 
+	 * @return absolute path to C/C++ language server binary or empty String
+	 */
+	public String getDefaultServerPath();
+	
+	
+	/**
+	 * Default command options in a String
+	 * 
+	 * @return command options as string separated by space or empty String
+	 */
+	public String getDefaultOptionsAsString();
 
 }

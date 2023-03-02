@@ -12,16 +12,21 @@
 
 package org.eclipse.cdt.lsp;
 
+import java.util.List;
+
 import org.eclipse.cdt.lsp.internal.server.CLanguageServerRegistry;
+import org.eclipse.cdt.lsp.internal.server.CompileCommandsDirLocatorRegistry;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
+import org.eclipse.cdt.lsp.server.ICompileCommandsDirLocator;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class LspPlugin extends AbstractUIPlugin {
-
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp"; //$NON-NLS-1$
 	public static final String LSP_C_EDITOR_ID = "org.eclipse.cdt.lsp.CEditor"; //$NON-NLS-1$
@@ -31,6 +36,8 @@ public class LspPlugin extends AbstractUIPlugin {
 	private static LspPlugin plugin;
 	
 	private ICLanguageServerProvider cLanguageServerProvider;
+	private List<ICompileCommandsDirLocator> compileCommandsDirLocators;
+	private IWorkspace workspace;
 
 	/**
 	 * The constructor
@@ -42,7 +49,11 @@ public class LspPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
+		ServiceTracker<IWorkspace, IWorkspace> workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
+		workspaceTracker.open();
+		workspace = workspaceTracker.getService();
+		getCLanguageServerProvider();
+		getCompileCommandsDirLocators();
 	}
 
 	@Override
@@ -60,8 +71,18 @@ public class LspPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 	
-	public ICLanguageServerProvider getCLanguageServerProvider() {
+	public synchronized ICLanguageServerProvider getCLanguageServerProvider() {
+		if (cLanguageServerProvider == null) {
+			cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
+		}
 		return cLanguageServerProvider;
+	}
+	
+	public synchronized List<ICompileCommandsDirLocator> getCompileCommandsDirLocators() {
+		if (compileCommandsDirLocators == null) {
+			compileCommandsDirLocators = new CompileCommandsDirLocatorRegistry().createCompileCommandsDirLocators();
+		}
+		return compileCommandsDirLocators;
 	}
 	
 	public static void logError(String message, Throwable throwable) {
@@ -74,6 +95,10 @@ public class LspPlugin extends AbstractUIPlugin {
 	
 	public static void logWarning(String message, Throwable throwable) {
 		getDefault().getLog().warn(message, throwable);
+	}
+	
+	public synchronized IWorkspace getWorkspace() {
+		return workspace;
 	}
 
 }

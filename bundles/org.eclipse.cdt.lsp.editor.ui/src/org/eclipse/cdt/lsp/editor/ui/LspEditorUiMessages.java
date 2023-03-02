@@ -28,6 +28,7 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_preferLspEditor_description;
 	public static String LspEditorPreferencePage_server_options;
 	public static String LspEditorPreferencePage_server_path;
+	public static String LspEditorPreferencePage_compile_commands_dir;
 	
 	public static String LspEditorPropertiesPage_projectSpecificSettings;
 	

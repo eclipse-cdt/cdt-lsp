@@ -83,6 +83,10 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 		getDefault().getLog().error(message, throwable);
 	}
 	
+	public static void logError(String message) {
+		getDefault().getLog().error(message);
+	}
+	
 	public IWorkspace getWorkspace() {
 		return workspace;
 	}
