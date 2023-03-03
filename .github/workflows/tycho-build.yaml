@@ -13,7 +13,6 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          cache: maven
       - name: Download clangd
         run: |
           curl -L https://github.com/clangd/clangd/releases/download/15.0.6/clangd-linux-15.0.6.zip > clangd.zip
