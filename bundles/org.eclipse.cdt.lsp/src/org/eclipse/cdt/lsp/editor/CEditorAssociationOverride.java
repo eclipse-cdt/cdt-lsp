@@ -12,8 +12,8 @@
 
 package org.eclipse.cdt.lsp.editor;
 
-import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -72,12 +72,10 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	}
 
 	private boolean isNoCElement(IContentType contentType) {
-		if (contentType == null || !(CCorePlugin.CONTENT_TYPE_CHEADER.equals(contentType.getId()) ||
-				CCorePlugin.CONTENT_TYPE_CSOURCE.equals(contentType.getId()) ||
-				CCorePlugin.CONTENT_TYPE_CXXHEADER.equals(contentType.getId()) ||
-				CCorePlugin.CONTENT_TYPE_CXXSOURCE.equals(contentType.getId())))
+		if (contentType == null) {
 			return true;
-		return false;
+		}
+		return !LspUtils.isCContentType(contentType.getId());
 	}
 
 	private IEditorDescriptor[] editorFilter(String editorId, IEditorDescriptor[] editorDescriptors) {
@@ -100,15 +98,17 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 			return null;
 
 		if (cLanguageServerProvider.isEnabledFor(editorInput)) {
-			return getLspCEditor(editorInput, contentType);
-		}
-		return null;
+			return getEditorDescriptorById(editorInput.getName(), LspPlugin.LSP_C_EDITOR_ID, contentType); // return LSP based C/C++ Editor
+		} 
+		// TODO: return null; when either https://github.com/eclipse-cdt/cdt/pull/310 or 
+		// https://github.com/eclipse/tm4e/pull/500 has been merged.
+		return getEditorDescriptorById(editorInput.getName(), LspPlugin.C_EDITOR_ID, contentType); // return C/C++ Editor
 	}
 
-	private IEditorDescriptor getLspCEditor(IEditorInput editorInput, IContentType contentType) {
+	private IEditorDescriptor getEditorDescriptorById(String fileName, String editorId, IContentType contentType) {
 		IEditorRegistry registry = PlatformUI.getWorkbench().getEditorRegistry();
-		for (IEditorDescriptor descriptor : registry.getEditors(editorInput.getName(), contentType)) {
-			if (LspPlugin.LSP_C_EDITOR_ID.equals(descriptor.getId())) {
+		for (IEditorDescriptor descriptor : registry.getEditors(fileName, contentType)) {
+			if (editorId.equals(descriptor.getId())) {
 				return descriptor;
 			}
 		}

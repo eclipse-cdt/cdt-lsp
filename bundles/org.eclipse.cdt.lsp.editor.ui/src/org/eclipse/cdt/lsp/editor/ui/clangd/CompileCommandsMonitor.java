@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -71,8 +72,7 @@ public class CompileCommandsMonitor {
 			if (resource instanceof IFile) {
 				var contentTypes = Platform.getContentTypeManager().findContentTypesFor(((IFile) resource).getName());
 				return Arrays.stream(contentTypes).anyMatch(contentType -> {
-					var id = contentType.getId();
-					return id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header"));
+					return LspUtils.isCContentType(contentType.getId());
 				});
 			}
 			return false;
