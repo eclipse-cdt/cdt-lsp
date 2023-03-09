@@ -133,6 +133,8 @@ public class CompileCommandsMonitor {
 
 		// Refresh the editors after 5 seconds -> see https://reviews.llvm.org/D92663
 		UIJob.create("Refresh Editors", monitor -> {
+			if (textViewer.getDocument() == null)
+				return;
 			int rangeOffset = textViewer.getTopIndexStartOffset();
 			int rangeLength = textViewer.getBottomIndexEndOffset() - rangeOffset;
 			editor.getSite().getPage().reuseEditor((IReusableEditor) editor, editor.getEditorInput());
