@@ -5,6 +5,6 @@ Bundle-SymbolicName: org.eclipse.cdt.lsp.test;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse.org
 Fragment-Host: org.eclipse.cdt.lsp
-Require-Bundle: org.junit.jupiter.api
+Require-Bundle: junit-jupiter-api
 Automatic-Module-Name: org.eclipse.cdt.lsp.test
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
