@@ -49,7 +49,7 @@
     <version>${tycho.version}</version>
     <configuration>
      <!-- Optional set the Java version you are using-->
-    <executionEnvironment>JavaSE-11</executionEnvironment>-->
+    <executionEnvironment>JavaSE-17</executionEnvironment>-->
         <target>
             <artifact>
                 <groupId>${project.parent.groupId}</groupId>

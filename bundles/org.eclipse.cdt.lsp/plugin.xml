@@ -68,47 +68,18 @@
       </contentTypeMapping>
    </extension>
    <extension
-         point="org.eclipse.tm4e.languageconfiguration.languageConfigurations">
-      <languageConfiguration
-            contentTypeId="org.eclipse.cdt.core.cSource"
-            path="language-configurations/language-configuration.json">
-      </languageConfiguration>
-      <languageConfiguration
-            contentTypeId="org.eclipse.cdt.core.cxxSource"
-            path="language-configurations/language-configuration.json">
-      </languageConfiguration>
-      <languageConfiguration
-            contentTypeId="org.eclipse.cdt.core.cxxHeader"
-            path="language-configurations/language-configuration.json">
-      </languageConfiguration>
-   </extension>
-   <extension
          point="org.eclipse.tm4e.registry.grammars">
-      <grammar
-            path="language-configurations/c.tmLanguage.json"
-            scopeName="c-grammar">
-      </grammar>
-      <scopeNameContentTypeBinding
-            contentTypeId="org.eclipse.cdt.core.cSource"
-            scopeName="c-grammar">
-      </scopeNameContentTypeBinding>
-      <grammar
-            path="language-configurations/cpp.tmLanguage.json"
-            scopeName="cpp-grammar">
-      </grammar>
-      <scopeNameContentTypeBinding
-            contentTypeId="org.eclipse.cdt.core.cxxSource"
-            scopeName="cpp-grammar">
-      </scopeNameContentTypeBinding>
+      <!-- This content type binding is needed because the cpp content type from TM4E (lng.cpp) 
+      does not cover C++ standard library header without file extension -->
       <scopeNameContentTypeBinding
             contentTypeId="org.eclipse.cdt.core.cxxHeader"
-            scopeName="cpp-grammar">
+            scopeName="lngpck.source.cpp">
       </scopeNameContentTypeBinding>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="org.eclipse.tm4e.languageconfiguration.togglelinecommentcommand"
+            commandId="org.eclipse.tm4e.languageconfiguration.toggleLineCommentCommand"
             contextId="org.eclipse.ui.textEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="Ctrl+7">
