@@ -207,7 +207,7 @@
       <definition
             id="org.eclipse.cdt.lsp.server.enable.editorHasLanguageServer">
 	            <with
-	                  variable="activeEditor"> <!-- TODO: replace activeEditor with uri when LSPE fix for #393 has been done  -->
+	                  variable="uri">
 		            <test
 	                forcePluginActivation="true"
 	                property="org.eclipse.cdt.lsp.server.enable.hasLanguageServer"
