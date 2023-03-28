@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
 
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.editor.ui.test.TestUtils;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.io.TempDir;
 
 
 public class LspEditorPreferencesTesterTest {
@@ -25,16 +25,11 @@ public class LspEditorPreferencesTesterTest {
 	private static final String HEADER_HPP = "header.hpp";
 	private static final String MAIN_C = "main.c";
 	private static final String HEADER_H = "header.h";
-	//private static final String EXTERNAL_HEADER_HPP = "ExternalHeader.hpp";
+	private static final String EXTERNAL_HEADER_HPP = "ExternalHeader.hpp";
 	private IProject project;
 	
-	// @TempDir -> does not work with org.junit.jupiter.api. Needs junit-jupiter-api and junit-jupiter-params.
-	// These packages are not accessible on the CI build server because we build with Eclipse 2022-06
-	// Path tempDir = Files.createTempFile("ExternalHeader", ".hpp", null);
-	
-	private File createTempHppHeaderfile() throws IOException {
-		return Files.createTempFile("ExternalHeader", ".hpp").toFile();
-	}
+	@TempDir
+	private static File TEMP_DIR;
 	
 	@BeforeEach
 	public void setUp(TestInfo testInfo) throws CoreException {
@@ -225,13 +220,13 @@ public class LspEditorPreferencesTesterTest {
 	}
 	
 	/**
-	 * Tests whether LS enable returns false for an external file which is not opened.
+	 * Tests whether LS enable returns false for an external file when no (LSP) editor is opened.
 	 * @throws IOException 
 	 */
 	@Test
-	public void testLsEnableByExternalUriTest_NoEditorOpen() throws CoreException, IOException {
+	public void testLsNotEnabledForExternalFile_NoEditorOpen() throws CoreException, IOException {
 		//GIVEN is an external file which does not exists in the given project and is not opened:
-		File externalFile = createTempHppHeaderfile();
+		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
 		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
@@ -242,32 +237,12 @@ public class LspEditorPreferencesTesterTest {
 	}
 	
 	/**
-	 * Tests whether LS enable returns true for an external file which is opened in the C/C++ Editor (LSP).
-	 */	
-	@Test
-	public void testLsEnableByExternalUriTest_OpenedInLspCEditor() throws CoreException, IOException {
-		//GIVEN is an existing external file:
-		File externalFile = createTempHppHeaderfile();
-		externalFile.createNewFile();
-		//AND it's opened in the LSP based C/C++ Editor:
-		var editor = TestUtils.openInEditor(externalFile.toURI(), LspPlugin.LSP_C_EDITOR_ID);
-		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
-		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
-		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
-		//THEN the LspEditorPreferencesTester.test returns TRUE for the given file URI:
-		assertTrue(cLanguageServerProvider.isEnabledFor(externalFile.toURI()));	
-		TestUtils.closeEditor(editor, false);
-		//ensure clean up
-		externalFile.delete();
-	}
-	
-	/**
 	 * Tests whether LS enable returns false for an external file which is opened in the C/C++ Editor.
 	 */	
 	@Test
-	public void testLsEnableByExternalUriTest_OpenedInCEditor() throws CoreException, IOException {
+	public void testLsNotEnabledForExternalFile_OpenedInCEditor() throws CoreException, IOException {
 		//GIVEN is an existing external file:
-		File externalFile = createTempHppHeaderfile();
+		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		externalFile.createNewFile();
 		//AND it's opened in the C/C++ Editor:
 		var editor = TestUtils.openInEditor(externalFile.toURI(), LspPlugin.C_EDITOR_ID);
@@ -276,8 +251,87 @@ public class LspEditorPreferencesTesterTest {
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
 		//THEN the LspEditorPreferencesTester.test returns FALSE for the given file URI:
 		assertTrue(!cLanguageServerProvider.isEnabledFor(externalFile.toURI()));	
-		TestUtils.closeEditor(editor, false);
+
 		//ensure clean up
+		TestUtils.closeEditor(editor, false);
+		externalFile.delete();
+	}
+	
+	/**
+	 * Tests whether LS enable returns true for an external file which is opened in the C/C++ Editor (LSP).
+	 */	
+	@Test
+	public void testLsEnableForExternalFile_OpenedInLspCEditor() throws CoreException, IOException {
+		//GIVEN is an existing external file:
+		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
+		externalFile.createNewFile();
+		//AND it's opened in the LSP based C/C++ Editor:
+		var editor = TestUtils.openInEditor(externalFile.toURI(), LspPlugin.LSP_C_EDITOR_ID);
+		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
+		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
+		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
+		//THEN the LspEditorPreferencesTester.test returns TRUE for the given file URI:
+		assertTrue(cLanguageServerProvider.isEnabledFor(externalFile.toURI()));	
+
+		//ensure clean up
+		TestUtils.closeEditor(editor, false);
+		externalFile.delete();
+	}
+	
+	/**
+	 * Tests whether the LS is NOT enabled when switching from a tab with a project file with LS enabled 
+	 * to a project file without LS enabled.
+	 * @throws UnsupportedEncodingException 
+	 */
+	@Test
+	public void testLsNotEnabledByTabSwitchFromLspToNonLspProjectFile() throws CoreException, UnsupportedEncodingException {
+		//GIVEN is a project with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
+		TestUtils.setLspPreferred(project, true);
+		//AND a file exists in the given project:
+		var lspProjectFile = TestUtils.createFile(project, MAIN_C, FILE_CONTENT);
+		//AND this file will be opened:
+		var lspEditorPart = TestUtils.openInEditor(lspProjectFile);
+		//AND a second project with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
+		var nonLspProject = TestUtils.createCProject("NonLspProject");
+		TestUtils.setLspPreferred(nonLspProject, false);
+		//WHEN a file exits in the given second project with DISABLED "Prefer C/C++ Editor (LSP)":
+		var nonLspProjectFile = TestUtils.createFile(nonLspProject, MAIN_C, FILE_CONTENT);
+		//THEN the LS won't be enabled for the non LSP project file:
+		assertTrue(!LspPlugin.getDefault().getCLanguageServerProvider().isEnabledFor(nonLspProjectFile.getLocationURI()));
+		//AND those file has been be opened:
+		var nonLspEditorPart = TestUtils.openInEditor(nonLspProjectFile);
+		//THEN the file from the project with enabled "Prefer C/C++ Editor (LSP)" has been opened in the C/C++ Editor (LSP):
+		assertEquals(LspPlugin.LSP_C_EDITOR_ID, lspEditorPart.getEditorSite().getId());
+		//THEN the file from the project with disabled "Prefer C/C++ Editor (LSP)" has been opened in the C/C++ Editor:
+		assertEquals(LspPlugin.C_EDITOR_ID, nonLspEditorPart.getEditorSite().getId());
+		
+		//clean-up:
+		TestUtils.closeEditor(lspEditorPart, false);
+		TestUtils.closeEditor(nonLspEditorPart, false);
+		TestUtils.deleteProject(nonLspProject);
+	}
+	
+	/**
+	 * Tests whether the LS is enabled for an external header file when a LSP based editor is in focus 
+	 * and an external header file shall be opened. (hyperlink test)
+	 * @throws UnsupportedEncodingException, IOException
+	 */
+	@Test
+	public void testLsEnableByHyperlinkFromLspFileToExternalFile() throws CoreException, IOException {
+		//GIVEN is a project with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
+		TestUtils.setLspPreferred(project, true);
+		//AND a file exists in the given project:
+		var lspProjectFile = TestUtils.createFile(project, MAIN_C, FILE_CONTENT);
+		//AND this file has been opened:
+		var lspEditorPart = TestUtils.openInEditor(lspProjectFile);
+		//WHEN an external header file shall be opened in the C/C++ Editor:
+		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
+		externalFile.createNewFile();
+		//THEN the LS will be enabled for the external file, because we assume that is opened via hyperlink from the opened main.c:
+		assertTrue(LspPlugin.getDefault().getCLanguageServerProvider().isEnabledFor(externalFile.toURI()));
+	
+		//clean-up:
+		TestUtils.closeEditor(lspEditorPart, false);
 		externalFile.delete();
 	}
 

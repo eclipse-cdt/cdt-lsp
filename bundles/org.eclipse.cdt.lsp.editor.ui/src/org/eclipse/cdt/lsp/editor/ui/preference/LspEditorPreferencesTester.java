@@ -15,7 +15,6 @@ package org.eclipse.cdt.lsp.editor.ui.preference;
 
 import java.net.URI;
 
-import org.eclipse.cdt.internal.ui.editor.CEditor;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.core.expressions.PropertyTester;
@@ -34,7 +33,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
-@SuppressWarnings("restriction")
 public class LspEditorPreferencesTester extends PropertyTester {
 	private static final String FILE_SCHEME = "file"; //$NON-NLS-1$
 	
@@ -60,11 +58,8 @@ public class LspEditorPreferencesTester extends PropertyTester {
 			}
 			// When resource == null it's an external file: Check if the file is already opened, if not check the active editor:
 			return isFileOpenedInLspEditor(editorInput);
-		} else if (receiver instanceof CEditor) {
-			// TODO: remove this dirty hack when LSPE4 has solved the issue #393
-			return false;
 		}
-		return true; // we assume it's a C/C++ based editor. TODO: change to false when SPE4 has solved the issue #393 and last else-if has been removed
+		return false;
 	}
 
 	protected boolean preferLspEditor(IProject project) {
@@ -123,11 +118,13 @@ public class LspEditorPreferencesTester extends PropertyTester {
 				}
 
 				if (uri.equals(editorUnputURI)) {
-					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId());
+					// should return false when an external header file with same URI is opened in a LSP editor 
+					// and non LSP editor and tab switching from a non LSP editor to the tab with the file in the non LSP editor:
+					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId()) && isLspEditorActive();
 				}
 			}
 		}
-		// the file has not been opened yet:
+		// the file has not been opened yet -> goto definition/declaration case
 		return isLspEditorActive();
 	}
 	
