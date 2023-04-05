@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *******************************************************************************/
+
 package org.eclipse.cdt.lsp.editor.ui.test;
 
 import java.io.ByteArrayInputStream;
@@ -20,6 +33,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.junit.jupiter.api.TestInfo;
 
 public class TestUtils {
 	
@@ -78,6 +92,12 @@ public class TestUtils {
 		IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page = workbenchWindow.getActivePage();
 		return page.closeEditor(editor, save);
+	}
+	
+	public static String getName(TestInfo testInfo) {
+		String displayName = testInfo.getDisplayName();
+		String replaceFirst = displayName.replaceFirst("\\(.*\\)", "");
+		return replaceFirst;
 	}
 	
 	private static IWorkbenchPage getWorkbenchPage() {

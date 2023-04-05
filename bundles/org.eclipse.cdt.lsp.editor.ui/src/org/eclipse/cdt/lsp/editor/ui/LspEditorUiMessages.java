@@ -30,5 +30,8 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_server_path;
 	
 	public static String LspEditorPropertiesPage_projectSpecificSettings;
+	
+	public static String CProjectChangeMonitor_yaml_scanner_error;
+	public static String CProjectChangeMonitor_yaml_scanner_error_message;
 
 }

@@ -62,7 +62,7 @@ public class LspEditorPreferencesTester extends PropertyTester {
 		return false;
 	}
 
-	protected boolean preferLspEditor(IProject project) {
+	public static boolean preferLspEditor(IProject project) {
 		// check project properties:
 		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
 		return Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
