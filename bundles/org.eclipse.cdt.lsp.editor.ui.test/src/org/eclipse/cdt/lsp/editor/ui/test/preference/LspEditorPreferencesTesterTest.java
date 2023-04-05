@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *******************************************************************************/
+
 package org.eclipse.cdt.lsp.editor.ui.test.preference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
 
-
 public class LspEditorPreferencesTesterTest {
 	private static final String FILE_CONTENT = "// sample file content";
 	private static final String MAIN_CPP = "main.cpp";
@@ -33,13 +45,7 @@ public class LspEditorPreferencesTesterTest {
 	
 	@BeforeEach
 	public void setUp(TestInfo testInfo) throws CoreException {
-		project = TestUtils.createCProject(getName(testInfo));
-	}
-	
-	private String getName(TestInfo testInfo) {
-		String displayName = testInfo.getDisplayName();
-		String replaceFirst = displayName.replaceFirst("\\(.*\\)", "");
-		return replaceFirst;
+		project = TestUtils.createCProject(TestUtils.getName(testInfo));
 	}
 	
 	@AfterEach

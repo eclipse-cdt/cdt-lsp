@@ -13,6 +13,7 @@
 
 package org.eclipse.cdt.lsp.editor.ui;
 
+import org.eclipse.cdt.lsp.editor.ui.clangd.CProjectChangeMonitor;
 import org.eclipse.cdt.lsp.editor.ui.clangd.CompileCommandsMonitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -29,6 +30,7 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 	private IPreferenceStore preferenceStore;
 	private IWorkspace workspace;
 	private CompileCommandsMonitor compileCommandsMonitor;
+	private CProjectChangeMonitor cProjectChangeMonitor;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.editor.ui"; //$NON-NLS-1$
@@ -50,13 +52,14 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 		workspaceTracker.open();
 		workspace = workspaceTracker.getService();
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
-		//getLsPreferences();
+		cProjectChangeMonitor = new CProjectChangeMonitor().start();
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		compileCommandsMonitor.stop();
+		cProjectChangeMonitor.stop();
 		super.stop(context);
 	}
 
