@@ -215,6 +215,20 @@
 		            </test>
 	            </with>        
       </definition>
-   </extension>   
+   </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+         <!-- Still using the deprecated extension until there is a proper replacement for the RulerDoubleClick action (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=455985) -->
+      <editorContribution
+            id="org.eclipse.cdt.lsp.CEditor.BreakpointRulerActions"
+            targetID="org.eclipse.cdt.lsp.CEditor">
+         <action
+               actionID="RulerDoubleClick"
+               class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+               id="org.eclipse.cdt.lsp.CEditor.RulerToggleBreakpointAction"
+               label="unusedlabel">
+         </action>
+      </editorContribution>
+   </extension>
 </plugin>
 

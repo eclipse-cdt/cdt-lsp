@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.cdt.core,
  org.eclipse.ui.workbench,
  org.eclipse.core.expressions,
- org.eclipse.jface.text
+ org.eclipse.jface.text,
+ org.eclipse.debug.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy
