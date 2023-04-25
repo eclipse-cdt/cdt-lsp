@@ -7,6 +7,11 @@ Bundle-Vendor: Eclipse.org
 Fragment-Host: org.eclipse.cdt.lsp.editor.ui;bundle-version="0.0.0"
 Require-Bundle: org.eclipse.cdt.lsp,
  junit-jupiter-api,
- org.yaml.snakeyaml
+ org.yaml.snakeyaml,
+ org.mockito.mockito-core,
+ org.objenesis,
+ net.bytebuddy.byte-buddy,
+ net.bytebuddy.byte-buddy-agent,
+ org.mockito.junit-jupiter
 Automatic-Module-Name: org.eclipse.cdt.lsp.editor.ui.test
 Bundle-RequiredExecutionEnvironment: JavaSE-17

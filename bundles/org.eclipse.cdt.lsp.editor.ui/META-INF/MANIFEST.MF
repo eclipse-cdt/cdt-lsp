@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.cdt.lsp.editor.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin
 Bundle-Vendor: Eclipse.org
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.cdt.lsp,
@@ -15,7 +16,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.cdt.core,
  org.eclipse.jface.text,
- org.yaml.snakeyaml
+ org.yaml.snakeyaml,
+ org.eclipse.lsp4j,
+ org.eclipse.lsp4e,
+ org.eclipse.lsp4j.jsonrpc
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp.editor.ui
 Bundle-ActivationPolicy: lazy
