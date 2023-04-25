@@ -4,7 +4,8 @@ Bundle-Name: Language Server based C/C++ Editor
 Bundle-SymbolicName: org.eclipse.cdt.lsp;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp,
- org.eclipse.cdt.lsp.server
+ org.eclipse.cdt.lsp.server,
+ org.eclipse.cdt.lsp.services
 Bundle-Activator: org.eclipse.cdt.lsp.LspPlugin
 Bundle-Vendor: Eclipse.org
 Require-Bundle: org.eclipse.ui,
@@ -22,7 +23,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench,
  org.eclipse.core.expressions,
  org.eclipse.jface.text,
- org.eclipse.debug.ui
+ org.eclipse.debug.ui,
+ org.eclipse.lsp4j,
+ org.eclipse.lsp4j.jsonrpc
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy

@@ -37,6 +37,13 @@
             properties="LspEditorPreference"
             type="java.lang.Object">
       </propertyTester>
+      <propertyTester
+            class="org.eclipse.cdt.lsp.editor.ui.commands.LspEditorActiveTester"
+            id="org.eclipse.cdt.lsp.editor.ui.isLspCEditor"
+            namespace="org.eclipse.cdt.lsp.editor.ui"
+            properties="isLspCEditor"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
    <extension
          point="org.eclipse.cdt.lsp.serverProvider">
@@ -50,6 +57,52 @@
             </test>
          </enabledWhen>
       </server>
+   </extension>
+
+  <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header"
+            name="%Commands.ToggleSourceAndHeader.name">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header"
+            contextId="org.eclipse.ui.genericeditor.genericEditorContext"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+TAB">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.eclipse.cdt.lsp.editor.ui.commands.ToggleSourceAndHeaderCommandHandler"
+            commandId="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header">
+         <activeWhen>
+            	<with variable="activeEditor">
+                <test
+                      property="org.eclipse.cdt.lsp.editor.ui.isLspCEditor">
+                </test>
+            	</with>
+         </activeWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any?before=org.eclipse.lsp4e.openCallHierarchy">
+         <command
+               commandId="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header"
+               label="%PopupMenu.ToggleSourceAndHeader.label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
 
 </plugin>
