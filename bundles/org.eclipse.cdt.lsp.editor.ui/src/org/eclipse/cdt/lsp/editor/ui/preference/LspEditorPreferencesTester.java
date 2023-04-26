@@ -14,7 +14,10 @@
 package org.eclipse.cdt.lsp.editor.ui.preference;
 
 import java.net.URI;
+import java.util.Optional;
 
+import org.eclipse.cdt.core.model.ICProject;
+import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.core.expressions.PropertyTester;
@@ -26,6 +29,7 @@ import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
+import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IURIEditorInput;
@@ -58,6 +62,16 @@ public class LspEditorPreferencesTester extends PropertyTester {
 			}
 			// When resource == null it's an external file: Check if the file is already opened, if not check the active editor:
 			return isFileOpenedInLspEditor(editorInput);
+		} else if (receiver instanceof ITranslationUnit) {
+			// called to enable the LS based CSymbolsContentProvider: 
+			return Optional.of((ITranslationUnit) receiver)
+					 .map(ITranslationUnit::getCProject)
+					 .map(ICProject::getProject)
+					 .map(LspEditorPreferencesTester::preferLspEditor)
+					 .orElse(Boolean.FALSE);
+		} else if (receiver instanceof DocumentSymbolWithFile) {
+			// called to enable the LS based CSymbolsContentProvider:
+			return true;
 		}
 		return false;
 	}

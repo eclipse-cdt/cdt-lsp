@@ -126,53 +126,55 @@
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
             activeByDefault="true"
-            contentProvider="org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider"
+            contentProvider="org.eclipse.cdt.lsp.ui.navigator.CSymbolsContentProvider"
+            icon="icons/c.png"
             id="org.eclipse.cdt.lsp.navigator.content"
-            labelProvider="org.eclipse.cdt.internal.ui.navigator.CNavigatorLabelProvider"
-            name="C/C++ Elements"
-            priority="high">
+            labelProvider="org.eclipse.lsp4e.outline.SymbolsLabelProvider"
+            name="LS Symbols"
+            priority="normal">
 	    <triggerPoints>
-          <or>
-             <instanceof value="org.eclipse.cdt.core.model.ICElement"/>
-             <instanceof value="org.eclipse.cdt.ui.CElementGrouping"/>
-             <and>
-	             <instanceof value="org.eclipse.core.resources.IResource"/>
-	             <test
-                    forcePluginActivation="true"
-                    property="org.eclipse.core.resources.projectNature"
-                    value="org.eclipse.cdt.core.cnature"/>
-             </and>
-             <instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
-          </or>
+        <and>
+           <or>
+              <instanceof
+                    value="org.eclipse.cdt.core.model.ITranslationUnit">
+              </instanceof>
+              <instanceof
+                    value="org.eclipse.lsp4e.outline.SymbolsModel$DocumentSymbolWithFile">
+              </instanceof></or>
+           <test
+                 forcePluginActivation="true"
+                 property="org.eclipse.cdt.lsp.server.enable.hasLanguageServer"
+                 value="true">
+           </test>
+        </and>
    	   </triggerPoints>
    	   <possibleChildren>
           <or>
-             <instanceof value="org.eclipse.core.resources.IResource"/>
-             <instanceof value="org.eclipse.cdt.core.model.ICElement"/>
-             <instanceof value="org.eclipse.cdt.ui.CElementGrouping"/>
+             <instanceof
+                   value="org.eclipse.lsp4e.outline.SymbolsModel$DocumentSymbolWithFile">
+             </instanceof>
           </or>
 	   </possibleChildren>
  	   <override
              policy="InvokeAlwaysRegardlessOfSuppressedExt"
-             suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
+             suppressedExtensionId="org.eclipse.cdt.ui.navigator.content"/>
 	   <actionProvider
-			class="org.eclipse.cdt.lsp.ui.navigator.LspCEditorOpenActionProvider"
+			class="org.eclipse.cdt.lsp.ui.navigator.CSymbolsOpenActionProvider"
 			id="org.eclipse.cdt.lsp.navigator.actions.open"
 			overrides="org.eclipse.ui.navigator.resources.OpenActions"
-			priority="highest">
+			priority="normal">
 		 <enablement>
 			<or>
-				<instanceof value="org.eclipse.cdt.core.model.ICElement" />
-		        <and>
-		            <instanceof value="org.eclipse.core.resources.IProject"/>
-		            <test
-                    forcePluginActivation="true"
-                    property="org.eclipse.core.resources.projectNature"
-                    value="org.eclipse.cdt.core.cnature"/>
-		        </and>
+          <instanceof
+                value="org.eclipse.lsp4e.outline.SymbolsModel$DocumentSymbolWithFile">
+          </instanceof>
 			</or>
          </enablement>			
        </actionProvider>
+    <commonSorter
+          class="org.eclipse.lsp4e.outline.OutlineSorter"
+          id="org.eclipse.lsp4e.outline.OutlineSorter">
+    </commonSorter>
       </navigatorContent>
    </extension>
    <extension

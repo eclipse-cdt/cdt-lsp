@@ -12,23 +12,21 @@
 
 package org.eclipse.cdt.lsp.ui.navigator;
 
-import org.eclipse.cdt.core.model.ICElement;
-import org.eclipse.cdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.cdt.internal.ui.cview.CViewMessages;
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.lsp4e.LSPEclipseUtils;
+import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.OpenFileAction;
-import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.navigator.CommonActionProvider;
@@ -36,12 +34,14 @@ import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 @SuppressWarnings("restriction")
-public class LspCEditorOpenActionProvider extends CommonActionProvider {
+public class CSymbolsOpenActionProvider extends CommonActionProvider {
 
 	private class OpenCFileAction extends OpenFileAction {
 		private IWorkbenchPage page;
+		private DocumentSymbolWithFile fOpenElement;
 
 		public OpenCFileAction(IWorkbenchPage page) {
 			super(page);
@@ -50,22 +50,51 @@ public class LspCEditorOpenActionProvider extends CommonActionProvider {
 
 		@Override
 		public void run() {
-			var sel = page.getSelection();
-			if (!sel.isEmpty() && sel instanceof IStructuredSelection) {
+			if (fOpenElement != null) {
+				IEditorPart part;
 				try {
-					IFile file = Adapters.adapt(((IStructuredSelection) sel).getFirstElement(), IFile.class);
-					if (file != null) {
-						IDE.openEditor(this.page, file);
-					}
+					part = IDE.openEditor(this.page, fOpenElement.file);
+					revealInEditor(part, fOpenElement);
 				} catch (CoreException exc) {
 					LspPlugin.logError(exc.getMessage(), exc);
 				}
 			}
 		}
+		
+		@Override
+		protected boolean updateSelection(IStructuredSelection selection) {
+			fOpenElement = null;
+			if (selection.size() == 1) {
+				Object element = selection.getFirstElement();
+				if (element instanceof DocumentSymbolWithFile) {
+					fOpenElement = (DocumentSymbolWithFile) element;
+				}
+			}
+			return fOpenElement != null || super.updateSelection(selection);
+		}
 
 		public IWorkbenchPage getPage() {
 			return page;
 		}
+		
+		private void revealInEditor(IEditorPart part, DocumentSymbolWithFile element) {
+			if (element == null) {
+				return;
+			}
+			if (part instanceof ITextEditor) {
+				try {
+					var range = element.symbol.getSelectionRange();
+					var document = LSPEclipseUtils.getDocument(element.file);
+					int startOffset = document.getLineOffset(range.getStart().getLine())
+							+ range.getStart().getCharacter();
+					int endOffset = document.getLineOffset(range.getEnd().getLine())
+							+ range.getEnd().getCharacter();
+					((ITextEditor) part).selectAndReveal(startOffset, endOffset - startOffset);
+				} catch (BadLocationException exc) {
+					LspPlugin.logError(exc.getMessage(), exc);
+				}
+			}
+		}	
 	}
 
 	private OpenCFileAction openCFileAction;
@@ -92,19 +121,26 @@ public class LspCEditorOpenActionProvider extends CommonActionProvider {
 			actionBars.updateActionBars();
 		}
 	}
+	
+	@Override
+	public void updateActionBars() {
+		if (openCFileAction != null) {
+			IStructuredSelection celements = (IStructuredSelection) getContext().getSelection();
+			openCFileAction.selectionChanged(celements);
+		}
+	}
 
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
-		IStructuredSelection celements = (IStructuredSelection) getContext().getSelection();
-		IStructuredSelection selection = SelectionConverter.convertSelectionToResources(celements);
-
-		openCFileAction.selectionChanged(celements);
-		if (openCFileAction.isEnabled()) {
-			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, openCFileAction);
-			fillOpenWithMenu(menu, selection);
+		if (openCFileAction != null) {
+			IStructuredSelection celements = (IStructuredSelection) getContext().getSelection();
+			
+			openCFileAction.selectionChanged(celements);
+			if (openCFileAction.isEnabled()) {
+				menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, openCFileAction);
+				fillOpenWithMenu(menu, celements);
+			}
 		}
-
-		addNewWindowAction(menu, selection);
 	}
 
 	/**
@@ -120,42 +156,15 @@ public class LspCEditorOpenActionProvider extends CommonActionProvider {
 		if (selection.size() != 1) {
 			return;
 		}
-		Object element = selection.getFirstElement();
-		if (!(element instanceof IFile)) {
+		IFile file;
+		if (selection.getFirstElement() instanceof DocumentSymbolWithFile) {
+			file = ((DocumentSymbolWithFile) selection.getFirstElement()).file;
+		} else {
 			return;
 		}
 
 		MenuManager submenu = new MenuManager(CViewMessages.OpenWithMenu_label, ICommonMenuConstants.GROUP_OPEN_WITH);
-		submenu.add(new OpenWithMenu(openCFileAction.getPage(), (IFile) element));
+		submenu.add(new OpenWithMenu(openCFileAction.getPage(), file));
 		menu.insertAfter(ICommonMenuConstants.GROUP_OPEN_WITH, submenu);
-	}
-
-	/**
-	 * Adds the Open in New Window action to the context menu.
-	 *
-	 * @param menu
-	 *                      the context menu
-	 * @param selection
-	 *                      the current selection
-	 */
-	private void addNewWindowAction(IMenuManager menu, IStructuredSelection selection) {
-
-		// Only supported if exactly one container (i.e open project or folder) is selected.
-		if (selection.size() != 1) {
-			return;
-		}
-		Object element = selection.getFirstElement();
-		if (element instanceof ICElement) {
-			element = ((ICElement) element).getResource();
-		}
-		if (!(element instanceof IContainer)) {
-			return;
-		}
-		if (element instanceof IProject && !(((IProject) element).isOpen())) {
-			return;
-		}
-
-		menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
-				new OpenInNewWindowAction(viewPart.getSite().getWorkbenchWindow(), (IContainer) element));
 	}
 }
