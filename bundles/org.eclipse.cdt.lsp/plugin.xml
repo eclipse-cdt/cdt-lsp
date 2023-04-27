@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="serverProvider" name="C/C++ Language Server" schema="schema/serverProvider.exsd"/>
+   <extension-point id="compileCommands" name="Directory locator for compile_commands.json file" schema="schema/compileCommands.exsd"/>
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -34,7 +35,7 @@
             class="org.eclipse.cdt.lsp.internal.server.CLanguageServerStreamConnectionProvider"
             id="org.eclipse.cdt.lsp.server"
             label="C/C++ Language Server"
-            singleton="true">
+            singleton="false">
       </server>
       <contentTypeMapping
             contentType="org.eclipse.cdt.core.cSource"

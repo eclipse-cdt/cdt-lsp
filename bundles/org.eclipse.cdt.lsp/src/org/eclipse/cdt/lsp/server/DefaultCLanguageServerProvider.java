@@ -25,14 +25,17 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 	public static final String PRETTY = "--pretty";
 	public static final String QUERY_DRIVER = "--query-driver=";
 	
-	protected List<String> commands;
+	public static final String DEFAULT_COMPILE_COMMANDS_DIR = "build/default";
+	
+	private List<String> defaultCommands;
+	private List<String> commands;
 	
 	protected EnableExpression enableExpression;
 	
 	public DefaultCLanguageServerProvider() {
 		commands = createCommands();
 	}
-	
+
 	@Override
 	public List<String> getCommands() {
 		return commands;
@@ -43,22 +46,9 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 		this.commands = commands;		
 	}
 	
-	protected List<String> createCommands() {
-		List<String> commands = new ArrayList<>();
-		IPath clangdLocation = PathUtil.findProgramLocation("clangd", null); //in case pathStr is null environment variable ${PATH} is inspected
-		if (clangdLocation != null) {
-			commands.add(clangdLocation.toOSString());
-			commands.add(CLANG_TIDY);
-			commands.add(BACKGROUND_INDEX);
-			commands.add(COMPLETION_STYLE);
-			commands.add(PRETTY);
-			// clangd will execute drivers and fetch necessary include paths to compile your code:
-			IPath compilerLocation = PathUtil.findProgramLocation("gcc", null);
-			if (compilerLocation != null) {
-				commands.add(QUERY_DRIVER + compilerLocation.removeLastSegments(1).append(IPath.SEPARATOR + "*"));
-			}
-		}
-		return commands;
+	@Override
+	public List<String> getDefaultCommands() {
+		return defaultCommands;
 	}
 
 	@Override
@@ -78,5 +68,54 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 		}
 		//language server is always enabled when no enable expression has been defined in the extension point: 
 		return true;
+	}
+	
+	@Override
+	public String getServerPath() {
+		if (commands.isEmpty())
+			return "";
+		return commands.get(0);
+	}
+	
+	@Override
+	public String getOptionsAsString() {
+		return getCommandOptionsAsString(commands);
+	}
+	
+	@Override
+	public String getDefaultServerPath() {
+		if (defaultCommands.isEmpty())
+			return "";
+		return defaultCommands.get(0);
+	}
+
+	@Override
+	public String getDefaultOptionsAsString() {
+		return getCommandOptionsAsString(defaultCommands);
+	}
+	
+	protected List<String> createCommands() {
+		List<String> commands = new ArrayList<>();
+		IPath clangdLocation = PathUtil.findProgramLocation("clangd", null); //in case pathStr is null environment variable ${PATH} is inspected
+		if (clangdLocation != null) {
+			commands.add(clangdLocation.toOSString());
+			commands.add(CLANG_TIDY);
+			commands.add(BACKGROUND_INDEX);
+			commands.add(COMPLETION_STYLE);
+			commands.add(PRETTY);
+			// clangd will execute drivers and fetch necessary include paths to compile your code:
+			IPath compilerLocation = PathUtil.findProgramLocation("gcc", null);
+			if (compilerLocation != null) {
+				commands.add(QUERY_DRIVER + compilerLocation.removeLastSegments(1).append(IPath.SEPARATOR + "*"));
+			}
+		}
+		defaultCommands = commands; //initialize defaults
+		return commands;
+	}
+	
+	private String getCommandOptionsAsString(List<String> commands) {
+		StringBuilder builder = new StringBuilder();
+		commands.forEach(cmd -> { builder.append(" ").append(cmd); });
+		return builder.toString();
 	}
 }

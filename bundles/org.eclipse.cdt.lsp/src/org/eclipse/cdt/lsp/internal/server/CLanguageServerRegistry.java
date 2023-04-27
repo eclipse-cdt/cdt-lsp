@@ -21,7 +21,6 @@ import org.eclipse.cdt.lsp.server.EnableExpression;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.ExpressionConverter;
 import org.eclipse.core.expressions.IEvaluationContext;
-import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -32,10 +31,10 @@ import org.eclipse.ui.handlers.IHandlerService;
 public class CLanguageServerRegistry {
 	private static final String EXTENSION_ID = LspPlugin.PLUGIN_ID + ".serverProvider"; //$NON-NLS-1$
 	private static final String SERVER_ELEMENT = "server"; //$NON-NLS-1$
-	private static final String CLASS = "class"; //$NON-NLS-1$
 	private static final String PRIORITY = "priority"; //$NON-NLS-1$
 	private static final String ENABLED_WHEN_ATTRIBUTE = "enabledWhen"; //$NON-NLS-1$
 	private final IExtensionPoint cExtensionPoint;
+	private final ClassCreator cClassCreator;
 	private ICLanguageServerProvider prioritizedProvider = null;
 	private Priority highestPrio = Priority.low;
 	
@@ -45,8 +44,10 @@ public class CLanguageServerRegistry {
 		high
 	}
 
+	//TODO: Make class creatable and use DI
 	public CLanguageServerRegistry() {
 		cExtensionPoint = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_ID);
+		cClassCreator = new ClassCreator(); 
 	}
 
 	public ICLanguageServerProvider createCLanguageServerProvider() {
@@ -55,8 +56,8 @@ public class CLanguageServerRegistry {
 		HashMap<Priority, ICLanguageServerProvider> providers = new HashMap<Priority, ICLanguageServerProvider>();
 		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
 			if (SERVER_ELEMENT.equals(configurationElement.getName())) {
-				ICLanguageServerProvider provider = (ICLanguageServerProvider) getInstanceFromExtension(configurationElement, ICLanguageServerProvider.class);		
-				if (provider != null) {
+				Optional<ICLanguageServerProvider> optProvider = cClassCreator.getInstanceFromExtension(configurationElement, ICLanguageServerProvider.class);
+				if (optProvider.isPresent()) {
 					// set enable expression:
 					EnableExpression enableExpression = null;
 					if (configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE) != null) {
@@ -74,9 +75,9 @@ public class CLanguageServerRegistry {
 							}
 						}
 					}
-					provider.setEnableExpression(enableExpression);
+					optProvider.get().setEnableExpression(enableExpression);
 					// save priority attribute:
-					providers.put(Priority.valueOf(configurationElement.getAttribute(PRIORITY)),provider);
+					providers.put(Priority.valueOf(configurationElement.getAttribute(PRIORITY)),optProvider.get());
 				}
 			}
 		}
@@ -97,17 +98,6 @@ public class CLanguageServerRegistry {
 
 	private IEvaluationContext getEvaluationContext() {
 		return Optional.ofNullable(PlatformUI.getWorkbench().getService(IHandlerService.class)).map(IHandlerService::getCurrentState).orElse(null);
-	}
-
-	private <T> Object getInstanceFromExtension(IConfigurationElement configurationElement, Class<T> clazz) {
-		Object result = null;
-		try {
-			Object obj = configurationElement.createExecutableExtension(CLASS);
-			result = Adapters.adapt(obj, clazz);
-		} catch (CoreException e) {
-			LspPlugin.logError(e.getMessage(), e);
-		}
-		return result;
 	}
 
 }

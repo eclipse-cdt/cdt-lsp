@@ -51,5 +51,17 @@
          </enabledWhen>
       </server>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.eclipse.cdt.lsp.editor.ui.preference.LsPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.cdt.lsp.compileCommands">
+      <locator
+            class="org.eclipse.cdt.lsp.editor.ui.properties.PropertiesCompileCommandsDirLocator">
+      </locator>
+   </extension>
 
 </plugin>
