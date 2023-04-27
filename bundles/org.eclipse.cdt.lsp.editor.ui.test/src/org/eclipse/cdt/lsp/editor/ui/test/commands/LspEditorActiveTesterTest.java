@@ -24,27 +24,20 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 public class LspEditorActiveTesterTest {
 
 	LspEditorActiveTester tut;
 
-	@Mock
 	IEditorPart editorPart;
-
-	@Mock
 	IEditorSite editorSite;
 
 	@BeforeEach
 	public void setup() {
 		tut = new LspEditorActiveTester();
+
+		editorPart = mock(IEditorPart.class);
+		editorSite = mock(IEditorSite.class);
 
 		when(editorPart.getSite()).thenReturn(editorSite);
 	}
