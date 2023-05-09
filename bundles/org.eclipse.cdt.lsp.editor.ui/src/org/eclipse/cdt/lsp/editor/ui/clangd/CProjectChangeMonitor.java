@@ -42,20 +42,22 @@ public class CProjectChangeMonitor {
 				if (project != null && LspEditorPreferencesTester.preferLspEditor(project)) {
 					ICConfigurationDescription newConfig = newCProjectDecription.getDefaultSettingConfiguration();
 					var cwdBuilder = newConfig.getBuildSetting().getBuilderCWD();
-					try {
-						var cwdString = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(cwdBuilder.toOSString(), "", null, newConfig);
-						var projectLocation = project.getLocation().addTrailingSeparator().toOSString();
-						var databasePath = cwdString.replace(projectLocation, "");
+					if (cwdBuilder != null) {
 						try {
-							ClangdConfigurationManager.setCompilationDatabase(project, databasePath);
-						} catch (ScannerException e) {
-							var status = new Status(IStatus.ERROR, LspEditorUiPlugin.PLUGIN_ID, e.getMessage());
-							var configFile = ClangdConfigurationManager.CLANGD_CONFIG_FILE_NAME;
-							LspUtils.showErrorMessage(LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error, 
-									LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error_message + projectLocation + configFile , status);
+							var cwdString = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(cwdBuilder.toOSString(), "", null, newConfig);
+							var projectLocation = project.getLocation().addTrailingSeparator().toOSString();
+							var databasePath = cwdString.replace(projectLocation, "");
+							try {
+								ClangdConfigurationManager.setCompilationDatabase(project, databasePath);
+							} catch (ScannerException e) {
+								var status = new Status(IStatus.ERROR, LspEditorUiPlugin.PLUGIN_ID, e.getMessage());
+								var configFile = ClangdConfigurationManager.CLANGD_CONFIG_FILE_NAME;
+								LspUtils.showErrorMessage(LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error, 
+										LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error_message + projectLocation + configFile , status);
+							}
+						} catch (CoreException | IOException e) {
+							LspEditorUiPlugin.logError(e.getMessage(), e);
 						}
-					} catch (CoreException | IOException e) {
-						LspEditorUiPlugin.logError(e.getMessage(), e);
 					}
 				}			
 			}
