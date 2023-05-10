@@ -72,11 +72,13 @@ public class LspEditorPreferencesTester extends PropertyTester {
 		} else if (receiver instanceof DocumentSymbolWithFile) {
 			// called to enable the LS based CSymbolsContentProvider:
 			return true;
+		} else if (receiver instanceof IProject) {
+			return preferLspEditor((IProject) receiver);
 		}
 		return false;
 	}
 
-	public static boolean preferLspEditor(IProject project) {
+	private static boolean preferLspEditor(IProject project) {
 		// check project properties:
 		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
 		return Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
