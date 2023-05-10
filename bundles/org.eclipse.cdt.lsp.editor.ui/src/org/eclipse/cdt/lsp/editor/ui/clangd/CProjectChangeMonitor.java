@@ -14,16 +14,17 @@
 package org.eclipse.cdt.lsp.editor.ui.clangd;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
+import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiMessages;
 import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
-import org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferencesTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -39,7 +40,8 @@ public class CProjectChangeMonitor {
 			ICProjectDescription newCProjectDecription = event.getNewCProjectDescription();
 			if (newCProjectDecription != null) {
 				IProject project = event.getProject();
-				if (project != null && LspEditorPreferencesTester.preferLspEditor(project)) {
+				boolean isEnabled = Optional.ofNullable(LspPlugin.getDefault()).map(LspPlugin::getCLanguageServerProvider).map(provider -> provider.isEnabledFor(project)).orElse(Boolean.FALSE);
+				if (project != null && isEnabled) {
 					ICConfigurationDescription newConfig = newCProjectDecription.getDefaultSettingConfiguration();
 					var cwdBuilder = newConfig.getBuildSetting().getBuilderCWD();
 					if (cwdBuilder != null) {
