@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.editor.ui.test.TestUtils;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
+import org.eclipse.cdt.lsp.server.enable.HasLanguageServerPropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.jupiter.api.AfterEach;
@@ -67,8 +68,8 @@ public class LspEditorPreferencesTesterTest {
 		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
 		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
-		//THEN the LspEditorPreferencesTester.test returns TRUE for the given project file URI:
-		assertTrue(cLanguageServerProvider.isEnabledFor(project.getFile(fileName).getLocationURI()));		
+		//THEN the LspEditorPreferencesTester.test returns TRUE for the given project:
+		assertTrue(cLanguageServerProvider.isEnabledFor(project));		
 	}
 	
 	/**
@@ -85,8 +86,8 @@ public class LspEditorPreferencesTesterTest {
 		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
 		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
-		//THEN the LspEditorPreferencesTester.test returns FALSE for the given project file URI:
-		assertTrue(!cLanguageServerProvider.isEnabledFor(project.getFile(fileName).getLocationURI()));		
+		//THEN the LspEditorPreferencesTester.test returns FALSE for the given project:
+		assertTrue(!cLanguageServerProvider.isEnabledFor(project));		
 	}
 	
 	/**
@@ -225,64 +226,9 @@ public class LspEditorPreferencesTesterTest {
 		TestUtils.closeEditor(editorPart, false);
 	}
 	
-	/**
-	 * Tests whether LS enable returns false for an external file when no (LSP) editor is opened.
-	 * @throws IOException 
-	 */
-	@Test
-	public void testLsNotEnabledForExternalFile_NoEditorOpen() throws CoreException, IOException {
-		//GIVEN is an external file which does not exists in the given project and is not opened:
-		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
-		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
-		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
-		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
-		//THEN the LspEditorPreferencesTester.test returns FALSE for the given file URI:
-		assertTrue(!cLanguageServerProvider.isEnabledFor(externalFile.toURI()));		
-		//ensure clean up
-		externalFile.delete();
-	}
-	
-	/**
-	 * Tests whether LS enable returns false for an external file which is opened in the C/C++ Editor.
-	 */	
-	@Test
-	public void testLsNotEnabledForExternalFile_OpenedInCEditor() throws CoreException, IOException {
-		//GIVEN is an existing external file:
-		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
-		externalFile.createNewFile();
-		//AND it's opened in the C/C++ Editor:
-		var editor = TestUtils.openInEditor(externalFile.toURI(), LspPlugin.C_EDITOR_ID);
-		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
-		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
-		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
-		//THEN the LspEditorPreferencesTester.test returns FALSE for the given file URI:
-		assertTrue(!cLanguageServerProvider.isEnabledFor(externalFile.toURI()));	
-
-		//ensure clean up
-		TestUtils.closeEditor(editor, false);
-		externalFile.delete();
-	}
-	
-	/**
-	 * Tests whether LS enable returns true for an external file which is opened in the C/C++ Editor (LSP).
-	 */	
-	@Test
-	public void testLsEnableForExternalFile_OpenedInLspCEditor() throws CoreException, IOException {
-		//GIVEN is an existing external file:
-		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
-		externalFile.createNewFile();
-		//AND it's opened in the LSP based C/C++ Editor:
-		var editor = TestUtils.openInEditor(externalFile.toURI(), LspPlugin.LSP_C_EDITOR_ID);
-		//AND a ICLanguageServerProvider which uses LspEditorPreferencesTester as enabledWhen tester:
-		ICLanguageServerProvider cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
-		//WHEN the LspEditorPreferencesTester gets called by the property tester in the enabledWhen element of the serverProvider extension point,
-		//THEN the LspEditorPreferencesTester.test returns TRUE for the given file URI:
-		assertTrue(cLanguageServerProvider.isEnabledFor(externalFile.toURI()));	
-
-		//ensure clean up
-		TestUtils.closeEditor(editor, false);
-		externalFile.delete();
-	}
+	//**********************************************************************************************************************************
+	// The following test
+	//**********************************************************************************************************************************
 	
 	/**
 	 * Tests whether the LS is NOT enabled when switching from a tab with a project file with LS enabled 
@@ -303,7 +249,7 @@ public class LspEditorPreferencesTesterTest {
 		//WHEN a file exits in the given second project with DISABLED "Prefer C/C++ Editor (LSP)":
 		var nonLspProjectFile = TestUtils.createFile(nonLspProject, MAIN_C, FILE_CONTENT);
 		//THEN the LS won't be enabled for the non LSP project file:
-		assertTrue(!LspPlugin.getDefault().getCLanguageServerProvider().isEnabledFor(nonLspProjectFile.getLocationURI()));
+		assertTrue(!new HasLanguageServerPropertyTester().test(nonLspProjectFile.getLocationURI(), null, null, null));
 		//AND those file has been be opened:
 		var nonLspEditorPart = TestUtils.openInEditor(nonLspProjectFile);
 		//THEN the file from the project with enabled "Prefer C/C++ Editor (LSP)" has been opened in the C/C++ Editor (LSP):
@@ -334,7 +280,7 @@ public class LspEditorPreferencesTesterTest {
 		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		externalFile.createNewFile();
 		//THEN the LS will be enabled for the external file, because we assume that is opened via hyperlink from the opened main.c:
-		assertTrue(LspPlugin.getDefault().getCLanguageServerProvider().isEnabledFor(externalFile.toURI()));
+		assertTrue(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
 	
 		//clean-up:
 		TestUtils.closeEditor(lspEditorPart, false);

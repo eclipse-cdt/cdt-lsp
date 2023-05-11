@@ -41,7 +41,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType)) {
 			return editorDescriptors;
 		}
-		if (cLanguageServerProvider.isEnabledFor(editorInput)) {
+		if (isEnabledFor(editorInput)) {
 			return editorFilter(LspPlugin.C_EDITOR_ID, editorDescriptors); // remove CDT C-Editor
 		}
 		return editorFilter(LspPlugin.LSP_C_EDITOR_ID, editorDescriptors); // remove LSP based C-Editor
@@ -70,6 +70,15 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		}
 		return editorDescriptor;
 	}
+	
+	private boolean isEnabledFor(IEditorInput editorInput) {
+		IResource resource = editorInput.getAdapter(IResource.class);
+		if (resource != null) {
+			return cLanguageServerProvider.isEnabledFor(resource.getProject());
+		}
+		// When resource == null it's an external file: Check if the file is already opened, if not check the active editor:
+		return LspUtils.isFileOpenedInLspEditor(editorInput);
+	}
 
 	private boolean isNoCElement(IContentType contentType) {
 		if (contentType == null) {
@@ -97,7 +106,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (isNoCElement(contentType))
 			return null;
 
-		if (cLanguageServerProvider.isEnabledFor(editorInput)) {
+		if (isEnabledFor(editorInput)) {
 			return getEditorDescriptorById(editorInput.getName(), LspPlugin.LSP_C_EDITOR_ID, contentType); // return LSP based C/C++ Editor
 		} 
 		// TODO: return null; when either https://github.com/eclipse-cdt/cdt/pull/310 or 

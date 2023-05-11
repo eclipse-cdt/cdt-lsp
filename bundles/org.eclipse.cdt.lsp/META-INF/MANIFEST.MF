@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.cdt.lsp;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp,
  org.eclipse.cdt.lsp.server,
+ org.eclipse.cdt.lsp.server.enable,
  org.eclipse.cdt.lsp.services
 Bundle-Activator: org.eclipse.cdt.lsp.LspPlugin
 Bundle-Vendor: Eclipse.org
