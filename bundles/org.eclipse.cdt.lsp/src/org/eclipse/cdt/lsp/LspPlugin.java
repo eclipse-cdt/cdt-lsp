@@ -14,8 +14,10 @@ package org.eclipse.cdt.lsp;
 
 import org.eclipse.cdt.lsp.internal.server.CLanguageServerRegistry;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -31,6 +33,7 @@ public class LspPlugin extends AbstractUIPlugin {
 	private static LspPlugin plugin;
 	
 	private ICLanguageServerProvider cLanguageServerProvider;
+	private IWorkspace workspace;
 
 	/**
 	 * The constructor
@@ -42,6 +45,9 @@ public class LspPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		ServiceTracker<IWorkspace, IWorkspace> workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
+		workspaceTracker.open();
+		workspace = workspaceTracker.getService();
 		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
 	}
 
@@ -58,6 +64,10 @@ public class LspPlugin extends AbstractUIPlugin {
 	 */
 	public static LspPlugin getDefault() {
 		return plugin;
+	}
+	
+	public IWorkspace getWorkspace() {
+		return workspace;
 	}
 	
 	public ICLanguageServerProvider getCLanguageServerProvider() {

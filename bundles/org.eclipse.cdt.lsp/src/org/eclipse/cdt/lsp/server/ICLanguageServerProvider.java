@@ -14,6 +14,8 @@ package org.eclipse.cdt.lsp.server;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+
 public interface ICLanguageServerProvider {
 
 	/**
@@ -23,10 +25,10 @@ public interface ICLanguageServerProvider {
 	 */
 	public List<String> getCommands();
 	
-	
 	/**
 	 * The command list includes the location of the language server followed by its calling arguments.
 	 * 
+	 * @param commands
 	 */
 	public void setCommands(List<String> commands);
 	
@@ -38,12 +40,11 @@ public interface ICLanguageServerProvider {
 	public void setEnableExpression(EnableExpression enableExpression);
 	
 	/**
-	 * Check whether the LSP based C/C++ Editor and the language server shall be used for the given object.
-	 * Should be checked by the {@link EnableExpression#evaluate(Object)} method.
+	 * Check whether the LSP based C/C++ Editor and the language server shall be used for the given project.
 	 * 
-	 * @param receiver object which should be opened by the LSP Editor with language server
-	 * @return true if LSP based C/C++ Editor and language server shall be enabled for the given object
+	 * @param project 
+	 * @return true if LSP based C/C++ Editor and language server shall be enabled for the given project, otherwise false.
 	 */
-	public boolean isEnabledFor(Object receiver);
+	public boolean isEnabledFor(IProject project);
 
 }

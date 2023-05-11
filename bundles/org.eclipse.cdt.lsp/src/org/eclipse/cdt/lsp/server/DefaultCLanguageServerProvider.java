@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.utils.PathUtil;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 
 public class DefaultCLanguageServerProvider implements ICLanguageServerProvider {
@@ -67,14 +68,14 @@ public class DefaultCLanguageServerProvider implements ICLanguageServerProvider 
 	}
 
 	@Override
-	public boolean isEnabledFor(Object document) {
-		// check if server has been found:
+	public boolean isEnabledFor(IProject project) {
+		// check if server has been defined:
 		if (getCommands().isEmpty()) {
 			return false;
 		}
 		// check if enable expression is defined:
 		if (enableExpression != null) {
-			return enableExpression.evaluate(document);
+			return enableExpression.evaluate(project);
 		}
 		//language server is always enabled when no enable expression has been defined in the extension point: 
 		return true;
