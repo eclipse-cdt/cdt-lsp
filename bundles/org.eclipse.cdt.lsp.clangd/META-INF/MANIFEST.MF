@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.eclipse.cdt.lsp.clangd
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.cdt.lsp.clangd;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Name: %Bundle-Name
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Copyright: %Bundle-Copyright
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Require-Bundle: org.eclipse.cdt.lsp;bundle-version="1.0.0"
