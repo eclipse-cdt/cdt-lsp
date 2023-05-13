@@ -8,6 +8,7 @@
  * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.ui.navigator;
@@ -24,8 +25,8 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider;
-import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.lsp4e.LSPEclipseUtils;
 import org.eclipse.lsp4e.LanguageServerWrapper;
@@ -95,7 +96,7 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 						.map(s -> s.execute(ls -> ls.getTextDocumentService().documentSymbol(params)))
 						.orElse(CompletableFuture.completedFuture(null));
 			} catch (TimeoutException | ExecutionException | InterruptedException e) {
-				LspPlugin.logError(e.getMessage(), e);
+				Platform.getLog(getClass()).error(e.getMessage(), e);
 				symbols = CompletableFuture.completedFuture(null);
 				if (e instanceof InterruptedException) {
 					Thread.currentThread().interrupt();

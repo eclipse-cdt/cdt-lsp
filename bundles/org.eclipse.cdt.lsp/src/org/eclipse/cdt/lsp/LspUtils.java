@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 package org.eclipse.cdt.lsp;
 
 import java.net.URI;
@@ -6,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -68,7 +80,7 @@ public class LspUtils {
 				try {
 					editorInput = editor.getEditorInput();
 				} catch (PartInitException e) {
-					LspPlugin.logError(e.getMessage(), e);
+					Platform.getLog(LspUtils.class).error(e.getMessage(), e);
 					continue;
 				}
 				
@@ -101,7 +113,7 @@ public class LspUtils {
 				try {
 					editorInputFromEditor = editor.getEditorInput();
 				} catch (PartInitException e) {
-					LspPlugin.logError(e.getMessage(), e);
+					Platform.getLog(LspUtils.class).error(e.getMessage(), e);
 					continue;
 				}
 				if (editorInput.equals(editorInputFromEditor)) {

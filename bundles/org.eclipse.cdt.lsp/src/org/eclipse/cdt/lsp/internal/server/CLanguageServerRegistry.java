@@ -8,6 +8,7 @@
  * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.internal.server;
@@ -69,7 +70,7 @@ public class CLanguageServerRegistry {
 									enableExpression = new EnableExpression(this::getEvaluationContext,
 											ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
 								} catch (CoreException e) {
-									LspPlugin.logWarning("Failed to create enable expression for " + configurationElement.getNamespaceIdentifier(), e);
+									Platform.getLog(getClass()).warn("Failed to create enable expression for " + configurationElement.getNamespaceIdentifier(), e);
 								}
 							}
 						}
@@ -81,7 +82,7 @@ public class CLanguageServerRegistry {
 			}
 		}
 		if (providers.isEmpty()) {
-			LspPlugin.logWarning("No C/C++ language server defined");
+			Platform.getLog(getClass()).warn("No C/C++ language server defined");
 			prioritizedProvider = new DefaultCLanguageServerProvider();
 		} else {
 			// get provider with highest priority:
@@ -105,7 +106,7 @@ public class CLanguageServerRegistry {
 			Object obj = configurationElement.createExecutableExtension(CLASS);
 			result = Adapters.adapt(obj, clazz);
 		} catch (CoreException e) {
-			LspPlugin.logError(e.getMessage(), e);
+			Platform.getLog(getClass()).log(e.getStatus());
 		}
 		return result;
 	}

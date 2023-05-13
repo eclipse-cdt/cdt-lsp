@@ -8,18 +8,19 @@
  * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.server;
 
 import java.util.function.Supplier;
 
-import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.core.expressions.EvaluationContext;
 import org.eclipse.core.expressions.EvaluationResult;
 import org.eclipse.core.expressions.Expression;
 import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 
 /**
  * Checks whether the LSP based C/C++ Editor and language server shall be enabled
@@ -48,7 +49,7 @@ public final class EnableExpression {
 			context.setAllowPluginActivation(true);
 			return cExpression.evaluate(context).equals(EvaluationResult.TRUE);
 		} catch (CoreException e) {
-			LspPlugin.logError("Error occured during evaluation of enablement expression", e); //$NON-NLS-1$
+			Platform.getLog(getClass()).log(e.getStatus());
 		}
 		return false;
 	}
