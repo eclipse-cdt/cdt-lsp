@@ -22,6 +22,17 @@
 		id="org.eclipse.cdt.lsp.feature">
 		<category name="org.eclipse.cdt.lsp.category" />
 	</feature>
+	<category-def
+		name="org.eclipse.cdt.lsp.category.source"
+		label="Passage LDC Developer Resources">
+		<description>
+			C/C++ Language Server Protocol Support  Developer Resources: 
+		</description>
+	</category-def>
+	<feature 
+		id="org.eclipse.cdt.lsp.feature.source">
+		<category name="org.eclipse.cdt.lsp.category.source" />
+	</feature>
 	<bundle id="org.yaml.snakeyaml" />
 	<bundle id="org.yaml.snakeyaml.source" />
 </site>
