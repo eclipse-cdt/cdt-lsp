@@ -8,6 +8,7 @@
  * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp;
@@ -74,16 +75,4 @@ public class LspPlugin extends AbstractUIPlugin {
 		return cLanguageServerProvider;
 	}
 	
-	public static void logError(String message, Throwable throwable) {
-		getDefault().getLog().error(message, throwable);
-	}
-	
-	public static void logWarning(String message) {
-		getDefault().getLog().warn(message);
-	}
-	
-	public static void logWarning(String message, Throwable throwable) {
-		getDefault().getLog().warn(message, throwable);
-	}
-
 }

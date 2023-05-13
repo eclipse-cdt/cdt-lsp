@@ -9,6 +9,7 @@
  * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.editor.ui;
@@ -77,10 +78,6 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, LspEditorUiPlugin.PLUGIN_ID);
 		}
 		return preferenceStore;
-	}
-	
-	public static void logError(String message, Throwable throwable) {
-		getDefault().getLog().error(message, throwable);
 	}
 	
 	public IWorkspace getWorkspace() {

@@ -9,6 +9,7 @@
  * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.editor.ui.clangd;
@@ -28,6 +29,7 @@ import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
@@ -57,8 +59,10 @@ public class CProjectChangeMonitor {
 								LspUtils.showErrorMessage(LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error, 
 										LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error_message + projectLocation + configFile , status);
 							}
-						} catch (CoreException | IOException e) {
-							LspEditorUiPlugin.logError(e.getMessage(), e);
+						} catch (CoreException e) {
+							Platform.getLog(getClass()).log(e.getStatus());
+						} catch (IOException e) {
+							Platform.getLog(getClass()).error(e.getMessage(), e);
 						}
 					}
 				}			

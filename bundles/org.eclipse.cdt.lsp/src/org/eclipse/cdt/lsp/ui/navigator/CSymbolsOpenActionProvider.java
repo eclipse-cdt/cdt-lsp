@@ -8,14 +8,15 @@
  * 
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.ui.navigator;
 
 import org.eclipse.cdt.internal.ui.cview.CViewMessages;
-import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.BadLocationException;
@@ -56,7 +57,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 					part = IDE.openEditor(this.page, fOpenElement.file);
 					revealInEditor(part, fOpenElement);
 				} catch (CoreException exc) {
-					LspPlugin.logError(exc.getMessage(), exc);
+					Platform.getLog(getClass()).log(exc.getStatus());
 				}
 			}
 		}
@@ -91,7 +92,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 							+ range.getEnd().getCharacter();
 					((ITextEditor) part).selectAndReveal(startOffset, endOffset - startOffset);
 				} catch (BadLocationException exc) {
-					LspPlugin.logError(exc.getMessage(), exc);
+					Platform.getLog(getClass()).error(exc.getMessage(), exc);
 				}
 			}
 		}	
