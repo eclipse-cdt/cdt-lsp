@@ -11,9 +11,8 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.preference;
+package org.eclipse.cdt.lsp.internal.clangd.editor.preferences;
 
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.cdt.ui.newui.MultiLineTextFieldEditor;
 import org.eclipse.cdt.utils.CommandLineUtil;
 
@@ -22,7 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiMessages;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;

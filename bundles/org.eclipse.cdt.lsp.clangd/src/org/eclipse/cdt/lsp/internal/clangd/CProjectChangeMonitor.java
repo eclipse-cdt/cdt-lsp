@@ -12,7 +12,7 @@
  * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.clangd;
+package org.eclipse.cdt.lsp.internal.clangd;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -24,8 +24,8 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiMessages;
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;

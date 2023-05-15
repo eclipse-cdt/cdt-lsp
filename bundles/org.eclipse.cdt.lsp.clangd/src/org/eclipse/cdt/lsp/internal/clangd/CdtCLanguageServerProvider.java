@@ -11,19 +11,21 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui;
+package org.eclipse.cdt.lsp.internal.clangd;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferences;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
 import org.eclipse.cdt.lsp.server.DefaultCLanguageServerProvider;
 import org.eclipse.cdt.utils.CommandLineUtil;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 
 public class CdtCLanguageServerProvider extends DefaultCLanguageServerProvider {
+	//FIXME: AF: rework to core preferences
 	private static final IPreferenceStore preferenceStore = LspEditorUiPlugin.getDefault().getLsPreferences();
 
 	

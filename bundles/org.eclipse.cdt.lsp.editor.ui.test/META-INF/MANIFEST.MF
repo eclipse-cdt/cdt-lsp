@@ -4,7 +4,7 @@ Bundle-Name: Test CDT C/C++ Editor (LSP) UI
 Bundle-SymbolicName: org.eclipse.cdt.lsp.editor.ui.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse.org
-Fragment-Host: org.eclipse.cdt.lsp.editor.ui;bundle-version="0.0.0"
+Fragment-Host: org.eclipse.cdt.lsp.clangd;bundle-version="0.0.0"
 Require-Bundle: org.eclipse.cdt.lsp,
  junit-jupiter-api,
  org.yaml.snakeyaml,

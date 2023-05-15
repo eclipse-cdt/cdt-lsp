@@ -11,7 +11,7 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.clangd;
+package org.eclipse.cdt.lsp.internal.clangd;
 
 import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;

@@ -11,9 +11,9 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.preference;
+package org.eclipse.cdt.lsp.internal.clangd.editor.preferences;
 
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiMessages;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
 public final class LspEditorPreferences {

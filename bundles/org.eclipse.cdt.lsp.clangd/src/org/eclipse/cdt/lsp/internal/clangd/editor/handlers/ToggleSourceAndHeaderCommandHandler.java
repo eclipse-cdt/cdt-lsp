@@ -10,13 +10,13 @@
  * Contributors:
  * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.editor.ui.commands;
+package org.eclipse.cdt.lsp.internal.clangd.editor.handlers;
 
 import java.net.URI;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
 import org.eclipse.cdt.lsp.services.ClangdLanguageServer;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;

@@ -11,9 +11,10 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.preference;
+package org.eclipse.cdt.lsp.internal.clangd.editor.expressions;
 
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;

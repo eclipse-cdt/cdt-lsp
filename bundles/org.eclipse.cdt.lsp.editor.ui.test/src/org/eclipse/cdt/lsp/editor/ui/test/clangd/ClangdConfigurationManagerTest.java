@@ -13,7 +13,8 @@
 
 package org.eclipse.cdt.lsp.editor.ui.test.clangd;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -24,8 +25,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
-import org.eclipse.cdt.lsp.editor.ui.clangd.ClangdConfigurationManager;
 import org.eclipse.cdt.lsp.editor.ui.test.TestUtils;
+import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigurationManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
