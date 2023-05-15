@@ -12,10 +12,9 @@
  * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui;
+package org.eclipse.cdt.lsp.internal.clangd.editor;
 
-import org.eclipse.cdt.lsp.editor.ui.clangd.CProjectChangeMonitor;
-import org.eclipse.cdt.lsp.editor.ui.clangd.CompileCommandsMonitor;
+import org.eclipse.cdt.lsp.internal.clangd.CProjectChangeMonitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;

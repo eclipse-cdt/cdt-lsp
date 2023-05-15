@@ -10,7 +10,7 @@
  * Contributors:
  * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.editor.ui.commands;
+package org.eclipse.cdt.lsp.internal.clangd.editor.expressions;
 
 import java.util.Optional;
 

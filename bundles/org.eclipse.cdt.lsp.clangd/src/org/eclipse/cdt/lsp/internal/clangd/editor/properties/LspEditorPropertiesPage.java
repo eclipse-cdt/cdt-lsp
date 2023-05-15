@@ -11,12 +11,12 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.properties;
+package org.eclipse.cdt.lsp.internal.clangd.editor.properties;
 
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
-import org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferences;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Platform;

@@ -17,8 +17,8 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
-import org.eclipse.cdt.lsp.editor.ui.preference.LspEditorPreferences;
+import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;

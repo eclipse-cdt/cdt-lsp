@@ -11,7 +11,7 @@
  * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.clangd;
+package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.cdt.lsp.LspUtils;
-import org.eclipse.cdt.lsp.editor.ui.LspEditorUiPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
