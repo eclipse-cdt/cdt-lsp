@@ -237,5 +237,15 @@
          </action>
       </editorContribution>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.genericeditor.hoverProviders">
+      <hoverProvider
+            class="org.eclipse.cdt.lsp.editor.DebugHoverProvider"
+            contentType="org.eclipse.core.runtime.text"
+            id="org.eclipse.cdt.lsp.editor.DebugHoverProvider"
+            isBefore="org.eclipse.lsp4e.operations.hover.LSPTextHover">
+      </hoverProvider>
+   </extension>
 </plugin>
 
