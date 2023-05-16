@@ -129,5 +129,6 @@
     <module>features</module>
     <module>releng/org.eclipse.cdt.lsp.repository</module>
     <module>releng/org.eclipse.cdt.lsp.target</module>
+    <module>tests</module>
  </modules>
 </project>

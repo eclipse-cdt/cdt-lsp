@@ -8,14 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
- * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *     Alexander Fedorov (ArSysOp) - extract headless part
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.test;
+package org.eclipse.cdt.lsp.clangd.tests;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
 import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
@@ -27,15 +27,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.junit.jupiter.api.TestInfo;
 
-public class TestUtils {
+public final class TestUtils {
 	
 	public static void setLspPreferred(IProject project, boolean value) {
 		IEclipsePreferences node = new ProjectScope(project).getNode(LspEditorUiPlugin.PLUGIN_ID);
@@ -76,32 +70,10 @@ public class TestUtils {
 		return testFile;
 	}
 	
-	public static IEditorPart openInEditor(URI uri, String editorID) throws PartInitException {
-		IEditorPart part = IDE.openEditor(getWorkbenchPage(), uri, editorID, true);		
-		part.setFocus();
-		return part;
-	}
-	
-	public static IEditorPart openInEditor(IFile file) throws PartInitException {
-		IEditorPart part = IDE.openEditor(getWorkbenchPage(), file);
-		part.setFocus();
-		return part;
-	}
-
-	public static boolean closeEditor(IEditorPart editor, boolean save) {
-		IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		IWorkbenchPage page = workbenchWindow.getActivePage();
-		return page.closeEditor(editor, save);
-	}
-	
 	public static String getName(TestInfo testInfo) {
 		String displayName = testInfo.getDisplayName();
 		String replaceFirst = displayName.replaceFirst("\\(.*\\)", "");
 		return replaceFirst;
-	}
-	
-	private static IWorkbenchPage getWorkbenchPage() {
-		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
 
 }

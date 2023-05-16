@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.eclipse.cdt.lsp.editor.ui.test</name>
+	<name>org.eclipse.cdt.lsp.clangd.tests</name>
 	<comment></comment>
 	<projects>
 	</projects>
