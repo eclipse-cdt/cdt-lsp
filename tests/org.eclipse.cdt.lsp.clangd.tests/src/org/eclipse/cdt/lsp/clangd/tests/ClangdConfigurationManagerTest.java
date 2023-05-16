@@ -8,10 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
- * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *     Alexander Fedorov (ArSysOp) - extract headless part
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor.ui.test.clangd;
+package org.eclipse.cdt.lsp.clangd.tests;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
-import org.eclipse.cdt.lsp.editor.ui.test.TestUtils;
 import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigurationManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -39,7 +39,8 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-class ClangdConfigurationManagerTest {
+final class ClangdConfigurationManagerTest {
+	
 	private static final String RELATIVE_DIR_PATH_BUILD_DEFAULT = "build/default";
 	private static final String RELATIVE_DIR_PATH_BUILD_DEBUG = "build/debug";
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}\n";

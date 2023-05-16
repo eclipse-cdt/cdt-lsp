@@ -8,9 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
- * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
+ *     Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
+ *     Alexander Fedorov (ArSysOp) - extract headless part
  *******************************************************************************/
-package org.eclipse.cdt.lsp.editor.ui.test.commands;
+package org.eclipse.cdt.lsp.clangd.editor.tests.expressions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,21 +26,21 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LspEditorActiveTesterTest {
+public final class LspEditorActiveTesterTest {
 
 	LspEditorActiveTester tut;
 
-	IEditorPart editorPart;
-	IEditorSite editorSite;
+	IEditorPart part;
+	IEditorSite site;
 
 	@BeforeEach
 	public void setup() {
 		tut = new LspEditorActiveTester();
 
-		editorPart = mock(IEditorPart.class);
-		editorSite = mock(IEditorSite.class);
+		part = mock(IEditorPart.class);
+		site = mock(IEditorSite.class);
 
-		when(editorPart.getSite()).thenReturn(editorSite);
+		when(part.getSite()).thenReturn(site);
 	}
 
 	/**
@@ -57,7 +58,7 @@ public class LspEditorActiveTesterTest {
 	 */
 	@Test
 	public void editorPartNonMatchingProperty() {
-		assertFalse(tut.test(editorPart, "someOtherProperty", null, tut));
+		assertFalse(tut.test(part, "someOtherProperty", null, tut));
 	}
 
 	/**
@@ -65,7 +66,7 @@ public class LspEditorActiveTesterTest {
 	 */
 	@Test
 	public void matchingEditorPartWithNonMatchingId() {
-		when(editorSite.getId()).thenReturn("someId");
+		when(site.getId()).thenReturn("someId");
 		assertTestResult(false);
 	}
 
@@ -74,7 +75,7 @@ public class LspEditorActiveTesterTest {
 	 */
 	@Test
 	public void matchingEditorPartWithMatchingId() {
-		when(editorSite.getId()).thenReturn(LspPlugin.LSP_C_EDITOR_ID);
+		when(site.getId()).thenReturn(LspPlugin.LSP_C_EDITOR_ID);
 		assertTestResult(true);
 	}
 
@@ -89,8 +90,8 @@ public class LspEditorActiveTesterTest {
 		IEditorSite innerEditorSite = mock(IEditorSite.class);
 		when(innerEditor.getSite()).thenReturn(innerEditorSite);
 		when(innerEditorSite.getId()).thenReturn("someId");
-		when(editorPart.getAdapter(ITextEditor.class)).thenReturn(innerEditor);
-		when(editorSite.getId()).thenReturn("someOtherId");
+		when(part.getAdapter(ITextEditor.class)).thenReturn(innerEditor);
+		when(site.getId()).thenReturn("someOtherId");
 
 		assertTestResult(false);
 	}
@@ -106,8 +107,8 @@ public class LspEditorActiveTesterTest {
 		IEditorSite innerEditorSite = mock(IEditorSite.class);
 		when(innerEditor.getSite()).thenReturn(innerEditorSite);
 		when(innerEditorSite.getId()).thenReturn(LspPlugin.LSP_C_EDITOR_ID);
-		when(editorPart.getAdapter(ITextEditor.class)).thenReturn(innerEditor);
-		when(editorSite.getId()).thenReturn("someOtherId");
+		when(part.getAdapter(ITextEditor.class)).thenReturn(innerEditor);
+		when(site.getId()).thenReturn("someOtherId");
 
 		assertTestResult(true);
 	}
@@ -116,7 +117,7 @@ public class LspEditorActiveTesterTest {
 	 * Helper method.
 	 */
 	private void assertTestResult(boolean expectedResult) {
-		assertEquals(expectedResult, tut.test(editorPart, LspEditorActiveTester.IS_LSP_CEDITOR_PROPERTY, null, tut));
+		assertEquals(expectedResult, tut.test(part, LspEditorActiveTester.IS_LSP_CEDITOR_PROPERTY, null, tut));
 	}
 
 }
