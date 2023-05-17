@@ -9,7 +9,7 @@
          <enabledWhen>
             <test
                   forcePluginActivation="true"
-                  property="org.eclipse.cdt.lsp.editor.ui.LspEditorPreference">
+                  property="org.eclipse.cdt.lsp.prefer">
             </test></enabledWhen>
       </server>
    </extension>
