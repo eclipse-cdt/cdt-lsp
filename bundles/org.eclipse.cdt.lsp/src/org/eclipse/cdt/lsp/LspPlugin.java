@@ -13,6 +13,9 @@
 
 package org.eclipse.cdt.lsp;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.cdt.lsp.internal.server.CLanguageServerRegistry;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IWorkspace;
@@ -50,6 +53,9 @@ public class LspPlugin extends AbstractUIPlugin {
 		workspaceTracker.open();
 		workspace = workspaceTracker.getService();
 		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
+		
+		// Disable warnings, see https://github.com/eclipse-cdt/cdt-lsp/issues/88
+		Logger.getLogger("").setLevel(Level.SEVERE);
 	}
 
 	@Override
