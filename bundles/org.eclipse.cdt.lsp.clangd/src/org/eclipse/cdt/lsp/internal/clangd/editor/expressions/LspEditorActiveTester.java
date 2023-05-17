@@ -26,7 +26,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * editor id.
  */
 public class LspEditorActiveTester extends PropertyTester {
-	public final static String IS_LSP_CEDITOR_PROPERTY = "isLspCEditor";
+	public final static String IS_LSP_CEDITOR_PROPERTY = "active";
 
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {

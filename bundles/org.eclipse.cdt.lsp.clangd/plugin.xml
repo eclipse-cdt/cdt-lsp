@@ -13,19 +13,22 @@
 <plugin>
    <extension
          point="org.eclipse.ui.preferencePages">
+      <!-- FIXME: AF: Exract clangd-specific preferences -->
+      <!-- FIXME: AF: Move commmon part to "org.eclipse.cdt.lsp[.editor]" -->
       <page
             category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
             class="org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferencePage"
-            id="org.eclipse.cdt.lsp.editor.ui.preference.page"
+            id="org.eclipse.cdt.lsp.clangd.editor.preferences.general"
             name="Editor (LSP)">
       </page>
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
+      <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp[.editor]" -->
       <page
             category="org.eclipse.cdt.ui.newui.Page_head_general"
             class="org.eclipse.cdt.lsp.internal.clangd.editor.properties.LspEditorPropertiesPage"
-            id="org.eclipse.cdt.lsp.editor.ui.properties.page"
+            id="org.eclipse.cdt.lsp.editor.properties.general"
             name="Editor (LSP)">
          <filter
                name="projectNature"
@@ -40,18 +43,20 @@
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
+      <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp" -->
       <propertyTester
             class="org.eclipse.cdt.lsp.internal.clangd.editor.expressions.LspEditorPreferencesTester"
-            id="org.eclipse.cdt.lsp.editor.ui.lspEditorPreference"
-            namespace="org.eclipse.cdt.lsp.editor.ui"
-            properties="LspEditorPreference"
+            id="org.eclipse.cdt.lsp.expressions.lsp.prefer"
+            namespace="org.eclipse.cdt.lsp"
+            properties="prefer"
             type="java.lang.Object">
       </propertyTester>
+      <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp[.editor]" -->
       <propertyTester
             class="org.eclipse.cdt.lsp.internal.clangd.editor.expressions.LspEditorActiveTester"
-            id="org.eclipse.cdt.lsp.editor.ui.isLspCEditor"
-            namespace="org.eclipse.cdt.lsp.editor.ui"
-            properties="isLspCEditor"
+            id="org.eclipse.cdt.lsp.editor.active"
+            namespace="org.eclipse.cdt.lsp.editor"
+            properties="active"
             type="java.lang.Object">
       </propertyTester>
    </extension>
@@ -63,7 +68,7 @@
          <enabledWhen>
             <test
                   forcePluginActivation="true"
-                  property="org.eclipse.cdt.lsp.editor.ui.LspEditorPreference">
+                  property="org.eclipse.cdt.lsp.prefer">
             </test>
          </enabledWhen>
       </server>
@@ -71,15 +76,16 @@
 
   <extension
          point="org.eclipse.ui.commands">
+      <!-- FIXME: AF: Register "org.eclipse.cdt.lsp.clangd.editor.commands.category.extensions" -->
       <command
-            id="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header"
+            id="org.eclipse.cdt.lsp.clangd.editor.commands.command.switchSourceHeader"
             name="%Commands.ToggleSourceAndHeader.name">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header"
+            commandId="org.eclipse.cdt.lsp.clangd.editor.commands.command.switchSourceHeader"
             contextId="org.eclipse.ui.genericeditor.genericEditorContext"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+TAB">
@@ -89,11 +95,11 @@
          point="org.eclipse.ui.handlers">
       <handler
             class="org.eclipse.cdt.lsp.internal.clangd.editor.handlers.ToggleSourceAndHeaderCommandHandler"
-            commandId="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header">
+            commandId="org.eclipse.cdt.lsp.clangd.editor.commands.command.switchSourceHeader">
          <activeWhen>
             	<with variable="activeEditor">
                 <test
-                      property="org.eclipse.cdt.lsp.editor.ui.isLspCEditor">
+                      property="org.eclipse.cdt.lsp.editor.active">
                 </test>
             	</with>
          </activeWhen>
@@ -105,7 +111,7 @@
             allPopups="false"
             locationURI="popup:org.eclipse.ui.popup.any?before=org.eclipse.lsp4e.openCallHierarchy">
          <command
-               commandId="org.eclipse.cdt.lsp.editor.ui.toggle_source_and_header"
+               commandId="org.eclipse.cdt.lsp.clangd.editor.commands.command.switchSourceHeader"
                label="%PopupMenu.ToggleSourceAndHeader.label"
                style="push">
             <visibleWhen

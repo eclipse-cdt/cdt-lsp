@@ -28,7 +28,7 @@ Not supported (yet):
 - Call hierarchy
 - Include browser (Eclipse CDT speciality)
 
-The `org.eclipse.cdt.lsp.editor.ui` plugin provides an activation for the LSP based C/C++ Editor on project and workspace level. 
+The `org.eclipse.cdt.lsp` plugin provides an activation for the LSP based C/C++ Editor on project and workspace level. 
 The language server path and the arguments can be changed in the workspace preferences as well:
 
 ![image](images/preferences.png "preferences.png")

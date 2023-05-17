@@ -33,6 +33,7 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 	private CProjectChangeMonitor cProjectChangeMonitor;
 
 	// The plug-in ID
+	//FIXME: AF: change this value together with preferences rework
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.editor.ui"; //$NON-NLS-1$
 
 	// The shared instance
