@@ -93,6 +93,10 @@
             contentTypeId="org.eclipse.cdt.core.cSource"
             scopeName="c-grammar">
       </scopeNameContentTypeBinding>
+            <scopeNameContentTypeBinding
+            contentTypeId="org.eclipse.cdt.core.cHeader"
+            scopeName="cpp-grammar">
+      </scopeNameContentTypeBinding>
       <grammar
             path="language-configurations/cpp.tmLanguage.json"
             scopeName="cpp-grammar">
