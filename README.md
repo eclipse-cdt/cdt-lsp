@@ -4,7 +4,7 @@
 
 This plugin is based on the [LSP4E](https://github.com/eclipse/lsp4e) and [TM4E](https://github.com/eclipse/tm4e) Eclipse projects. The editor is based on the `ExtensionBasedTextEditor` in Eclipse.
 
-The `org.eclipse.cdt.lsp` is the core plugin. C/C++ IDE Developers can use the `serverProvider` extension point to define a C/C++ language server. If there is no extension defined, the LLVM [clangd](https://clangd.llvm.org/) language server will be used and searched on the PATH environement variable. Clangd searches for a `compile_commands.json` file in the source file folder and its parents. It's needed to determine the compile informations. In the default clangd configuration the PATH will be searched for a `gcc` compiler to determine the default compiler include paths.
+The `org.eclipse.cdt.lsp` is the core plugin. C/C++ IDE Developers can use the `serverProvider` extension point to define a C/C++ language server. If there is no extension defined, the LLVM [clangd](https://clangd.llvm.org/) language server will be used and searched on the PATH environment variable. Clangd searches for a `compile_commands.json` file in the source file folder and its parents. It's needed to determine the compile informations. In the default clangd configuration the PATH will be searched for a `gcc` compiler to determine the default compiler include paths.
 
 The editor is basically the `ExtensionBasedTextEditor`. The language grammar comes from [TM4E](https://github.com/eclipse/tm4e). 
 
@@ -22,10 +22,11 @@ Currently these feature are supported (clangd 15.0.3) and current LSP4E:
 - Find References
 - Code actions (Declare implicit copy/move members, Extract to function/variable, rename)
 - Quick Fix (Ctrl+1)
+- Type hierarchy (quick hierarchy view only) 
+- Call hierarchy
+- Outline view
 
 Not supported (yet):
-- Type hierarchy
-- Call hierarchy
 - Include browser (Eclipse CDT speciality)
 
 The `org.eclipse.cdt.lsp` plugin provides an activation for the LSP based C/C++ Editor on project and workspace level. 
@@ -43,11 +44,7 @@ Different C/C++ projects using the old and new editor as default can be mixed in
 To use these plugins import them in your CDT sources.
 
 **TODO:**
-- Support type/call hierarchy and include browser
-- Fetch outline informations from language server
-- Remove indexer from projects using LSP
-- Add tests
-...
+see [issues](https://github.com/eclipse-cdt/cdt-lsp/issues)
 
 ## Setup the source
 
@@ -88,6 +85,8 @@ This file may be hidden by default, therefore to see the file uncheck the *.\* r
 By default C/C++ will be opened with the standard CEditor.
 The default can be changed per project or per workspace with the *C/C++ General* -> *Editor (LSP)* -> *Prefer C/C++ Editor (LSP)* checkbox in the project setting or preferences.
 
+- Note: The workspace setting will be used for new projects only. To use the LSP based editor on a project, *Prefer C/C++ Editor (LSP)* must be activated in the project properties.
+
 Alternatively, you can choose which editor to open the file by using *Open With*:
 
 ![open-with.png](images/open-with.png "open-with.png")
@@ -100,4 +99,4 @@ With the *C/C++ Editor (LSP)* open, the presentation of the C++ file will follow
 
 ### Known issues
 
-See the open issues for [known issues](https://github.com/Bachmann-electronic-GmbH/eclipse-cdt-lsp/issues) and workarounds while the code is in active development.
+See the open issues for [known issues](https://github.com/eclipse-cdt/cdt-lsp/issues) and workarounds while the code is in active development.
