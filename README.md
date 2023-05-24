@@ -29,6 +29,8 @@ Currently these feature are supported (clangd 15.0.3) and current LSP4E:
 Not supported (yet):
 - Include browser (Eclipse CDT speciality)
 
+### Activating LSP based C/C++ Editor
+
 The `org.eclipse.cdt.lsp` plugin provides an activation for the LSP based C/C++ Editor on project and workspace level. 
 The language server path and the arguments can be changed in the workspace preferences as well:
 
@@ -46,16 +48,17 @@ To use these plugins import them in your CDT sources.
 **TODO:**
 see [issues](https://github.com/eclipse-cdt/cdt-lsp/issues)
 
-## Setup the source
+## Try it out
 
-To try out the plug-ins in their current state you need to run them from source.
+1. Download the latest Developer Build of Eclipse for C/C++ Developers or Eclipse for Embedded C/C++ Developers using the [Eclipse installer](https://www.eclipse.org/downloads/packages/installer) or downloading and extracting the latest milestone available on [eclipse.org](https://www.eclipse.org/downloads/packages/release/).
+2. Add `https://download.eclipse.org/tools/cdt/builds/cdt-lsp/master/` to your Available Software Sites and install *C/C++ LSP Support* in the *Eclipse CDT LSP* Category and restart Eclipse.
+3. [Install Pre-requisites](#install-pre-requisites) listed below
+4. [Create a CMake project](#create-an-example-cmake-project) or [import an existing](#import-an-existing-project) project following guidelines below
+5. [Enable the LSP based C/C++ Editor](#activating-lsp-based-cc-editor) following instructions above.
 
-1. Setup a CDT development environment following the instructions in [CDT's contributing instructions](https://github.com/eclipse-cdt/cdt/blob/main/CONTRIBUTING.md#contributing-to-cdt).
-2. Clone this repo
-3. Import the plug-ins in this repo into Eclipse development environment from Step 1
-4. Launch the Eclipse IDE with this Pug-ins tab settings from the launch config: *All workspace and enabled target Pug-ins* from your development IDE
+See [contribution guide](CONTRIBUTING.md) for details on running CDT LSP from source.
 
-## Install pre-requisites
+### Install pre-requisites
 
 The following tools are needed on the `PATH` to operate the demo.
 
@@ -63,7 +66,7 @@ The following tools are needed on the `PATH` to operate the demo.
 - cmake 3.10 or more recent - See [cmake installation instructions](https://cmake.org/install/)
 - clangd 15.0.3 or more recent - See [clangd installation instructions](https://clangd.llvm.org/installation#installing-clangd)
 
-## Try it out
+### Import an existing project
 
 You can import an existing project that contains a `compile_commands.json` file, or follow these instructions to create a simple starting project.
 
