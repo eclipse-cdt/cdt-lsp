@@ -69,6 +69,7 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 		return NO_CHILDREN;
 	}
 
+	@Override
 	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) throws CModelException {
 		if (unit.getResource() instanceof IFile) {
 			refreshTreeContentFromLS((IFile) unit.getResource());
@@ -102,11 +103,11 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 				}
 			}
 			symbols.thenAcceptAsync(response -> {
-				symbolsModel.setFile(file);
+				symbolsModel.setUri(file.getLocationURI());
 				symbolsModel.update(response);
 			}).join();
 		} else {
-			symbolsModel.setFile(file);
+			symbolsModel.setUri(file.getLocationURI());
 			symbolsModel.update(null);
 		}
 

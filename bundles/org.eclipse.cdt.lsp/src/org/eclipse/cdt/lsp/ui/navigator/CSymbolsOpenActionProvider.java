@@ -54,7 +54,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 			if (fOpenElement != null) {
 				IEditorPart part;
 				try {
-					part = IDE.openEditor(this.page, fOpenElement.file);
+					part = IDE.openEditor(this.page, fOpenElement.uri, "org.eclipse.cdt.lsp.CEditor", false); //$NON-NLS-1$
 					revealInEditor(part, fOpenElement);
 				} catch (CoreException exc) {
 					Platform.getLog(getClass()).log(exc.getStatus());
@@ -85,7 +85,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 			if (part instanceof ITextEditor) {
 				try {
 					var range = element.symbol.getSelectionRange();
-					var document = LSPEclipseUtils.getDocument(element.file);
+					var document = LSPEclipseUtils.getDocument(part.getEditorInput());
 					int startOffset = document.getLineOffset(range.getStart().getLine())
 							+ range.getStart().getCharacter();
 					int endOffset = document.getLineOffset(range.getEnd().getLine()) + range.getEnd().getCharacter();
@@ -158,7 +158,10 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 		}
 		IFile file;
 		if (selection.getFirstElement() instanceof DocumentSymbolWithFile) {
-			file = ((DocumentSymbolWithFile) selection.getFirstElement()).file;
+			file = LSPEclipseUtils.getFileHandle(((DocumentSymbolWithFile) selection.getFirstElement()).uri);
+			if (file == null) {
+				return;
+			}
 		} else {
 			return;
 		}
