@@ -36,10 +36,9 @@ The language server path and the arguments can be changed in the workspace prefe
 
 ![image](images/preferences.png "preferences.png")
 
-
 Newly created C/C++ projects will inherit the *Prefer C/C++ Editor (LSP)* setting from the workspace preferences. This can be changed in the project properties:
 
-![image](https://user-images.githubusercontent.com/123444711/219040315-b11dd8e2-f7ba-437e-9b51-ac4d22f14e53.png)
+![image](images/preferences-prefer-lsp.png "preferences-prefer-lsp.png")
 
 Different C/C++ projects using the old and new editor as default can be mixed in one workspace. The linked include files will be opened with the same editor.
 
