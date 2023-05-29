@@ -13,7 +13,7 @@
 <site>
 	<category-def
 		name="org.eclipse.cdt.lsp.category"
-		label="CDT LSP">
+		label="Eclipse CDT LSP">
 		<description>
 			C/C++ Language Server Protocol Support 
 		</description>
@@ -24,7 +24,7 @@
 	</feature>
 	<category-def
 		name="org.eclipse.cdt.lsp.category.source"
-		label="Passage LDC Developer Resources">
+		label="Eclipse CDT LSP Developer Resources">
 		<description>
 			C/C++ Language Server Protocol Support  Developer Resources: 
 		</description>
