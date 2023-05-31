@@ -54,8 +54,8 @@ public class LspPlugin extends AbstractUIPlugin {
 		workspace = workspaceTracker.getService();
 		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
 
-		// Disable warnings, see https://github.com/eclipse-cdt/cdt-lsp/issues/88
-		Logger.getLogger("").setLevel(Level.SEVERE);
+		// Disable warnings, see https://github.com/eclipse-cdt/cdt-lsp/issues/88 and https://github.com/eclipse-cdt/cdt-lsp/issues/101
+		Logger.getLogger("org.eclipse.tm4e.core.internal.oniguruma.OnigRegExp").setLevel(Level.SEVERE); //$NON-NLS-1$
 	}
 
 	@Override
