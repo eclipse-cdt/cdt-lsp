@@ -13,6 +13,7 @@
 
 package org.eclipse.cdt.lsp.internal.clangd;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 public class CdtCLanguageServerProvider extends DefaultCLanguageServerProvider {
 	//FIXME: AF: rework to core preferences
 	private static final IPreferenceStore preferenceStore = LspEditorUiPlugin.getDefault().getLsPreferences();
+	private final ClangdFallbackManager clangdFallbackManager = new ClangdFallbackManager();
 
 	@Override
 	protected List<String> createCommands() {
@@ -38,13 +40,18 @@ public class CdtCLanguageServerProvider extends DefaultCLanguageServerProvider {
 		return commandsFromStore;
 	}
 
+	@Override
+	public Object getInitializationOptions(URI rootUri) {
+		return clangdFallbackManager.getFallbackFlagsFromInitialUri();
+	}
+
 	private void setPreferenceStoreDefaults(List<String> commands) {
 		if (!commands.isEmpty()) {
 			//set values in preference store:
 			preferenceStore.setDefault(LspEditorPreferences.SERVER_PATH, commands.get(0));
-			String args = "";
+			String args = ""; //$NON-NLS-1$
 			for (int i = 1; i < commands.size(); i++) {
-				args = args + " " + commands.get(i);
+				args = args + " " + commands.get(i); //$NON-NLS-1$
 			}
 			preferenceStore.setDefault(LspEditorPreferences.SERVER_OPTIONS, args);
 		}
