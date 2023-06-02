@@ -13,16 +13,16 @@
 
 package org.eclipse.cdt.lsp.internal.clangd.editor.preferences;
 
-import org.eclipse.cdt.ui.newui.MultiLineTextFieldEditor;
-import org.eclipse.cdt.utils.CommandLineUtil;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
+import org.eclipse.cdt.ui.newui.MultiLineTextFieldEditor;
+import org.eclipse.cdt.utils.CommandLineUtil;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -70,28 +70,35 @@ public class LspEditorPreferencePage extends FieldEditorPreferencePage implement
 		if (path == null || path.isBlank()) {
 			return;
 		}
-		List<String> commands = LspPlugin.getDefault().getCLanguageServerProvider().getCommands();
+		List<String> commands = Optional.ofNullable(LspPlugin.getDefault())
+				.map(plugin -> plugin.getCLanguageServerProvider()).map(provider -> provider.getCommands())
+				.orElse(null);
 		if (commands != null && !commands.isEmpty()) {
 			commands.set(0, path);
 		} else if (commands == null) {
 			commands = new ArrayList<>();
 			commands.add(path);
 		}
-		LspPlugin.getDefault().getCLanguageServerProvider().setCommands(commands);
+		final List<String> finalCommands = commands;
+		Optional.ofNullable(LspPlugin.getDefault()).map(plugin -> plugin.getCLanguageServerProvider())
+				.ifPresent(provider -> provider.setCommands(finalCommands));
 	}
 
 	private void writeServerOptionsToProvider(String options) {
 		if (options == null) {
 			return;
 		}
-		List<String> commands = LspPlugin.getDefault().getCLanguageServerProvider().getCommands();
+		List<String> commands = Optional.ofNullable(LspPlugin.getDefault())
+				.map(plugin -> plugin.getCLanguageServerProvider()).map(provider -> provider.getCommands())
+				.orElse(null);
 		if (commands != null && !commands.isEmpty()) {
 			String serverPath = commands.get(0); // save server path
 			commands.clear(); // clear all old options
 			commands.add(serverPath);
 			commands.addAll(Arrays.asList(CommandLineUtil.argumentsToArray(options)));
+			Optional.ofNullable(LspPlugin.getDefault()).map(plugin -> plugin.getCLanguageServerProvider())
+					.ifPresent(provider -> provider.setCommands(commands));
 		}
-		LspPlugin.getDefault().getCLanguageServerProvider().setCommands(commands);
 	}
 
 }

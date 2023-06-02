@@ -10,7 +10,7 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd;
+package org.eclipse.cdt.lsp.clangd;
 
 import java.util.Optional;
 
@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.osgi.service.environment.Constants;
 
 /**
- * Used to set the clangd fallbackFlags.
+ * Used to create and set the clangd fallbackFlags.
  * This is needed for Windows OS to allow clangd to determine the system includes in case no compile_commands.json can be found.
  * see also: https://clangd.llvm.org/extensions#compilation-commands
  *

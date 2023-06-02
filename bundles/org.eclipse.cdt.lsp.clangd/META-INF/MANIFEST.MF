@@ -4,7 +4,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.cdt.lsp.clangd;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Export-Package: org.eclipse.cdt.lsp.internal.clangd;x-internal:=true,
+Export-Package: org.eclipse.cdt.lsp.clangd;x-internal:=true,
+ org.eclipse.cdt.lsp.internal.clangd;x-internal:=true,
  org.eclipse.cdt.lsp.internal.clangd.editor;x-internal:=true,
  org.eclipse.cdt.lsp.internal.clangd.editor.expressions;x-internal:=true,
  org.eclipse.cdt.lsp.internal.clangd.editor.handlers;x-internal:=true,
