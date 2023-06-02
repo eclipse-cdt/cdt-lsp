@@ -13,14 +13,17 @@ package org.eclipse.cdt.lsp;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -154,17 +157,14 @@ public class LspUtils {
 	}
 
 	public static Optional<IProject> getProject(URI uri) {
-		return getFile(Optional.ofNullable(uri)).map(file -> file.getProject());
+		return getFile(uri).map(file -> file.getProject());
 	}
 
-	public static Optional<IFile> getFile(Optional<URI> uri) {
-		if (uri.isPresent()) {
-			IFile[] files = LspPlugin.getDefault().getWorkspace().getRoot().findFilesForLocationURI(uri.get());
-			if (files.length > 0) {
-				return Optional.ofNullable(files[0]);
-			}
-		}
-		return Optional.empty();
+	public static Optional<IFile> getFile(URI uri) {
+		List<IFile> found = new ArrayList<>();
+		ServiceCaller.callOnce(LspUtils.class, IWorkspace.class, //
+				w -> Arrays.stream(w.getRoot().findFilesForLocationURI(uri)).forEach(found::add));
+		return found.stream().findFirst();
 	}
 
 }

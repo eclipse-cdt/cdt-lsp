@@ -8,6 +8,7 @@
  *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - use OSGi services
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.server.enable;
@@ -20,18 +21,19 @@ import java.util.Optional;
 
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.lsp.InitialFileManager;
+import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
 
 public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
 	private final List<String> cContentTypes = new ArrayList<>();
-	private final InitialFileManager initialFileManager;
+	private final ServiceCaller<InitialUri> initial;
 
 	public HasLanguageServerPropertyTester() {
 		this.cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
@@ -39,7 +41,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 		this.cContentTypes.add("org.eclipse.cdt.core.cHeader"); //$NON-NLS-1$
 		this.cContentTypes.add("org.eclipse.cdt.core.cxxSource"); //$NON-NLS-1$
 		this.cContentTypes.add("org.eclipse.cdt.core.cxxHeader"); //$NON-NLS-1$
-		this.initialFileManager = InitialFileManager.getInstance();
+		this.initial = new ServiceCaller<>(getClass(), InitialUri.class);
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				var isEnabled = LspUtils.getProject(uri).map(cLanguageServerProvider::isEnabledFor)
 						.orElse(LspUtils.isFileOpenedInLspEditor(uri));
 				if (isEnabled) {
-					initialFileManager.setInitialUri(uri);
+					initial.call(iu -> iu.register(uri));
 				}
 				return isEnabled;
 			} else if (receiver instanceof ITranslationUnit) {

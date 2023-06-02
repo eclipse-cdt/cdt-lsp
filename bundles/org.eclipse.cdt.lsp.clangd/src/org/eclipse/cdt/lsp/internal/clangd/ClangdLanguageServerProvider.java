@@ -9,6 +9,7 @@
  *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - rework to OSGi components
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.internal.clangd;
@@ -17,18 +18,19 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.cdt.lsp.clangd.BaseClangdLanguageServerProvider;
-import org.eclipse.cdt.lsp.clangd.ClangdFallbackManager;
+import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
 import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
 import org.eclipse.cdt.utils.CommandLineUtil;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 public class ClangdLanguageServerProvider extends BaseClangdLanguageServerProvider {
 	//FIXME: AF: rework to core preferences
 	private static final IPreferenceStore preferenceStore = LspEditorUiPlugin.getDefault().getLsPreferences();
-	private final ClangdFallbackManager clangdFallbackManager = new ClangdFallbackManager();
 
 	@Override
 	protected List<String> createCommands() {
@@ -43,7 +45,10 @@ public class ClangdLanguageServerProvider extends BaseClangdLanguageServerProvid
 
 	@Override
 	public Object getInitializationOptions(URI rootUri) {
-		return clangdFallbackManager.getFallbackFlagsFromInitialUri();
+		List<Object> result = new ArrayList<>();
+		ServiceCaller.callOnce(getClass(), ClangdFallbackFlags.class, //
+				f -> result.add(f.getFallbackFlagsFromInitialUri(rootUri)));
+		return result.stream().filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
 	private void setPreferenceStoreDefaults(List<String> commands) {
