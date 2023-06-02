@@ -14,7 +14,10 @@ package org.eclipse.cdt.lsp;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -94,8 +97,7 @@ public class LspUtils {
 				if (uri.equals(editorUnputURI)) {
 					// should return false when an external header file with same URI is opened in a LSP editor
 					// and non LSP editor and tab switching from a non LSP editor to the tab with the file in the non LSP editor:
-					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId())
-							&& isLspEditorActive();
+					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId()) && isLspEditorActive();
 				}
 			}
 			// the file has not been opened yet -> goto definition/declaration case
@@ -149,6 +151,20 @@ public class LspUtils {
 			}
 		}
 		return false;
+	}
+
+	public static Optional<IProject> getProject(URI uri) {
+		return getFile(Optional.ofNullable(uri)).map(file -> file.getProject());
+	}
+
+	public static Optional<IFile> getFile(Optional<URI> uri) {
+		if (uri.isPresent()) {
+			IFile[] files = LspPlugin.getDefault().getWorkspace().getRoot().findFilesForLocationURI(uri.get());
+			if (files.length > 0) {
+				return Optional.ofNullable(files[0]);
+			}
+		}
+		return Optional.empty();
 	}
 
 }

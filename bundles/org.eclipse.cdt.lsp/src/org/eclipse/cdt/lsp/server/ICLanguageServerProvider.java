@@ -12,6 +12,7 @@
 
 package org.eclipse.cdt.lsp.server;
 
+import java.net.URI;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -31,6 +32,16 @@ public interface ICLanguageServerProvider {
 	 * @param commands
 	 */
 	public void setCommands(List<String> commands);
+
+	/**
+	 * Optional initialization options for the language server during. Will be put in the initialize jsonrpc call.
+	 *
+	 * @param rootUri
+	 * @return
+	 */
+	public default Object getInitializationOptions(URI rootUri) {
+		return null;
+	}
 
 	/**
 	 * The enable expression is used to determine if the language server should be enabled.
