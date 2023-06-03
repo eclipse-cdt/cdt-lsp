@@ -76,6 +76,8 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	}
 
 	private boolean isEnabledFor(IEditorInput editorInput) {
+		if (cLanguageServerProvider == null)
+			return false;
 		IResource resource = editorInput.getAdapter(IResource.class);
 		if (resource != null) {
 			return cLanguageServerProvider.isEnabledFor(resource.getProject());

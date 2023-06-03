@@ -13,6 +13,7 @@
 package org.eclipse.cdt.lsp.internal.server;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
@@ -23,7 +24,7 @@ public class CLanguageServerStreamConnectionProvider extends ProcessStreamConnec
 
 	public CLanguageServerStreamConnectionProvider() {
 		this.cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
-		setCommands(cLanguageServerProvider.getCommands());
+		Optional.ofNullable(cLanguageServerProvider).ifPresent(p -> setCommands(p.getCommands()));
 
 		// set the working directory for the Java process which runs the C/C++ language server:
 		setWorkingDirectory(System.getProperty("user.dir")); //$NON-NLS-1$
@@ -31,7 +32,7 @@ public class CLanguageServerStreamConnectionProvider extends ProcessStreamConnec
 
 	@Override
 	public Object getInitializationOptions(URI rootUri) {
-		return this.cLanguageServerProvider.getInitializationOptions(rootUri);
+		return Optional.ofNullable(cLanguageServerProvider).map(p -> p.getInitializationOptions(rootUri)).orElse(null);
 	}
 
 }

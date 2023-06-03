@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.server.DefaultCLanguageServerProvider;
 import org.eclipse.cdt.lsp.server.EnableExpression;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.ExpressionConverter;
@@ -51,7 +50,7 @@ public class CLanguageServerRegistry {
 	public ICLanguageServerProvider createCLanguageServerProvider() {
 		prioritizedProvider = null;
 		highestPrio = Priority.low;
-		HashMap<Priority, ICLanguageServerProvider> providers = new HashMap<Priority, ICLanguageServerProvider>();
+		HashMap<Priority, ICLanguageServerProvider> providers = new HashMap<>();
 		for (IConfigurationElement configurationElement : cExtensionPoint.getConfigurationElements()) {
 			if (SERVER_ELEMENT.equals(configurationElement.getName())) {
 				ICLanguageServerProvider provider = (ICLanguageServerProvider) getInstanceFromExtension(
@@ -84,7 +83,6 @@ public class CLanguageServerRegistry {
 		}
 		if (providers.isEmpty()) {
 			Platform.getLog(getClass()).warn("No C/C++ language server defined");
-			prioritizedProvider = new DefaultCLanguageServerProvider();
 		} else {
 			// get provider with highest priority:
 			providers.forEach((key, value) -> {
