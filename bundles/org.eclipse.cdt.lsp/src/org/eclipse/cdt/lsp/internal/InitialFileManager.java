@@ -8,40 +8,39 @@
  *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - rework to OSGi component
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp;
+package org.eclipse.cdt.lsp.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.cdt.lsp.InitialUri;
+import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.LspUtils;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-public class InitialFileManager {
-	private static InitialFileManager initialFileManager = null;
+@Component
+public final class InitialFileManager implements InitialUri {
+
 	private static final QualifiedName INITIAL_URI = new QualifiedName(LspPlugin.PLUGIN_ID, "initialUri"); //$NON-NLS-1$
-	private final IWorkspaceRoot workspaceRoot;
 	private URI uri;
 
-	private InitialFileManager() {
-		workspaceRoot = LspPlugin.getDefault().getWorkspace().getRoot();
-	}
+	@Reference
+	private IWorkspace workspace;
 
-	public static synchronized InitialFileManager getInstance() {
-		if (initialFileManager == null)
-			initialFileManager = new InitialFileManager();
-
-		return initialFileManager;
-	}
-
-	public synchronized void setInitialUri(URI uri) {
+	@Override
+	public synchronized void register(URI uri) {
 		if (this.uri == null && LspUtils.getProject(uri).isPresent()) {
 			try {
-				workspaceRoot.setPersistentProperty(INITIAL_URI, uri.toString());
+				workspace.getRoot().setPersistentProperty(INITIAL_URI, uri.toString());
 				this.uri = uri;
 			} catch (CoreException e) {
 				Platform.getLog(InitialFileManager.class).error(e.getMessage(), e);
@@ -49,11 +48,12 @@ public class InitialFileManager {
 		}
 	}
 
-	public Optional<URI> getInitialUri() {
+	@Override
+	public Optional<URI> find(URI root) {
 		if (this.uri == null) {
 			String initialUriString = null;
 			try {
-				initialUriString = workspaceRoot.getPersistentProperty(INITIAL_URI);
+				initialUriString = workspace.getRoot().getPersistentProperty(INITIAL_URI);
 				if (initialUriString != null) {
 					this.uri = new URI(initialUriString);
 				}

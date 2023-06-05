@@ -8,19 +8,26 @@
  *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - rework to OSGi components
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd;
+package org.eclipse.cdt.lsp.internal.clangd;
 
+import java.net.URI;
 import java.util.Optional;
 
+import org.eclipse.cdt.core.build.ICBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
-import org.eclipse.cdt.lsp.InitialFileManager;
+import org.eclipse.cdt.core.parser.IScannerInfo;
+import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.LspUtils;
+import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.osgi.service.environment.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Used to create and set the clangd fallbackFlags.
@@ -28,7 +35,8 @@ import org.eclipse.osgi.service.environment.Constants;
  * see also: https://clangd.llvm.org/extensions#compilation-commands
  *
  */
-public class ClangdFallbackManager {
+@Component
+public final class ClangdFallbackManager implements ClangdFallbackFlags {
 
 	class FallbackFlags {
 		// fallbackFlags is used as element name in the initialize jsonrpc call:
@@ -46,31 +54,40 @@ public class ClangdFallbackManager {
 	}
 
 	private static final String ISYSTEM = "-isystem"; //$NON-NLS-1$
-	private final ServiceCaller<ICBuildConfigurationManager> configManagerServiceCaller = new ServiceCaller<>(
-			getClass(), ICBuildConfigurationManager.class);
-	private final InitialFileManager initialFileManager = InitialFileManager.getInstance();
 	private final boolean isWindows = Constants.OS_WIN32.equals(Platform.getOS());
 
-	public FallbackFlags getFallbackFlagsFromInitialUri() {
+	@Reference
+	private ICBuildConfigurationManager build;
+	@Reference
+	private InitialUri uri;
+
+	@Override
+	public FallbackFlags getFallbackFlagsFromInitialUri(URI root) {
 		if (isWindows) {
-			var configManager = configManagerServiceCaller.current();
-			try {
-				var initialFile = Optional.of(initialFileManager).map(m -> m.getInitialUri()).map(LspUtils::getFile)
-						.orElse(Optional.empty());
-				if (initialFile.isPresent() && configManager.isPresent()) {
-					var activeBuildConfig = initialFile.get().getProject().getActiveBuildConfig();
-					var cBuildConfig = configManager.get().getBuildConfiguration(activeBuildConfig);
-					if (cBuildConfig != null) {
-						var scannerInfo = cBuildConfig.getScannerInformation(initialFile.get());
-						if (scannerInfo != null) {
-							return new FallbackFlags(scannerInfo.getIncludePaths());
-						}
-					}
-				}
-			} catch (CoreException e) {
-				Platform.getLog(ClangdFallbackManager.class).error(e.getMessage(), e);
-			}
+			return uri.find(root)//
+					.flatMap(LspUtils::getFile)//
+					.flatMap(this::flags)//
+					.orElse(null);
 		}
 		return null;
+	}
+
+	private Optional<FallbackFlags> flags(IFile initial) {
+		return buildConfiguration(initial)//
+				.map(bc -> bc.getScannerInformation(initial))//
+				.map(IScannerInfo::getIncludePaths)//
+				.map(FallbackFlags::new);
+	}
+
+	private Optional<ICBuildConfiguration> buildConfiguration(IFile initial) {
+		try {
+			var active = initial.getProject().getActiveBuildConfig();
+			if (active != null) {
+				return Optional.ofNullable(build.getBuildConfiguration(active));
+			}
+		} catch (CoreException e) {
+			Platform.getLog(ClangdFallbackManager.class).error(e.getMessage(), e);
+		}
+		return Optional.empty();
 	}
 }

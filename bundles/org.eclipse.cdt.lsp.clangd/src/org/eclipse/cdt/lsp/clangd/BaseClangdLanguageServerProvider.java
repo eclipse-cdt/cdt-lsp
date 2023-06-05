@@ -52,16 +52,15 @@ public abstract class BaseClangdLanguageServerProvider implements ICLanguageServ
 
 	protected List<String> createCommands() {
 		List<String> commands = new ArrayList<>();
-		IPath clangdLocation = PathUtil.findProgramLocation("clangd", null); // in case pathStr is null environment //$NON-NLS-1$
-																				// variable ${PATH} is inspected
+		IPath clangdLocation = PathUtil.findProgramLocation("clangd", null); //$NON-NLS-1$
+		//in case pathStr is null environment variable ${PATH} is inspected
 		if (clangdLocation != null) {
 			commands.add(clangdLocation.toOSString());
 			commands.add(CLANG_TIDY);
 			commands.add(BACKGROUND_INDEX);
 			commands.add(COMPLETION_STYLE);
 			commands.add(PRETTY);
-			// clangd will execute drivers and fetch necessary include paths to compile your
-			// code:
+			// clangd will execute drivers and fetch necessary include paths to compile your code:
 			IPath compilerLocation = PathUtil.findProgramLocation("gcc", null); //$NON-NLS-1$
 			if (compilerLocation != null) {
 				commands.add(QUERY_DRIVER + compilerLocation.removeLastSegments(1).append(IPath.SEPARATOR + "*")); //$NON-NLS-1$
@@ -85,8 +84,7 @@ public abstract class BaseClangdLanguageServerProvider implements ICLanguageServ
 		if (enableExpression != null) {
 			return enableExpression.evaluate(project);
 		}
-		// language server is always enabled when no enable expression has been defined
-		// in the extension point:
+		//language server is always enabled when no enable expression has been defined in the extension point:
 		return true;
 	}
 }
