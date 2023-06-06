@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Language Server based C/C++ Editor
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.cdt.lsp;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp,
@@ -8,7 +8,7 @@ Export-Package: org.eclipse.cdt.lsp,
  org.eclipse.cdt.lsp.server.enable,
  org.eclipse.cdt.lsp.services
 Bundle-Activator: org.eclipse.cdt.lsp.LspPlugin
-Bundle-Vendor: Eclipse.org
+Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.lsp4e;bundle-version="0.16.1",
