@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.eclipse.debug.ui,
  org.eclipse.lsp4j,
- org.eclipse.lsp4j.jsonrpc
+ org.eclipse.lsp4j.jsonrpc,
+ org.eclipse.cdt.codan.core
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy
