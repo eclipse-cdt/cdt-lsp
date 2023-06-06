@@ -12,12 +12,15 @@
 
 package org.eclipse.cdt.lsp.editor;
 
+import org.eclipse.cdt.codan.core.model.IProblemReporter;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -80,10 +83,22 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 			return false;
 		IResource resource = editorInput.getAdapter(IResource.class);
 		if (resource != null) {
-			return cLanguageServerProvider.isEnabledFor(resource.getProject());
+			boolean enabled = cLanguageServerProvider.isEnabledFor(resource.getProject());
+			if (enabled) {
+				deleteCodanMarkers(resource);
+			}
+			return enabled;
 		}
 		// When resource == null it's an external file: Check if the file is already opened, if not check the active editor:
 		return LspUtils.isFileOpenedInLspEditor(editorInput);
+	}
+
+	private void deleteCodanMarkers(IResource resource) {
+		try {
+			resource.deleteMarkers(IProblemReporter.GENERIC_CODE_ANALYSIS_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+		} catch (CoreException e) {
+			Platform.getLog(CEditorAssociationOverride.class).error(e.getMessage(), e);
+		}
 	}
 
 	private boolean isNoCElement(IContentType contentType) {
