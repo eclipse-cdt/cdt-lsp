@@ -69,7 +69,7 @@ public class CLanguageServerRegistry {
 									enableExpression = new EnableExpression(this::getEvaluationContext,
 											ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
 								} catch (CoreException e) {
-									Platform.getLog(getClass()).warn("Failed to create enable expression for "
+									Platform.getLog(getClass()).warn("Failed to create enable expression for " //$NON-NLS-1$
 											+ configurationElement.getNamespaceIdentifier(), e);
 								}
 							}
@@ -82,7 +82,7 @@ public class CLanguageServerRegistry {
 			}
 		}
 		if (providers.isEmpty()) {
-			Platform.getLog(getClass()).warn("No C/C++ language server defined");
+			Platform.getLog(getClass()).warn("No C/C++ language server defined"); //$NON-NLS-1$
 		} else {
 			// get provider with highest priority:
 			providers.forEach((key, value) -> {

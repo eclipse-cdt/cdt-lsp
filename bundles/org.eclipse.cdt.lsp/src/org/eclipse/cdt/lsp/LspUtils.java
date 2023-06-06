@@ -46,8 +46,8 @@ public class LspUtils {
 	public static boolean isCContentType(String id) {
 		// TODO: The content type definition from TM4E "lng.cpp" can be omitted if either https://github.com/eclipse-cdt/cdt/pull/310 or
 		// https://github.com/eclipse/tm4e/pull/500 has been merged.
-		return (id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header")))
-				|| "lng.cpp".equals(id);
+		return (id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header"))) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				|| "lng.cpp".equals(id); //$NON-NLS-1$
 	}
 
 	/**
