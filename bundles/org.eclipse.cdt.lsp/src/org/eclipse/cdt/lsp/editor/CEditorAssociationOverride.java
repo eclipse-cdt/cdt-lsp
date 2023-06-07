@@ -19,8 +19,12 @@ import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -94,11 +98,21 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	}
 
 	private void deleteCodanMarkers(IResource resource) {
-		try {
-			resource.deleteMarkers(IProblemReporter.GENERIC_CODE_ANALYSIS_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-		} catch (CoreException e) {
-			Platform.getLog(CEditorAssociationOverride.class).error(e.getMessage(), e);
-		}
+		var wsJob = new WorkspaceJob("Remove codan markers") { //$NON-NLS-1$
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+				try {
+					resource.deleteMarkers(IProblemReporter.GENERIC_CODE_ANALYSIS_MARKER_TYPE, true,
+							IResource.DEPTH_INFINITE);
+				} catch (CoreException e) {
+					Platform.getLog(CEditorAssociationOverride.class).log(e.getStatus());
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		wsJob.setRule(resource);
+		wsJob.setSystem(true);
+		wsJob.schedule();
 	}
 
 	private boolean isNoCElement(IContentType contentType) {
