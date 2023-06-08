@@ -25,7 +25,11 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.lsp4e.LSPEclipseUtils;
@@ -83,34 +87,54 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 			symbols.cancel(true);
 		}
 
-		final var params = new DocumentSymbolParams(LSPEclipseUtils.toTextDocumentIdentifier(file.getLocationURI()));
-
-		IDocument document = LSPEclipseUtils.getDocument(file);
-		if (document != null) {
-			CompletableFuture<Optional<LanguageServerWrapper>> languageServer = LanguageServers.forDocument(document)
-					.withFilter(capabilities -> LSPEclipseUtils.hasCapability(capabilities.getDocumentSymbolProvider()))
-					.computeFirst((w, ls) -> CompletableFuture.completedFuture(w));
-			try {
-				symbols = languageServer.get(500, TimeUnit.MILLISECONDS).filter(Objects::nonNull)
-						.filter(LanguageServerWrapper::isActive)
-						.map(s -> s.execute(ls -> ls.getTextDocumentService().documentSymbol(params)))
-						.orElse(CompletableFuture.completedFuture(null));
-			} catch (TimeoutException | ExecutionException | InterruptedException e) {
-				Platform.getLog(getClass()).error(e.getMessage(), e);
-				symbols = CompletableFuture.completedFuture(null);
-				if (e instanceof InterruptedException) {
-					Thread.currentThread().interrupt();
+		boolean temporaryLoadedDocument = false;
+		try {
+			IDocument document = LSPEclipseUtils.getExistingDocument(file);
+			if (document == null) {
+				document = LSPEclipseUtils.getDocument(file);
+				temporaryLoadedDocument = true;
+			}
+			if (document != null) {
+				final var params = new DocumentSymbolParams(
+						LSPEclipseUtils.toTextDocumentIdentifier(file.getLocationURI()));
+				CompletableFuture<Optional<LanguageServerWrapper>> languageServer = LanguageServers
+						.forDocument(document)
+						.withFilter(
+								capabilities -> LSPEclipseUtils.hasCapability(capabilities.getDocumentSymbolProvider()))
+						.computeFirst((w, ls) -> CompletableFuture.completedFuture(w));
+				try {
+					symbols = languageServer.get(500, TimeUnit.MILLISECONDS).filter(Objects::nonNull)
+							.filter(LanguageServerWrapper::isActive)
+							.map(s -> s.execute(ls -> ls.getTextDocumentService().documentSymbol(params)))
+							.orElse(CompletableFuture.completedFuture(null));
+				} catch (TimeoutException | ExecutionException | InterruptedException e) {
+					Platform.getLog(getClass()).error(e.getMessage(), e);
+					symbols = CompletableFuture.completedFuture(null);
+					if (e instanceof InterruptedException) {
+						Thread.currentThread().interrupt();
+					}
+				}
+				symbols.thenAcceptAsync(response -> {
+					symbolsModel.setUri(file.getLocationURI());
+					symbolsModel.update(response);
+				}).join();
+			} else {
+				temporaryLoadedDocument = false;
+				symbolsModel.setUri(file.getLocationURI());
+				symbolsModel.update(null);
+			}
+		} catch (Exception e) {
+			Platform.getLog(getClass()).error(e.getMessage(), e);
+		} finally {
+			if (temporaryLoadedDocument) {
+				try {
+					FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE,
+							new NullProgressMonitor());
+				} catch (CoreException e) {
+					Platform.getLog(getClass()).error(e.getMessage(), e);
 				}
 			}
-			symbols.thenAcceptAsync(response -> {
-				symbolsModel.setUri(file.getLocationURI());
-				symbolsModel.update(response);
-			}).join();
-		} else {
-			symbolsModel.setUri(file.getLocationURI());
-			symbolsModel.update(null);
 		}
-
 	}
 
 }
