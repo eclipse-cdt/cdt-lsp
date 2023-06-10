@@ -44,13 +44,6 @@ public interface ICLanguageServerProvider {
 	}
 
 	/**
-	 * The enable expression is used to determine if the language server should be enabled.
-	 *
-	 * @param enableExpression
-	 */
-	public void setEnableExpression(EnableExpression enableExpression);
-
-	/**
 	 * Check whether the LSP based C/C++ Editor and the language server shall be used for the given project.
 	 *
 	 * @param project

@@ -44,13 +44,6 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp" -->
-      <propertyTester
-            class="org.eclipse.cdt.lsp.internal.clangd.editor.expressions.LspEditorPreferencesTester"
-            id="org.eclipse.cdt.lsp.expressions.lsp.prefer"
-            namespace="org.eclipse.cdt.lsp"
-            properties="prefer"
-            type="java.lang.Object">
-      </propertyTester>
       <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp[.editor]" -->
       <propertyTester
             class="org.eclipse.cdt.lsp.internal.clangd.editor.expressions.LspEditorActiveTester"
@@ -65,12 +58,6 @@
       <server
             class="org.eclipse.cdt.lsp.internal.clangd.ClangdLanguageServerProvider"
             priority="low">
-         <enabledWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.eclipse.cdt.lsp.prefer">
-            </test>
-         </enabledWhen>
       </server>
    </extension>
 

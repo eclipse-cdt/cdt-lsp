@@ -14,7 +14,6 @@ package org.eclipse.cdt.lsp.test.server;
 
 import java.util.List;
 
-import org.eclipse.cdt.lsp.server.EnableExpression;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IProject;
 
@@ -22,25 +21,15 @@ public class MockCLanguageServerProvider implements ICLanguageServerProvider {
 
 	@Override
 	public List<String> getCommands() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void setCommands(List<String> commands) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setEnableExpression(EnableExpression enableExpression) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public boolean isEnabledFor(IProject project) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

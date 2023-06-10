@@ -25,12 +25,18 @@ import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
 import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
 import org.eclipse.cdt.utils.CommandLineUtil;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 public class ClangdLanguageServerProvider extends BaseClangdLanguageServerProvider {
 	//FIXME: AF: rework to core preferences
 	private static final IPreferenceStore preferenceStore = LspEditorUiPlugin.getDefault().getLsPreferences();
+	private static final PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
 
 	@Override
 	protected List<String> createCommands() {
@@ -61,6 +67,18 @@ public class ClangdLanguageServerProvider extends BaseClangdLanguageServerProvid
 			}
 			preferenceStore.setDefault(LspEditorPreferences.SERVER_OPTIONS, args);
 		}
+	}
+
+	@Override
+	public boolean isEnabledFor(IProject project) {
+		// check if LSP editor is preferred for given project:
+		return super.isEnabledFor(project) && preferLspEditor(project);
+	}
+
+	private boolean preferLspEditor(IProject project) {
+		// check project properties:
+		return Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
+				option.defaultValue(), new IScopeContext[] { new ProjectScope(project) });
 	}
 
 	private List<String> getCommandsFromStore() {
