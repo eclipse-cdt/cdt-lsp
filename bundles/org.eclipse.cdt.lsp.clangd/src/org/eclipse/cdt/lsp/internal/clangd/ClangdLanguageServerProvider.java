@@ -10,44 +10,26 @@
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  * Alexander Fedorov (ArSysOp) - rework to OSGi components
+ * Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.internal.clangd;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.cdt.lsp.clangd.BaseClangdLanguageServerProvider;
+import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
-import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
-import org.eclipse.cdt.utils.CommandLineUtil;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.PreferenceMetadata;
-import org.eclipse.jface.preference.IPreferenceStore;
 
-public class ClangdLanguageServerProvider extends BaseClangdLanguageServerProvider {
-	//FIXME: AF: rework to core preferences
-	private static final IPreferenceStore preferenceStore = LspEditorUiPlugin.getDefault().getLsPreferences();
-	private static final PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
+public final class ClangdLanguageServerProvider extends BaseClangdLanguageServerProvider {
 
-	@Override
-	protected List<String> createCommands() {
-		List<String> commands = super.createCommands();
-		setPreferenceStoreDefaults(commands); // use the server provider settings as default
-		List<String> commandsFromStore = getCommandsFromStore();
-		if (commandsFromStore.isEmpty()) {
-			return commands;
-		}
-		return commandsFromStore;
-	}
+	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
+			ClangdConfiguration.class);
 
 	@Override
 	public Object getInitializationOptions(URI rootUri) {
@@ -57,42 +39,18 @@ public class ClangdLanguageServerProvider extends BaseClangdLanguageServerProvid
 		return result.stream().filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
-	private void setPreferenceStoreDefaults(List<String> commands) {
-		if (!commands.isEmpty()) {
-			//set values in preference store:
-			preferenceStore.setDefault(LspEditorPreferences.SERVER_PATH, commands.get(0));
-			String args = ""; //$NON-NLS-1$
-			for (int i = 1; i < commands.size(); i++) {
-				args = args + " " + commands.get(i); //$NON-NLS-1$
-			}
-			preferenceStore.setDefault(LspEditorPreferences.SERVER_OPTIONS, args);
-		}
+	@Override
+	public List<String> getCommands(URI rootUri) {
+		List<String> result = new ArrayList<>();
+		configuration.call(c -> result.addAll(c.options(rootUri).toList()));
+		return result;
 	}
 
 	@Override
 	public boolean isEnabledFor(IProject project) {
-		// check if LSP editor is preferred for given project:
-		return super.isEnabledFor(project) && preferLspEditor(project);
+		boolean[] enabled = new boolean[1];
+		configuration.call(c -> enabled[0] = c.options(project).preferClangd());
+		return enabled[0];
 	}
 
-	private boolean preferLspEditor(IProject project) {
-		// check project properties:
-		return Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
-				option.defaultValue(), new IScopeContext[] { new ProjectScope(project) });
-	}
-
-	private List<String> getCommandsFromStore() {
-		List<String> commands = new ArrayList<>();
-		String serverPath = preferenceStore.getString(LspEditorPreferences.SERVER_PATH);
-		if (serverPath.isBlank()) {
-			return commands;
-		}
-		commands.add(serverPath);
-		String options = preferenceStore.getString(LspEditorPreferences.SERVER_OPTIONS);
-		if (options.isBlank()) {
-			return commands;
-		}
-		commands.addAll(Arrays.asList(CommandLineUtil.argumentsToArray(options)));
-		return commands;
-	}
 }

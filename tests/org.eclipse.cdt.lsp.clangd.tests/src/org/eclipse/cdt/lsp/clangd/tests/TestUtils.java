@@ -10,6 +10,7 @@
  * Contributors:
  *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *     Alexander Fedorov (ArSysOp) - extract headless part
+ *     Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.clangd.tests;
@@ -17,28 +18,28 @@ package org.eclipse.cdt.lsp.clangd.tests;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
+import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.junit.jupiter.api.TestInfo;
 
 public final class TestUtils {
 
 	public static void setLspPreferred(IProject project, boolean value) {
-		IEclipsePreferences node = new ProjectScope(project).getNode(LspEditorUiPlugin.PLUGIN_ID);
-		node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), value);
+		ServiceCaller.callOnce(TestUtils.class, ClangdConfiguration.class, //
+				cc -> cc.storage(project).save(value, cc.metadata().preferClangd()));
 	}
 
 	public static boolean isLspPreferred(IProject project) {
-		IEclipsePreferences node = new ProjectScope(project).getNode(LspEditorUiPlugin.PLUGIN_ID);
-		return node.getBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(), false);
+		boolean[] enabled = new boolean[1];
+		ServiceCaller.callOnce(TestUtils.class, ClangdConfiguration.class, //
+				c -> enabled[0] = c.options(project).preferClangd());
+		return enabled[0];
 	}
 
 	public static IProject createCProject(String projectName) throws CoreException {

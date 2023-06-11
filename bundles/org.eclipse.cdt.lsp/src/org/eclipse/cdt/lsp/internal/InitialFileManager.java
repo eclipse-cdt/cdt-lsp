@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.LspUtils;
+import org.eclipse.cdt.lsp.UriResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -38,7 +38,7 @@ public final class InitialFileManager implements InitialUri {
 
 	@Override
 	public synchronized void register(URI uri) {
-		if (this.uri == null && LspUtils.getProject(uri).isPresent()) {
+		if (this.uri == null && new UriResource(workspace).apply(uri).isPresent()) {
 			try {
 				workspace.getRoot().setPersistentProperty(INITIAL_URI, uri.toString());
 				this.uri = uri;

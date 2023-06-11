@@ -8,10 +8,13 @@
  *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.test.server;
 
+import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
@@ -20,12 +23,8 @@ import org.eclipse.core.resources.IProject;
 public class MockCLanguageServerProvider implements ICLanguageServerProvider {
 
 	@Override
-	public List<String> getCommands() {
-		return null;
-	}
-
-	@Override
-	public void setCommands(List<String> commands) {
+	public List<String> getCommands(URI rootUri) {
+		return Collections.emptyList();
 	}
 
 	@Override

@@ -156,6 +156,7 @@ public class LspUtils {
 		return false;
 	}
 
+	//FIXME: AF: consider removing, since it doesn't recognize containers, use UriResource instead
 	public static Optional<IProject> getProject(URI uri) {
 		return getFile(uri).map(file -> file.getProject());
 	}

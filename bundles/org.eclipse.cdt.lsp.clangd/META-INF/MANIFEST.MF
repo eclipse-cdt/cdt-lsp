@@ -32,4 +32,5 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
  org.eclipse.ui.workbench;bundle-version="0.0.0",
  org.eclipse.ui.workbench.texteditor;bundle-version="0.0.0"
 Bundle-Activator: org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin
-Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager.xml
+Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdConfigurationAccess.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager.xml
