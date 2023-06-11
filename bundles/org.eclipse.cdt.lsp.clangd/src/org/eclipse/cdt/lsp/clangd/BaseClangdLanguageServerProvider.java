@@ -15,7 +15,6 @@ package org.eclipse.cdt.lsp.clangd;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.cdt.lsp.server.EnableExpression;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.resources.IProject;
@@ -33,8 +32,6 @@ public abstract class BaseClangdLanguageServerProvider implements ICLanguageServ
 	public static final String QUERY_DRIVER = "--query-driver="; //$NON-NLS-1$
 
 	protected List<String> commands;
-
-	protected EnableExpression enableExpression;
 
 	public BaseClangdLanguageServerProvider() {
 		commands = createCommands();
@@ -70,21 +67,8 @@ public abstract class BaseClangdLanguageServerProvider implements ICLanguageServ
 	}
 
 	@Override
-	public void setEnableExpression(EnableExpression enableExpression) {
-		this.enableExpression = enableExpression;
-	}
-
-	@Override
 	public boolean isEnabledFor(IProject project) {
 		// check if server has been defined:
-		if (getCommands().isEmpty()) {
-			return false;
-		}
-		// check if enable expression is defined:
-		if (enableExpression != null) {
-			return enableExpression.evaluate(project);
-		}
-		//language server is always enabled when no enable expression has been defined in the extension point:
-		return true;
+		return !getCommands().isEmpty();
 	}
 }

@@ -6,11 +6,6 @@
       <server
             class="org.eclipse.cdt.lsp.test.server.MockCLanguageServerProvider"
             priority="normal">
-         <enabledWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.eclipse.cdt.lsp.prefer">
-            </test></enabledWhen>
       </server>
    </extension>
 

@@ -14,27 +14,20 @@
 package org.eclipse.cdt.lsp.internal.server;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.server.EnableExpression;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
-import org.eclipse.core.expressions.ExpressionConverter;
-import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.IHandlerService;
 
 public class CLanguageServerRegistry {
 	private static final String EXTENSION_ID = LspPlugin.PLUGIN_ID + ".serverProvider"; //$NON-NLS-1$
 	private static final String SERVER_ELEMENT = "server"; //$NON-NLS-1$
 	private static final String CLASS = "class"; //$NON-NLS-1$
 	private static final String PRIORITY = "priority"; //$NON-NLS-1$
-	private static final String ENABLED_WHEN_ATTRIBUTE = "enabledWhen"; //$NON-NLS-1$
 	private final IExtensionPoint cExtensionPoint;
 	private ICLanguageServerProvider prioritizedProvider = null;
 	private Priority highestPrio = Priority.low;
@@ -56,26 +49,6 @@ public class CLanguageServerRegistry {
 				ICLanguageServerProvider provider = (ICLanguageServerProvider) getInstanceFromExtension(
 						configurationElement, ICLanguageServerProvider.class);
 				if (provider != null) {
-					// set enable expression:
-					EnableExpression enableExpression = null;
-					if (configurationElement.getChildren(ENABLED_WHEN_ATTRIBUTE) != null) {
-						IConfigurationElement[] enabledWhenElements = configurationElement
-								.getChildren(ENABLED_WHEN_ATTRIBUTE);
-						if (enabledWhenElements.length == 1) {
-							IConfigurationElement enabledWhen = enabledWhenElements[0];
-							IConfigurationElement[] enabledWhenChildren = enabledWhen.getChildren();
-							if (enabledWhenChildren.length == 1) {
-								try {
-									enableExpression = new EnableExpression(this::getEvaluationContext,
-											ExpressionConverter.getDefault().perform(enabledWhenChildren[0]));
-								} catch (CoreException e) {
-									Platform.getLog(getClass()).warn("Failed to create enable expression for " //$NON-NLS-1$
-											+ configurationElement.getNamespaceIdentifier(), e);
-								}
-							}
-						}
-					}
-					provider.setEnableExpression(enableExpression);
 					// save priority attribute:
 					providers.put(Priority.valueOf(configurationElement.getAttribute(PRIORITY)), provider);
 				}
@@ -93,11 +66,6 @@ public class CLanguageServerRegistry {
 			});
 		}
 		return prioritizedProvider;
-	}
-
-	private IEvaluationContext getEvaluationContext() {
-		return Optional.ofNullable(PlatformUI.getWorkbench().getService(IHandlerService.class))
-				.map(IHandlerService::getCurrentState).orElse(null);
 	}
 
 	private <T> Object getInstanceFromExtension(IConfigurationElement configurationElement, Class<T> clazz) {

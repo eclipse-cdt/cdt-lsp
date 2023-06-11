@@ -54,9 +54,8 @@
 
    <element name="server">
       <complexType>
-         <sequence>
-            <element ref="enabledWhen" minOccurs="0" maxOccurs="1"/>
-         </sequence>
+         <choice>
+         </choice>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -84,31 +83,6 @@
                </restriction>
             </simpleType>
          </attribute>
-      </complexType>
-   </element>
-
-   <element name="enabledWhen">
-      <annotation>
-         <documentation>
-            A core Expression that controls the enablement of the server
-         </documentation>
-      </annotation>
-      <complexType>
-         <choice minOccurs="0" maxOccurs="1">
-            <element ref="not"/>
-            <element ref="or"/>
-            <element ref="and"/>
-            <element ref="instanceof"/>
-            <element ref="test"/>
-            <element ref="systemTest"/>
-            <element ref="equals"/>
-            <element ref="count"/>
-            <element ref="with"/>
-            <element ref="resolve"/>
-            <element ref="adapt"/>
-            <element ref="iterate"/>
-            <element ref="reference"/>
-         </choice>
       </complexType>
    </element>
 

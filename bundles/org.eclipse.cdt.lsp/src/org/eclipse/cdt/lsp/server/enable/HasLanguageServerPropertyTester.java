@@ -15,8 +15,6 @@ package org.eclipse.cdt.lsp.server.enable;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.core.model.ICProject;
@@ -32,15 +30,10 @@ import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
 
 public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
-	private final List<String> cContentTypes = new ArrayList<>();
 	private final ServiceCaller<InitialUri> initial;
 
 	public HasLanguageServerPropertyTester() {
 		this.cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
-		this.cContentTypes.add("org.eclipse.cdt.core.cSource"); //$NON-NLS-1$
-		this.cContentTypes.add("org.eclipse.cdt.core.cHeader"); //$NON-NLS-1$
-		this.cContentTypes.add("org.eclipse.cdt.core.cxxSource"); //$NON-NLS-1$
-		this.cContentTypes.add("org.eclipse.cdt.core.cxxHeader"); //$NON-NLS-1$
 		this.initial = new ServiceCaller<>(getClass(), InitialUri.class);
 	}
 
@@ -75,7 +68,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	private boolean validContentType(URI uri) {
 		var contentType = Platform.getContentTypeManager().findContentTypeFor(new File(uri.getPath()).getName());
 		if (contentType != null) {
-			return cContentTypes.stream().anyMatch(type -> type.equals(contentType.getId()));
+			return LspUtils.isCContentType(contentType.getId());
 		}
 		return false;
 	}
