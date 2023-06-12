@@ -20,9 +20,10 @@ import org.eclipse.cdt.core.build.ICBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
 import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.lsp.InitialUri;
-import org.eclipse.cdt.lsp.LspUtils;
+import org.eclipse.cdt.lsp.UriResource;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.environment.Constants;
@@ -60,26 +61,28 @@ public final class ClangdFallbackManager implements ClangdFallbackFlags {
 	private ICBuildConfigurationManager build;
 	@Reference
 	private InitialUri uri;
+	@Reference
+	private IWorkspace workspace;
 
 	@Override
 	public FallbackFlags getFallbackFlagsFromInitialUri(URI root) {
 		if (isWindows) {
 			return uri.find(root)//
-					.flatMap(LspUtils::getFile)//
+					.flatMap(new UriResource(workspace))//
 					.flatMap(this::flags)//
 					.orElse(null);
 		}
 		return null;
 	}
 
-	private Optional<FallbackFlags> flags(IFile initial) {
+	private Optional<FallbackFlags> flags(IResource initial) {
 		return buildConfiguration(initial)//
 				.map(bc -> bc.getScannerInformation(initial))//
 				.map(IScannerInfo::getIncludePaths)//
 				.map(FallbackFlags::new);
 	}
 
-	private Optional<ICBuildConfiguration> buildConfiguration(IFile initial) {
+	private Optional<ICBuildConfiguration> buildConfiguration(IResource initial) {
 		try {
 			var active = initial.getProject().getActiveBuildConfig();
 			if (active != null) {

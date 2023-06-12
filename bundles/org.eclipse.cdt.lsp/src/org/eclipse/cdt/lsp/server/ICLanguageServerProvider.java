@@ -8,6 +8,7 @@
  *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.server;
@@ -21,22 +22,16 @@ public interface ICLanguageServerProvider {
 
 	/**
 	 * The command list includes the location of the language server followed by its calling arguments.
+	 * @param rootUri {@link IProject} or standalone File
 	 *
 	 * @return Command list to run language server
 	 */
-	public List<String> getCommands();
-
-	/**
-	 * The command list includes the location of the language server followed by its calling arguments.
-	 *
-	 * @param commands
-	 */
-	public void setCommands(List<String> commands);
+	public List<String> getCommands(URI rootUri);
 
 	/**
 	 * Optional initialization options for the language server during. Will be put in the initialize jsonrpc call.
 	 *
-	 * @param rootUri
+	 * @param rootUri {@link IProject} or standalone File
 	 * @return
 	 */
 	public default Object getInitializationOptions(URI rootUri) {

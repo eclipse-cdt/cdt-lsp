@@ -9,105 +9,80 @@
  *
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ * Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.internal.clangd.editor.properties;
 
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferences;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.internal.clangd.ResolveProjectScope;
+import org.eclipse.cdt.lsp.internal.clangd.editor.configuration.ClangdConfigurationArea;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.PreferenceMetadata;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.prefs.BackingStoreException;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-public class LspEditorPropertiesPage extends PropertyPage {
+public final class LspEditorPropertiesPage extends PropertyPage {
 
-	private Button preferLspEditorCheckbox;
+	private final ClangdConfiguration configuration;
+	private final IWorkspace workspace;
+	private ClangdConfigurationArea area;
+
+	public LspEditorPropertiesPage() {
+		IWorkbench workbench = PlatformUI.getWorkbench();
+		this.configuration = workbench.getService(ClangdConfiguration.class);
+		this.workspace = workbench.getService(IWorkspace.class);
+	}
 
 	@Override
 	protected Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		composite.setLayout(layout);
-		GridData data = new GridData(GridData.FILL);
-		data.grabExcessHorizontalSpace = true;
-		composite.setLayoutData(data);
-		addSettingsSection(composite);
-		load();
+		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(3).create());
+		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+		area = new ClangdConfigurationArea(composite, configuration.metadata());
+		area.init(store(), this);
+		area.fields().forEach(FieldEditor::load);
 		return composite;
+	}
+
+	private ScopedPreferenceStore store() {
+		Optional<ProjectScope> scope = new ResolveProjectScope(workspace).apply(getElement());
+		if (scope.isPresent()) {
+			ScopedPreferenceStore store = new ScopedPreferenceStore(scope.get(), configuration.qualifier());
+			store.setSearchContexts(new IScopeContext[] { scope.get(), InstanceScope.INSTANCE });
+			return store;
+		}
+		return new ScopedPreferenceStore(InstanceScope.INSTANCE, configuration.qualifier());
 	}
 
 	@Override
 	protected void performDefaults() {
+		area.fields().forEach(FieldEditor::loadDefault);
 		super.performDefaults();
-		preferLspEditorCheckbox.setSelection(LspEditorPreferences.getPreferenceMetadata().defaultValue());
 	}
 
 	@Override
 	public boolean performOk() {
-		Optional<IProject> project = project();
-		if (project.isPresent()) {
-			IEclipsePreferences node = new ProjectScope(project.get()).getNode(LspEditorUiPlugin.PLUGIN_ID);
-			node.putBoolean(LspEditorPreferences.getPreferenceMetadata().identifer(),
-					preferLspEditorCheckbox.getSelection());
-			try {
-				node.flush();
-				return true;
-			} catch (BackingStoreException e) {
-				Platform.getLog(FrameworkUtil.getBundle(getClass())).error(e.getMessage(), e);
-			}
-		}
-		return false;
+		area.fields().forEach(FieldEditor::store);
+		return super.performOk();
 	}
 
-	private void addSettingsSection(Composite parent) {
-		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
-		Composite composite = createDefaultComposite(parent);
-		preferLspEditorCheckbox = new Button(composite, SWT.CHECK);
-		preferLspEditorCheckbox.setLayoutData(new GridData());
-		preferLspEditorCheckbox.setText(option.name());
-		preferLspEditorCheckbox.setToolTipText(option.description());
-	}
-
-	private void load() {
-		Optional<IProject> project = project();
-		PreferenceMetadata<Boolean> option = LspEditorPreferences.getPreferenceMetadata();
-		if (project.isPresent()) {
-			preferLspEditorCheckbox.setSelection(
-					Platform.getPreferencesService().getBoolean(LspEditorUiPlugin.PLUGIN_ID, option.identifer(),
-							option.defaultValue(), new IScopeContext[] { new ProjectScope(project.get()) }));
-		} else {
-			preferLspEditorCheckbox.setSelection(option.defaultValue());
-		}
-	}
-
-	private Composite createDefaultComposite(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NULL);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		composite.setLayout(layout);
-		composite.setLayoutData(GridDataFactory.fillDefaults().create());
-		return composite;
-	}
-
-	private Optional<IProject> project() {
-		return Optional.ofNullable(getElement())//
-				.filter(IProject.class::isInstance)//
-				.map(IProject.class::cast);
+	@Override
+	public void dispose() {
+		area.fields().forEach(FieldEditor::dispose);
+		super.dispose();
 	}
 
 }

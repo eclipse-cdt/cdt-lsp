@@ -12,6 +12,12 @@
 -->
 <plugin>
    <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.eclipse.cdt.lsp.internal.clangd.ClangdPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
          point="org.eclipse.ui.preferencePages">
       <!-- FIXME: AF: Exract clangd-specific preferences -->
       <!-- FIXME: AF: Move commmon part to "org.eclipse.cdt.lsp[.editor]" -->
