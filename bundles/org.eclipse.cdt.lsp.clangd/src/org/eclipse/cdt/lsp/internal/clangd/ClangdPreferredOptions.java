@@ -95,7 +95,7 @@ final class ClangdPreferredOptions implements ClangdOptions {
 		if (prettyPrint()) {
 			list.add("--pretty"); //$NON-NLS-1$
 		}
-		list.add(NLS.bind("--query-driver=={0}", queryDriver())); //$NON-NLS-1$
+		list.add(NLS.bind("--query-driver={0}", queryDriver())); //$NON-NLS-1$
 		return list;
 	}
 
