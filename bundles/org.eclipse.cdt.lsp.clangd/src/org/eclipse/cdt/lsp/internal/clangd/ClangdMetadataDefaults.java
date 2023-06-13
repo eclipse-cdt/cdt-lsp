@@ -83,7 +83,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	@Override
 	public PreferenceMetadata<String> queryDriver() {
 		return new PreferenceMetadata<>(String.class, //
-				"pretty_print", //$NON-NLS-1$
+				"query_driver", //$NON-NLS-1$
 				Optional.ofNullable(PathUtil.findProgramLocation("gcc", null)) //$NON-NLS-1$
 						.map(p -> p.removeLastSegments(1).append(IPath.SEPARATOR + "*"))// //$NON-NLS-1$
 						.map(IPath::toString)//

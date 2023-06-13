@@ -23,8 +23,8 @@
       <!-- FIXME: AF: Move commmon part to "org.eclipse.cdt.lsp[.editor]" -->
       <page
             category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
-            class="org.eclipse.cdt.lsp.internal.clangd.editor.preferences.LspEditorPreferencePage"
-            id="org.eclipse.cdt.lsp.clangd.editor.preferences.general"
+            class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
+            id="org.eclipse.cdt.lsp.clangd.editor"
             name="Editor (LSP)">
       </page>
    </extension>
@@ -33,8 +33,8 @@
       <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp[.editor]" -->
       <page
             category="org.eclipse.cdt.ui.newui.Page_head_general"
-            class="org.eclipse.cdt.lsp.internal.clangd.editor.properties.LspEditorPropertiesPage"
-            id="org.eclipse.cdt.lsp.editor.properties.general"
+            class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
+            id="org.eclipse.cdt.lsp.clangd.editor"
             name="Editor (LSP)">
          <filter
                name="projectNature"
