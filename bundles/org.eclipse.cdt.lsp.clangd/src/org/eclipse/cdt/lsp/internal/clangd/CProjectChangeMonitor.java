@@ -25,7 +25,7 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
-import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -57,7 +57,7 @@ public class CProjectChangeMonitor {
 							try {
 								ClangdConfigurationManager.setCompilationDatabase(project, databasePath);
 							} catch (ScannerException e) {
-								var status = new Status(IStatus.ERROR, LspEditorUiPlugin.PLUGIN_ID, e.getMessage());
+								var status = new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, e.getMessage());
 								var configFile = ClangdConfigurationManager.CLANGD_CONFIG_FILE_NAME;
 								LspUtils.showErrorMessage(LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error,
 										LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error_message
