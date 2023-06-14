@@ -58,6 +58,13 @@
             properties="active"
             type="java.lang.Object">
       </propertyTester>
+      <propertyTester
+            class="org.eclipse.cdt.lsp.internal.clangd.editor.expressions.ClangdLanguageServerProviderActive"
+            id="org.eclipse.cdt.lsp.clangd.provider.active"
+            namespace="org.eclipse.cdt.lsp.clangd.provider"
+            properties="active"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
    <extension
          point="org.eclipse.cdt.lsp.serverProvider">
@@ -112,6 +119,23 @@
             </visibleWhen>
          </command>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.activities">
+      <activity
+            id="org.eclipse.cdt.lsp.clangd.ClangdLanguageProvider"
+            name="CDT Clangd Language Server Provider">
+         <enabledWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.eclipse.cdt.lsp.clangd.provider.active">
+            </test></enabledWhen>
+      </activity>
+      <activityPatternBinding
+            activityId="org.eclipse.cdt.lsp.clangd.ClangdLanguageProvider"
+            isEqualityPattern="true"
+            pattern="org.eclipse.cdt.lsp.clangd/org.eclipse.cdt.lsp.clangd.editor">
+      </activityPatternBinding>
    </extension>
 
 </plugin>
