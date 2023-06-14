@@ -20,21 +20,17 @@ import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.eclipse.osgi.util.NLS;
 
 final class ClangdPreferredOptions implements ClangdOptions {
 
-	private final IPreferencesService service;
 	private final String qualifier;
 	private final IScopeContext[] scopes;
 	private final ClangdMetadata metadata;
 
-	ClangdPreferredOptions(IPreferencesService service, String qualifier, IScopeContext[] scopes,
-			ClangdMetadata metadata) {
-		this.service = Objects.requireNonNull(service);
+	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata metadata) {
 		this.qualifier = Objects.requireNonNull(qualifier);
 		this.scopes = Objects.requireNonNull(scopes);
 		this.metadata = Objects.requireNonNull(metadata);
@@ -80,7 +76,7 @@ final class ClangdPreferredOptions implements ClangdOptions {
 		for (int i = scopes.length - 1; i >= 0; i--) {
 			IScopeContext scope = scopes[i];
 			String previous = actual;
-			actual = service.getString(qualifier, meta.identifer(), previous, new IScopeContext[] { scope });
+			actual = scope.getNode(qualifier).get(meta.identifer(), previous);
 		}
 		return actual;
 	}

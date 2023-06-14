@@ -47,7 +47,6 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<Boolean> useTidy() {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"use_tidy", //$NON-NLS-1$
-				//FIXME: AF: support override from vendor
 				true, //
 				"Enable clang-tidy diagnostics", //
 				"Enable clang-tidy diagnostics");

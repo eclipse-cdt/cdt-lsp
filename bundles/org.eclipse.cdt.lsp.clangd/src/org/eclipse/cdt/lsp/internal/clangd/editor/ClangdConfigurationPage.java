@@ -17,6 +17,7 @@ package org.eclipse.cdt.lsp.internal.clangd.editor;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.internal.clangd.ResolveProjectScope;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
@@ -113,7 +114,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	private void specificSelected() {
 		enableProjectSpecificSettings(specific.getSelection());
-		refreshWidgets();
+		refreshWidgets(configuration.options(getElement()));
 	}
 
 	private Link createLink(Composite composite, String text) {
@@ -125,7 +126,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 			public void widgetSelected(SelectionEvent e) {
 				if (PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null)
 						.open() == Window.OK) {
-					refreshWidgets();
+					refreshWidgets(configuration.options(getElement()));
 				}
 			}
 		});
@@ -143,7 +144,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 		if (projectScope().isPresent()) {
 			enableProjectSpecificSettings(hasProjectSpecificOptions());
 		}
-		refreshWidgets();
+		refreshWidgets(configuration.options(getElement()));
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
@@ -156,9 +157,9 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 		return composite;
 	}
 
-	private void refreshWidgets() {
+	private void refreshWidgets(ClangdOptions options) {
 		setErrorMessage(null);
-		area.load(configuration.options(getElement()));
+		area.load(options);
 	}
 
 	private Optional<ProjectScope> projectScope() {
@@ -178,7 +179,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 		} catch (BackingStoreException e) {
 			Platform.getLog(getClass()).error("Unable to restore default values.", e); //$NON-NLS-1$
 		}
-		refreshWidgets();
+		refreshWidgets(configuration.defaults());
 		super.performDefaults();
 	}
 
@@ -189,8 +190,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
 			if (!useProjectSettings()) {
 				try {
-					String[] keys = prefs.keys();
-					for (String key : keys) {
+					for (String key : prefs.keys()) {
 						prefs.remove(key);
 					}
 				} catch (BackingStoreException e) {
