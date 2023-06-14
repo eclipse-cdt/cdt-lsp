@@ -21,9 +21,9 @@ import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdQualifier;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IPreferenceMetadataStore;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
@@ -40,9 +40,6 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 	@Reference
 	private IWorkspace workspace;
 
-	@Reference
-	private IPreferencesService preferences;
-
 	public ClangdConfigurationAccess() {
 		this.qualifier = new ClangdQualifier().get();
 		this.metadata = new ClangdMetadataDefaults();
@@ -54,15 +51,20 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 	}
 
 	@Override
+	public ClangdOptions defaults() {
+		return new ClangdPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata);
+	}
+
+	@Override
 	public ClangdOptions options(Object context) {
 		Optional<ProjectScope> project = projectScope(context);
 		IScopeContext[] scopes;
 		if (project.isPresent()) {
-			scopes = new IScopeContext[] { project.get(), InstanceScope.INSTANCE };
+			scopes = new IScopeContext[] { project.get(), InstanceScope.INSTANCE, DefaultScope.INSTANCE };
 		} else {
-			scopes = new IScopeContext[] { InstanceScope.INSTANCE };
+			scopes = new IScopeContext[] { InstanceScope.INSTANCE, DefaultScope.INSTANCE };
 		}
-		return new ClangdPreferredOptions(preferences, qualifier, scopes, metadata);
+		return new ClangdPreferredOptions(qualifier, scopes, metadata);
 	}
 
 	@Override

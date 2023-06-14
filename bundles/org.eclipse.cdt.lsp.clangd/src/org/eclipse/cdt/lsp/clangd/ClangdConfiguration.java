@@ -29,6 +29,13 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 public interface ClangdConfiguration {
 
 	/**
+	 * Returns the clangd defaults
+	 *
+	 * @return clangd defaults
+	 */
+	ClangdOptions defaults();
+
+	/**
 	 * Returns the clangd options for the given context like {@link IResource} or {@link URI}, must not return <code>null</code>
 	 * @param context to be adapter to the proper scope
 	 *
