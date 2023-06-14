@@ -16,6 +16,7 @@ package org.eclipse.cdt.lsp.internal.clangd;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
@@ -41,44 +42,54 @@ final class ClangdPreferredOptions implements ClangdOptions {
 
 	@Override
 	public boolean preferClangd() {
-		PreferenceMetadata<Boolean> pref = metadata.preferClangd();
-		return service.getBoolean(qualifier, pref.identifer(), pref.defaultValue(), scopes);
+		return booleanValue(metadata.preferClangd());
 	}
 
 	@Override
 	public String clangdPath() {
-		PreferenceMetadata<String> pref = metadata.clangdPath();
-		return service.getString(qualifier, pref.identifer(), pref.defaultValue(), scopes);
+		return stringValue(metadata.clangdPath());
 	}
 
 	@Override
 	public boolean useTidy() {
-		PreferenceMetadata<Boolean> pref = metadata.useTidy();
-		return service.getBoolean(qualifier, pref.identifer(), pref.defaultValue(), scopes);
+		return booleanValue(metadata.useTidy());
 	}
 
 	@Override
 	public boolean useBackgroundIndex() {
-		PreferenceMetadata<Boolean> pref = metadata.useBackgroundIndex();
-		return service.getBoolean(qualifier, pref.identifer(), pref.defaultValue(), scopes);
+		return booleanValue(metadata.useBackgroundIndex());
 	}
 
 	@Override
 	public String completionStyle() {
-		PreferenceMetadata<String> pref = metadata.completionStyle();
-		return service.getString(qualifier, pref.identifer(), pref.defaultValue(), scopes);
+		return stringValue(metadata.completionStyle());
 	}
 
 	@Override
 	public boolean prettyPrint() {
-		PreferenceMetadata<Boolean> pref = metadata.prettyPrint();
-		return service.getBoolean(qualifier, pref.identifer(), pref.defaultValue(), scopes);
+		return booleanValue(metadata.prettyPrint());
 	}
 
 	@Override
 	public String queryDriver() {
-		PreferenceMetadata<String> pref = metadata.queryDriver();
-		return service.getString(qualifier, pref.identifer(), pref.defaultValue(), scopes);
+		return stringValue(metadata.queryDriver());
+	}
+
+	private String stringValue(PreferenceMetadata<?> meta) {
+		String actual = String.valueOf(meta.defaultValue());
+		for (int i = scopes.length - 1; i >= 0; i--) {
+			IScopeContext scope = scopes[i];
+			String previous = actual;
+			actual = service.getString(qualifier, meta.identifer(), previous, new IScopeContext[] { scope });
+		}
+		return actual;
+	}
+
+	private boolean booleanValue(PreferenceMetadata<Boolean> meta) {
+		return Optional.of(meta)//
+				.map(this::stringValue)//
+				.map(Boolean::valueOf)//
+				.orElseGet(meta::defaultValue);
 	}
 
 	@Override
