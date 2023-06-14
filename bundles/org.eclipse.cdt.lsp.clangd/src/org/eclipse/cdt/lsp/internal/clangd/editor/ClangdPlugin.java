@@ -16,10 +16,7 @@ package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import org.eclipse.cdt.lsp.internal.clangd.CProjectChangeMonitor;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -27,7 +24,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * The activator class controls the plug-in life cycle
  */
 public class ClangdPlugin extends AbstractUIPlugin {
-	private IPreferenceStore preferenceStore;
 	private IWorkspace workspace;
 	private CompileCommandsMonitor compileCommandsMonitor;
 	private CProjectChangeMonitor cProjectChangeMonitor;
@@ -70,13 +66,6 @@ public class ClangdPlugin extends AbstractUIPlugin {
 	 */
 	public static ClangdPlugin getDefault() {
 		return plugin;
-	}
-
-	public IPreferenceStore getLsPreferences() {
-		if (preferenceStore == null) {
-			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ClangdPlugin.PLUGIN_ID);
-		}
-		return preferenceStore;
 	}
 
 	public IWorkspace getWorkspace() {
