@@ -26,23 +26,22 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * The activator class controls the plug-in life cycle
  */
-public class LspEditorUiPlugin extends AbstractUIPlugin {
+public class ClangdPlugin extends AbstractUIPlugin {
 	private IPreferenceStore preferenceStore;
 	private IWorkspace workspace;
 	private CompileCommandsMonitor compileCommandsMonitor;
 	private CProjectChangeMonitor cProjectChangeMonitor;
 
 	// The plug-in ID
-	//FIXME: AF: change this value together with preferences rework
-	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.editor.ui"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.clangd"; //$NON-NLS-1$
 
 	// The shared instance
-	private static LspEditorUiPlugin plugin;
+	private static ClangdPlugin plugin;
 
 	/**
 	 * The constructor
 	 */
-	public LspEditorUiPlugin() {
+	public ClangdPlugin() {
 	}
 
 	@Override
@@ -69,13 +68,13 @@ public class LspEditorUiPlugin extends AbstractUIPlugin {
 	 *
 	 * @return the shared instance
 	 */
-	public static LspEditorUiPlugin getDefault() {
+	public static ClangdPlugin getDefault() {
 		return plugin;
 	}
 
 	public IPreferenceStore getLsPreferences() {
 		if (preferenceStore == null) {
-			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, LspEditorUiPlugin.PLUGIN_ID);
+			preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ClangdPlugin.PLUGIN_ID);
 		}
 		return preferenceStore;
 	}

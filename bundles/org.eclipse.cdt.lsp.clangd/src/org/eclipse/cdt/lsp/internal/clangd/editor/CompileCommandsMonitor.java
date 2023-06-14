@@ -96,7 +96,7 @@ public class CompileCommandsMonitor {
 						return true;
 					});
 				} catch (CoreException e) {
-					StatusManager.getManager().handle(e, LspEditorUiPlugin.PLUGIN_ID);
+					StatusManager.getManager().handle(e, ClangdPlugin.PLUGIN_ID);
 				}
 			}
 			return projects;

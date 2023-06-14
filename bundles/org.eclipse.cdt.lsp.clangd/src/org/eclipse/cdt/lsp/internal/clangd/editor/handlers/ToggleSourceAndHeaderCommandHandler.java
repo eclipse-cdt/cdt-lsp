@@ -16,7 +16,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiPlugin;
+import org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin;
 import org.eclipse.cdt.lsp.services.ClangdLanguageServer;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -88,7 +88,7 @@ public class ToggleSourceAndHeaderCommandHandler extends AbstractHandler impleme
 			try {
 				IDE.openEditor(page, fileUri, LspPlugin.LSP_C_EDITOR_ID, true);
 			} catch (PartInitException e) {
-				StatusManager.getManager().handle(e, LspEditorUiPlugin.PLUGIN_ID);
+				StatusManager.getManager().handle(e, ClangdPlugin.PLUGIN_ID);
 			}
 		});
 	}
