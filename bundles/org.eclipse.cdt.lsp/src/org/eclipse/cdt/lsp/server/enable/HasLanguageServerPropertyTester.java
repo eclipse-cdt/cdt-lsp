@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
-import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.UriResource;
@@ -34,12 +33,10 @@ import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
 
 public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
-	private final ServiceCaller<InitialUri> initial;
 	private final ServiceCaller<IWorkspace> workspace;
 
 	public HasLanguageServerPropertyTester() {
 		this.cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
-		this.initial = new ServiceCaller<>(getClass(), InitialUri.class);
 		this.workspace = new ServiceCaller<>(getClass(), IWorkspace.class);
 	}
 
@@ -52,11 +49,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				if (!validContentType(uri))
 					return false;
 				// when getProject is empty, it's an external file: Check if the file is already opened, if not check the active editor:
-				var isEnabled = enabledFor(uri);
-				if (isEnabled) {
-					initial.call(iu -> iu.register(uri));
-				}
-				return isEnabled;
+				return enabledFor(uri);
 			} else if (receiver instanceof ITranslationUnit) {
 				// called to enable the LS based CSymbolsContentProvider:
 				return Optional.of((ITranslationUnit) receiver).map(ITranslationUnit::getCProject)

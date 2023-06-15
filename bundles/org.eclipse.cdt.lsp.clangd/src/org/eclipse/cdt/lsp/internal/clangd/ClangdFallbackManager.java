@@ -19,7 +19,6 @@ import java.util.Optional;
 import org.eclipse.cdt.core.build.ICBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
 import org.eclipse.cdt.core.parser.IScannerInfo;
-import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.UriResource;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
 import org.eclipse.core.resources.IResource;
@@ -60,14 +59,12 @@ public final class ClangdFallbackManager implements ClangdFallbackFlags {
 	@Reference
 	private ICBuildConfigurationManager build;
 	@Reference
-	private InitialUri uri;
-	@Reference
 	private IWorkspace workspace;
 
 	@Override
 	public FallbackFlags getFallbackFlagsFromInitialUri(URI root) {
 		if (isWindows) {
-			return uri.find(root)//
+			return Optional.ofNullable(root)//
 					.flatMap(new UriResource(workspace))//
 					.flatMap(this::flags)//
 					.orElse(null);
