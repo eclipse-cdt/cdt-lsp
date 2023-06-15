@@ -30,16 +30,6 @@ public final class UriResource implements Function<URI, Optional<IResource>> {
 
 	@Override
 	public Optional<IResource> apply(URI uri) {
-		return forContainer(uri).or(() -> forFile(uri));
-	}
-
-	private Optional<IResource> forContainer(URI uri) {
-		return Arrays.stream(workspace.getRoot().findContainersForLocationURI(uri))//
-				.map(IResource.class::cast)//
-				.findFirst();
-	}
-
-	private Optional<IResource> forFile(URI uri) {
 		return Arrays.stream(workspace.getRoot().findFilesForLocationURI(uri))//
 				.map(IResource.class::cast)//
 				.findFirst();

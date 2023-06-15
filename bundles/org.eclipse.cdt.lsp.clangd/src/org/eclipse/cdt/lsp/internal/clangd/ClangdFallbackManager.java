@@ -68,9 +68,9 @@ public final class ClangdFallbackManager implements ClangdFallbackFlags {
 	public FallbackFlags getFallbackFlagsFromInitialUri(URI root) {
 		if (isWindows) {
 			return uri.find(root)//
-					.flatMap(new UriResource(workspace))//
-					.flatMap(this::flags)//
-					.orElse(null);
+					.flatMap(initUri -> new UriResource(workspace).apply(initUri))//
+					.map(this::flags)//
+					.orElse(Optional.empty()).orElse(null);
 		}
 		return null;
 	}
