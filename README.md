@@ -4,7 +4,7 @@
 
 This plugin is based on the [LSP4E](https://github.com/eclipse/lsp4e) and [TM4E](https://github.com/eclipse/tm4e) Eclipse projects. The editor is based on the `ExtensionBasedTextEditor` in Eclipse.
 
-The `org.eclipse.cdt.lsp` is the core plugin. C/C++ IDE Developers can use the `serverProvider` extension point to define a C/C++ language server. If there is no extension defined, the LLVM [clangd](https://clangd.llvm.org/) language server will be used and searched on the PATH environment variable. Clangd searches for a `compile_commands.json` file in the source file folder and its parents. It's needed to determine the compile informations. In the default clangd configuration the PATH will be searched for a `gcc` compiler to determine the default compiler include paths.
+The `org.eclipse.cdt.lsp` is the core plugin. C/C++ IDE Developers can use the `serverProvider` extension point to define a C/C++ language server. If there is no extension defined, the LLVM [clangd](https://clangd.llvm.org/) language server will be used and searched on the PATH environment variable. Clangd searches for a `compile_commands.json` file in the source file folder and its parents. It's needed to determine the compile informations. In the default clangd configuration, the PATH will be searched for a `gcc` compiler to determine the default compiler include paths.
 
 The editor is basically the `ExtensionBasedTextEditor`. The language grammar comes from [TM4E](https://github.com/eclipse/tm4e). 
 
@@ -31,16 +31,16 @@ Not supported (yet):
 
 ### Activating LSP based C/C++ Editor
 
-The `org.eclipse.cdt.lsp` plugin provides an activation for the LSP based C/C++ Editor on project and workspace level. 
-The language server path and the arguments can be changed in the workspace preferences as well:
+The `org.eclipse.cdt.lsp.clangd` plugin provides an activation UI for the LSP based C/C++ Editor on project and workspace level. 
+The clangd language server path and the arguments can be changed in the workspace preferences as well:
 
 ![image](images/preferences.png "preferences.png")
 
-Newly created C/C++ projects will inherit the *Prefer C/C++ Editor (LSP)* setting from the workspace preferences. This can be changed in the project properties:
+Newly created C/C++ projects will use the settings from the workspace preferences. This can be changed in the project properties:
 
-![image](images/preferences-prefer-lsp.png "preferences-prefer-lsp.png")
+![image](images/properties.png "properties.png")
 
-Different C/C++ projects using the old and new editor as default can be mixed in one workspace. The linked include files will be opened with the same editor.
+Different C/C++ projects using the old and new C/C++ editor can be mixed in one workspace. The linked include files will be opened with the same editor.
 
 To use these plugins import them in your CDT sources.
 
