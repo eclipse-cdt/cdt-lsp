@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.eclipse.cdt.lsp.UriResource;
+import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -25,10 +25,10 @@ import org.eclipse.core.runtime.Adapters;
 
 public final class ResolveProject implements Function<Object, Optional<IProject>> {
 
-	private final UriResource resolve;
+	private final ExistingResource resolve;
 
 	public ResolveProject(IWorkspace workspace) {
-		this.resolve = new UriResource(workspace);
+		this.resolve = new ExistingResource(workspace);
 	}
 
 	@Override

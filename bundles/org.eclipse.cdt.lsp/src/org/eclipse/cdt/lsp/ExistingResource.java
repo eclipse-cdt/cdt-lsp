@@ -20,11 +20,11 @@ import java.util.function.Function;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 
-public final class UriResource implements Function<URI, Optional<IResource>> {
+public final class ExistingResource implements Function<URI, Optional<IResource>> {
 
 	private final IWorkspace workspace;
 
-	public UriResource(IWorkspace workspace) {
+	public ExistingResource(IWorkspace workspace) {
 		this.workspace = Objects.requireNonNull(workspace);
 	}
 
@@ -36,12 +36,14 @@ public final class UriResource implements Function<URI, Optional<IResource>> {
 	private Optional<IResource> forContainer(URI uri) {
 		return Arrays.stream(workspace.getRoot().findContainersForLocationURI(uri))//
 				.map(IResource.class::cast)//
+				.filter(c -> c.exists())//
 				.findFirst();
 	}
 
 	private Optional<IResource> forFile(URI uri) {
 		return Arrays.stream(workspace.getRoot().findFilesForLocationURI(uri))//
 				.map(IResource.class::cast)//
+				.filter(c -> c.exists())//
 				.findFirst();
 	}
 }
