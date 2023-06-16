@@ -20,7 +20,7 @@ import org.eclipse.cdt.core.build.ICBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
 import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.lsp.InitialUri;
-import org.eclipse.cdt.lsp.UriResource;
+import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -68,7 +68,7 @@ public final class ClangdFallbackManager implements ClangdFallbackFlags {
 	public FallbackFlags getFallbackFlagsFromInitialUri(URI root) {
 		if (isWindows) {
 			return uri.find(root)//
-					.flatMap(new UriResource(workspace))//
+					.flatMap(new ExistingResource(workspace))//
 					.flatMap(this::flags)//
 					.orElse(null);
 		}

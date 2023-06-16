@@ -23,7 +23,7 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
-import org.eclipse.cdt.lsp.UriResource;
+import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IResource;
@@ -80,7 +80,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 
 	private boolean enabledFor(URI uri) {
 		boolean[] provider = new boolean[1];
-		workspace.call(w -> provider[0] = new UriResource(w).apply(uri)//
+		workspace.call(w -> provider[0] = new ExistingResource(w).apply(uri)//
 				.map(IResource::getProject)//
 				//FIXME: AF: consider changing signature here from IProject to Object
 				.map(cLanguageServerProvider::isEnabledFor)//
