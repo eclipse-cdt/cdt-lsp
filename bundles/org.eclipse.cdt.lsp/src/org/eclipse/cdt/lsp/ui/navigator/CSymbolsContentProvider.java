@@ -13,6 +13,8 @@
 
 package org.eclipse.cdt.lsp.ui.navigator;
 
+import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,26 +27,80 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider;
+import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.IFileBuffer;
+import org.eclipse.core.filebuffers.IFileBufferListener;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.lsp4e.LSPEclipseUtils;
 import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.lsp4e.LanguageServers;
 import org.eclipse.lsp4e.outline.SymbolsModel;
-import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
+import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 public class CSymbolsContentProvider extends CNavigatorContentProvider {
-	protected final SymbolsModel symbolsModel = new SymbolsModel();
+
+	class SymbolsContainer {
+		public final IFile file;
+		public final SymbolsModel symbolsModel;
+		public boolean isDirty = true;
+
+		SymbolsContainer(IFile file) {
+			this.file = file;
+			this.symbolsModel = new SymbolsModel();
+			this.symbolsModel.setUri(file.getLocationURI());
+		}
+	}
+
 	private volatile CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> symbols;
+	private HashMap<URI, SymbolsContainer> cachedSymbols = new HashMap<>();
+
+	private final IFileBufferListener fileBufferListener = new FileBufferListenerAdapter() {
+		@Override
+		public void dirtyStateChanged(IFileBuffer buffer, boolean isDirty) {
+			try {
+				if (isDirty && isCElement(buffer.getContentType())) {
+					var uri = LSPEclipseUtils.toUri(buffer);
+					if (uri != null) {
+						var cachedSymbol = cachedSymbols.get(uri);
+						if (cachedSymbol != null) {
+							cachedSymbol.isDirty = true;
+						}
+					}
+				}
+			} catch (CoreException e) {
+				Platform.getLog(getClass()).error(e.getMessage(), e);
+			}
+
+		}
+
+		private boolean isCElement(IContentType contentType) {
+			if (contentType == null) {
+				return false;
+			}
+			return LspUtils.isCContentType(contentType.getId());
+		}
+	};
+
+	public CSymbolsContentProvider() {
+		FileBuffers.getTextFileBufferManager().addFileBufferListener(fileBufferListener);
+	}
+
+	@Override
+	public void dispose() {
+		FileBuffers.getTextFileBufferManager().removeFileBufferListener(fileBufferListener);
+		super.dispose();
+	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -62,8 +118,15 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof DocumentSymbolWithFile) {
-			return symbolsModel.getChildren(parentElement);
+		if (parentElement instanceof DocumentSymbolWithURI) {
+			var file = LspUtils.getFile(((DocumentSymbolWithURI) parentElement).uri);
+			if (file.isPresent()) {
+				refreshTreeContentFromLS(getSymbolsContainer(file.get()));
+				var symbolsContainer = cachedSymbols.get(file.get().getLocationURI());
+				if (symbolsContainer != null) {
+					return symbolsContainer.symbolsModel.getChildren(parentElement);
+				}
+			}
 		} else if (parentElement instanceof ITranslationUnit) {
 			try {
 				return getTranslationUnitChildren((ITranslationUnit) parentElement);
@@ -76,27 +139,39 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	@Override
 	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) throws CModelException {
 		if (unit.getResource() instanceof IFile) {
-			refreshTreeContentFromLS((IFile) unit.getResource());
-			return symbolsModel.getElements();
+			var file = (IFile) unit.getResource();
+			refreshTreeContentFromLS(getSymbolsContainer(file));
+			var symbolsContainer = cachedSymbols.get(file.getLocationURI());
+			if (symbolsContainer != null)
+				return symbolsContainer.symbolsModel.getElements();
 		}
 		return NO_CHILDREN;
 	}
 
-	protected void refreshTreeContentFromLS(IFile file) {
-		if (symbols != null) {
-			symbols.cancel(true);
+	protected SymbolsContainer getSymbolsContainer(IFile file) {
+		SymbolsContainer symbolsContainer = cachedSymbols.get(file.getLocationURI());
+		if (symbolsContainer == null) {
+			symbolsContainer = new SymbolsContainer(file);
+			cachedSymbols.put(file.getLocationURI(), symbolsContainer);
 		}
+		return symbolsContainer;
+	}
 
+	protected void refreshTreeContentFromLS(SymbolsContainer symbolsContainer) {
+		if (symbolsContainer == null || !symbolsContainer.isDirty) {
+			return;
+		}
 		boolean temporaryLoadedDocument = false;
+
 		try {
-			IDocument document = LSPEclipseUtils.getExistingDocument(file);
+			IDocument document = LSPEclipseUtils.getExistingDocument(symbolsContainer.file);
 			if (document == null) {
-				document = LSPEclipseUtils.getDocument(file);
+				document = LSPEclipseUtils.getDocument(symbolsContainer.file);
 				temporaryLoadedDocument = true;
 			}
 			if (document != null) {
 				final var params = new DocumentSymbolParams(
-						LSPEclipseUtils.toTextDocumentIdentifier(file.getLocationURI()));
+						LSPEclipseUtils.toTextDocumentIdentifier(symbolsContainer.file.getLocationURI()));
 				CompletableFuture<Optional<LanguageServerWrapper>> languageServer = LanguageServers
 						.forDocument(document)
 						.withFilter(
@@ -115,21 +190,22 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 					}
 				}
 				symbols.thenAcceptAsync(response -> {
-					symbolsModel.setUri(file.getLocationURI());
-					symbolsModel.update(response);
+					symbolsContainer.symbolsModel.update(response);
+					symbolsContainer.isDirty = false;
 				}).join();
 			} else {
 				temporaryLoadedDocument = false;
-				symbolsModel.setUri(file.getLocationURI());
-				symbolsModel.update(null);
+				symbolsContainer.symbolsModel.update(null);
 			}
 		} catch (Exception e) {
 			Platform.getLog(getClass()).error(e.getMessage(), e);
 		} finally {
 			if (temporaryLoadedDocument) {
+				//Note: the LS will be terminated via the shutdown command by LSP4E, when all documents have been disconnected.
+				//This is the case when no file is opened in the LSP based C/C++ editor.
 				try {
-					FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE,
-							new NullProgressMonitor());
+					FileBuffers.getTextFileBufferManager().disconnect(symbolsContainer.file.getFullPath(),
+							LocationKind.IFILE, new NullProgressMonitor());
 				} catch (CoreException e) {
 					Platform.getLog(getClass()).error(e.getMessage(), e);
 				}

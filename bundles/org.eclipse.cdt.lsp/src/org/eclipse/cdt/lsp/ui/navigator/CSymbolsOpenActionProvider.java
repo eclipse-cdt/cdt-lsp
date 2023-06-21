@@ -22,7 +22,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.lsp4e.LSPEclipseUtils;
-import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
+import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
@@ -42,7 +42,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 
 	private class OpenCFileAction extends OpenFileAction {
 		private IWorkbenchPage page;
-		private DocumentSymbolWithFile fOpenElement;
+		private DocumentSymbolWithURI fOpenElement;
 
 		public OpenCFileAction(IWorkbenchPage page) {
 			super(page);
@@ -67,8 +67,8 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 			fOpenElement = null;
 			if (selection.size() == 1) {
 				Object element = selection.getFirstElement();
-				if (element instanceof DocumentSymbolWithFile) {
-					fOpenElement = (DocumentSymbolWithFile) element;
+				if (element instanceof DocumentSymbolWithURI) {
+					fOpenElement = (DocumentSymbolWithURI) element;
 				}
 			}
 			return fOpenElement != null || super.updateSelection(selection);
@@ -78,7 +78,7 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 			return page;
 		}
 
-		private void revealInEditor(IEditorPart part, DocumentSymbolWithFile element) {
+		private void revealInEditor(IEditorPart part, DocumentSymbolWithURI element) {
 			if (element == null) {
 				return;
 			}
@@ -157,8 +157,8 @@ public class CSymbolsOpenActionProvider extends CommonActionProvider {
 			return;
 		}
 		IFile file;
-		if (selection.getFirstElement() instanceof DocumentSymbolWithFile) {
-			file = LSPEclipseUtils.getFileHandle(((DocumentSymbolWithFile) selection.getFirstElement()).uri);
+		if (selection.getFirstElement() instanceof DocumentSymbolWithURI) {
+			file = LSPEclipseUtils.getFileHandle(((DocumentSymbolWithURI) selection.getFirstElement()).uri);
 			if (file == null) {
 				return;
 			}

@@ -20,17 +20,17 @@ import java.util.Optional;
 
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
+import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.LspUtils;
-import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
-import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithFile;
+import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
 
 public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
@@ -61,7 +61,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				// called to enable the LS based CSymbolsContentProvider:
 				return Optional.of((ITranslationUnit) receiver).map(ITranslationUnit::getCProject)
 						.map(ICProject::getProject).map(cLanguageServerProvider::isEnabledFor).orElse(Boolean.FALSE);
-			} else if (receiver instanceof DocumentSymbolWithFile) {
+			} else if (receiver instanceof DocumentSymbolWithURI) {
 				// called to enable the LS based CSymbolsContentProvider:
 				return true;
 			}
