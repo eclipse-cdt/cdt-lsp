@@ -35,4 +35,4 @@ Bundle-Activator: org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdMetadataDefaults.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaultsImpl.xml
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults.xml

@@ -2,9 +2,9 @@ package org.eclipse.cdt.lsp.examples.preferences;
 
 import java.util.List;
 
-import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaultsImpl;
+import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
 
-public class MyClangdOptionsDefaultsImpl extends ClangdOptionsDefaultsImpl {
+public class MyClangdOptionsDefaults extends ClangdOptionsDefaults {
 	
 	@Override
 	public boolean preferClangd() {
@@ -12,7 +12,7 @@ public class MyClangdOptionsDefaultsImpl extends ClangdOptionsDefaultsImpl {
 	}
 	
 	@Override
-	public List<String> customOptions() {
+	public List<String> additionalOptions() {
 		return List.of("--header-insertion=never", "--default-config");
 	}
 
