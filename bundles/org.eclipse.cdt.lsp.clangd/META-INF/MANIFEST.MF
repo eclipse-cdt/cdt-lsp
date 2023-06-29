@@ -33,4 +33,6 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
  org.eclipse.ui;bundle-version="0.0.0"
 Bundle-Activator: org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdConfigurationAccess.xml,
- OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager.xml
+ OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdMetadataDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaultsImpl.xml

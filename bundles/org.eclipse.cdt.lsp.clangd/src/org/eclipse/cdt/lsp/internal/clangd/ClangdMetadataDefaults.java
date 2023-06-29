@@ -13,21 +13,27 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.internal.clangd;
 
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
-import org.eclipse.cdt.utils.PathUtil;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
+import org.osgi.service.component.annotations.Reference;
 
-final class ClangdMetadataDefaults implements ClangdMetadata {
+public final class ClangdMetadataDefaults implements ClangdMetadata {
+
+	@Reference
+	private ClangdOptionsDefaults defaults;
+
+	public ClangdMetadataDefaults() {
+	}
 
 	@Override
 	public PreferenceMetadata<Boolean> preferClangd() {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"prefer_clangd", //$NON-NLS-1$
-				false, //
+				defaults.preferClangd(), //
 				LspEditorUiMessages.LspEditorPreferencePage_preferLspEditor,
 				LspEditorUiMessages.LspEditorPreferencePage_preferLspEditor_description);
 	}
@@ -36,10 +42,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<String> clangdPath() {
 		return new PreferenceMetadata<>(String.class, //
 				"clangd_path", //$NON-NLS-1$
-				Optional.ofNullable(PathUtil.findProgramLocation("clangd", null)) //$NON-NLS-1$
-						.map(IPath::toOSString)//
-						.orElse("clangd"), //  //$NON-NLS-1$
-				"Path", //
+				defaults.clangdPath(), "Path", //
 				"Path to clangd executable");
 	}
 
@@ -47,7 +50,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<Boolean> useTidy() {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"use_tidy", //$NON-NLS-1$
-				true, //
+				defaults.useTidy(), //
 				"Enable clang-tidy diagnostics", //
 				"Enable clang-tidy diagnostics");
 	}
@@ -56,7 +59,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<Boolean> useBackgroundIndex() {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"background_index", //$NON-NLS-1$
-				true, //
+				defaults.useBackgroundIndex(), //
 				"Index project code in the background and persist index on disk", //
 				"Index project code in the background and persist index on disk.");
 	}
@@ -65,7 +68,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<String> completionStyle() {
 		return new PreferenceMetadata<>(String.class, //
 				"completion_style", //$NON-NLS-1$
-				"detailed", //
+				defaults.completionStyle(), //
 				"Completion", //
 				"Granularity of code completion suggestions");
 	}
@@ -74,7 +77,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<Boolean> prettyPrint() {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"pretty_print", //$NON-NLS-1$
-				true, //
+				defaults.prettyPrint(), //
 				"Pretty-print JSON output", //
 				"Pretty-print JSON output");
 	}
@@ -83,11 +86,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<String> queryDriver() {
 		return new PreferenceMetadata<>(String.class, //
 				"query_driver", //$NON-NLS-1$
-				Optional.ofNullable(PathUtil.findProgramLocation("gcc", null)) //$NON-NLS-1$
-						.map(p -> p.removeLastSegments(1).append(IPath.SEPARATOR + "*"))// //$NON-NLS-1$
-						.map(IPath::toString)//
-						.orElse(""), //  //$NON-NLS-1$
-				"Drivers", //
+				defaults.queryDriver(), "Drivers", //
 				"Comma separated list of globs for white-listing gcc-compatible drivers that are safe to execute");
 	}
 
@@ -95,7 +94,7 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<String> additionalOptions() {
 		return new PreferenceMetadata<>(String.class, //
 				"additional_options", //$NON-NLS-1$
-				"", //  //$NON-NLS-1$
+				defaults.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())), //$NON-NLS-1$
 				"Additional", //
 				"Newline separated list of additional options for clangd");
 	}

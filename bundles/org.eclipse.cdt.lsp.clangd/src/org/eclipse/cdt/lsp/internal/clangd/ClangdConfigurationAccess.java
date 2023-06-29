@@ -33,16 +33,16 @@ import org.osgi.service.component.annotations.Reference;
 
 @Component
 public final class ClangdConfigurationAccess implements ClangdConfiguration {
-
-	private final ClangdMetadata metadata;
 	private final String qualifier;
+
+	@Reference
+	private ClangdMetadata metadata;
 
 	@Reference
 	private IWorkspace workspace;
 
 	public ClangdConfigurationAccess() {
 		this.qualifier = new ClangdQualifier().get();
-		this.metadata = new ClangdMetadataDefaults();
 	}
 
 	@Override
