@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
@@ -50,6 +51,7 @@ public final class ClangdConfigurationArea {
 	private final Button index;
 	private final Button pretty;
 	private final Text driver;
+	private final Text customOptions;
 
 	private final Map<PreferenceMetadata<Boolean>, Button> buttons;
 	private final Map<PreferenceMetadata<String>, Text> texts;
@@ -66,9 +68,10 @@ public final class ClangdConfigurationArea {
 		this.path = createFileSelector(metadata.clangdPath(), composite, this::selectClangdExecutable);
 		this.tidy = createCheckbox(metadata.useTidy(), composite);
 		this.index = createCheckbox(metadata.useBackgroundIndex(), composite);
-		this.completion = createText(metadata.completionStyle(), composite);
+		this.completion = createText(metadata.completionStyle(), composite, false);
 		this.pretty = createCheckbox(metadata.prettyPrint(), composite);
-		this.driver = createText(metadata.queryDriver(), composite);
+		this.driver = createText(metadata.queryDriver(), composite, false);
+		this.customOptions = createText(metadata.customOptions(), composite, true);
 	}
 
 	private Button createCheckbox(PreferenceMetadata<Boolean> meta, Composite composite) {
@@ -99,14 +102,15 @@ public final class ClangdConfigurationArea {
 		return text;
 	}
 
-	private Text createText(PreferenceMetadata<String> meta, Composite composite) {
+	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine) {
 		Label label = new Label(composite, SWT.NONE);
 		label.setText(meta.name());
 		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
-		Text text = new Text(composite, SWT.BORDER);
+		Text text = new Text(composite, multiLine ? SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL : SWT.BORDER);
 		text.setToolTipText(meta.description());
 		text.setData(meta);
-		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1).create());
+		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1)
+				.hint(SWT.DEFAULT, multiLine ? 3 * text.getLineHeight() : SWT.DEFAULT).create());
 		texts.put(meta, text);
 		text.addKeyListener(KeyListener.keyReleasedAdapter(this::changed));
 		return text;
@@ -150,6 +154,7 @@ public final class ClangdConfigurationArea {
 		completion.setText(options.completionStyle());
 		pretty.setSelection(options.prettyPrint());
 		driver.setText(options.queryDriver());
+		customOptions.setText(options.customOptions().stream().collect(Collectors.joining(System.lineSeparator())));
 	}
 
 	void store(IEclipsePreferences prefs) {

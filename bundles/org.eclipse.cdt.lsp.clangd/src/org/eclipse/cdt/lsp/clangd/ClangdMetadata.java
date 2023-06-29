@@ -86,4 +86,13 @@ public interface ClangdMetadata {
 	 */
 	PreferenceMetadata<String> queryDriver();
 
+	/**
+	 * Returns the metadata for the custom options, must not return <code>null</code>.
+	 *
+	 * @return the metadata for the custom options
+	 *
+	 * @see ClangdOptions#customOptions
+	 */
+	PreferenceMetadata<String> customOptions();
+
 }

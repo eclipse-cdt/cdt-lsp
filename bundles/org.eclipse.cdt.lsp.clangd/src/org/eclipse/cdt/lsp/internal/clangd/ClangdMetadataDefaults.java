@@ -91,4 +91,13 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 				"Comma separated list of globs for white-listing gcc-compatible drivers that are safe to execute");
 	}
 
+	@Override
+	public PreferenceMetadata<String> customOptions() {
+		return new PreferenceMetadata<>(String.class, //
+				"custom_options", //$NON-NLS-1$
+				"", //  //$NON-NLS-1$
+				"Options", //
+				"New line separated list of further options for clangd");
+	}
+
 }
