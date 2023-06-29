@@ -16,7 +16,7 @@ package org.eclipse.cdt.lsp.internal.clangd;
 import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
-import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.osgi.service.component.annotations.Reference;
@@ -24,7 +24,7 @@ import org.osgi.service.component.annotations.Reference;
 public final class ClangdMetadataDefaults implements ClangdMetadata {
 
 	@Reference
-	private ClangdOptionsDefaults defaults;
+	private ClangdOptions defaults;
 
 	public ClangdMetadataDefaults() {
 	}
