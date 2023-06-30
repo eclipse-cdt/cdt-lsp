@@ -73,8 +73,8 @@ final class ClangdPreferredOptions implements ClangdOptions {
 	}
 
 	@Override
-	public List<String> customOptions() {
-		return Arrays.asList(stringValue(metadata.customOptions()).split("\\R")); //$NON-NLS-1$
+	public List<String> additionalOptions() {
+		return Arrays.asList(stringValue(metadata.additionalOptions()).split("\\R")); //$NON-NLS-1$
 	}
 
 	private String stringValue(PreferenceMetadata<?> meta) {
@@ -110,7 +110,7 @@ final class ClangdPreferredOptions implements ClangdOptions {
 		}
 		list.add(NLS.bind("--query-driver={0}", queryDriver())); //$NON-NLS-1$
 
-		list.addAll(customOptions());
+		list.addAll(additionalOptions());
 		return list;
 	}
 

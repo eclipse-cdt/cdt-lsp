@@ -92,12 +92,12 @@ final class ClangdMetadataDefaults implements ClangdMetadata {
 	}
 
 	@Override
-	public PreferenceMetadata<String> customOptions() {
+	public PreferenceMetadata<String> additionalOptions() {
 		return new PreferenceMetadata<>(String.class, //
-				"custom_options", //$NON-NLS-1$
+				"additional_options", //$NON-NLS-1$
 				"", //  //$NON-NLS-1$
-				"Options", //
-				"New line separated list of further options for clangd");
+				"Additional", //
+				"Newline separated list of additional options for clangd");
 	}
 
 }

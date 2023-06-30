@@ -51,7 +51,7 @@ public final class ClangdConfigurationArea {
 	private final Button index;
 	private final Button pretty;
 	private final Text driver;
-	private final Text customOptions;
+	private final Text additional;
 
 	private final Map<PreferenceMetadata<Boolean>, Button> buttons;
 	private final Map<PreferenceMetadata<String>, Text> texts;
@@ -71,7 +71,7 @@ public final class ClangdConfigurationArea {
 		this.completion = createText(metadata.completionStyle(), composite, false);
 		this.pretty = createCheckbox(metadata.prettyPrint(), composite);
 		this.driver = createText(metadata.queryDriver(), composite, false);
-		this.customOptions = createText(metadata.customOptions(), composite, true);
+		this.additional = createText(metadata.additionalOptions(), composite, true);
 	}
 
 	private Button createCheckbox(PreferenceMetadata<Boolean> meta, Composite composite) {
@@ -154,7 +154,7 @@ public final class ClangdConfigurationArea {
 		completion.setText(options.completionStyle());
 		pretty.setSelection(options.prettyPrint());
 		driver.setText(options.queryDriver());
-		customOptions.setText(options.customOptions().stream().collect(Collectors.joining(System.lineSeparator())));
+		additional.setText(options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
 	}
 
 	void store(IEclipsePreferences prefs) {
