@@ -73,6 +73,13 @@ public interface ClangdOptions {
 	String queryDriver();
 
 	/**
+	 * List of additional options for clangd.
+	 *
+	 * @return list of additional options
+	 */
+	List<String> additionalOptions();
+
+	/**
 	 * Provides list of commands suitable for {@link ProcessStreamConnectionProvider}
 	 *
 	 * @return list of commands
