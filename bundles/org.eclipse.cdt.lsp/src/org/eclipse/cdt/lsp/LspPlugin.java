@@ -36,6 +36,10 @@ public class LspPlugin extends AbstractUIPlugin {
 
 	private ICLanguageServerProvider cLanguageServerProvider;
 
+	// Disable warnings, see https://github.com/eclipse-cdt/cdt-lsp/issues/88 and https://github.com/eclipse-cdt/cdt-lsp/issues/101.
+	// We keep this reference to avoid the logger being garbage collected.
+	private static final Logger logger = Logger.getLogger("org.eclipse.tm4e.core.internal.oniguruma.OnigRegExp"); //$NON-NLS-1$
+
 	/**
 	 * The constructor
 	 */
@@ -49,7 +53,7 @@ public class LspPlugin extends AbstractUIPlugin {
 		cLanguageServerProvider = new CLanguageServerRegistry().createCLanguageServerProvider();
 
 		// Disable warnings, see https://github.com/eclipse-cdt/cdt-lsp/issues/88 and https://github.com/eclipse-cdt/cdt-lsp/issues/101
-		Logger.getLogger("org.eclipse.tm4e.core.internal.oniguruma.OnigRegExp").setLevel(Level.SEVERE); //$NON-NLS-1$
+		logger.setLevel(Level.SEVERE);
 	}
 
 	@Override
