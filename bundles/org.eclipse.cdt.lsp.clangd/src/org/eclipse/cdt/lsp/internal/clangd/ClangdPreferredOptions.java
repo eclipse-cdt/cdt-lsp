@@ -74,7 +74,11 @@ final class ClangdPreferredOptions implements ClangdOptions {
 
 	@Override
 	public List<String> additionalOptions() {
-		return Arrays.asList(stringValue(metadata.additionalOptions()).split("\\R")); //$NON-NLS-1$
+		var options = stringValue(metadata.additionalOptions());
+		if (options.isBlank()) {
+			return new ArrayList<>();
+		}
+		return Arrays.asList(options.split("\\s+")); //$NON-NLS-1$
 	}
 
 	private String stringValue(PreferenceMetadata<?> meta) {
