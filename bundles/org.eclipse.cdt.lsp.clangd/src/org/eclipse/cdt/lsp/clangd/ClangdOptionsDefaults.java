@@ -6,7 +6,9 @@ import java.util.Optional;
 
 import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.runtime.IPath;
+import org.osgi.service.component.annotations.Component;
 
+@Component
 public class ClangdOptionsDefaults implements ClangdOptions {
 
 	@Override
