@@ -37,6 +37,7 @@ public final class ClangdPreferenceInitializer extends AbstractPreferenceInitial
 		initializeString(metadata.completionStyle(), qualifier);
 		initializeBoolean(metadata.prettyPrint(), qualifier);
 		initializeString(metadata.queryDriver(), qualifier);
+		initializeString(metadata.additionalOptions(), qualifier);
 	}
 
 	private void initializeBoolean(PreferenceMetadata<Boolean> preference, String qualifier) {
