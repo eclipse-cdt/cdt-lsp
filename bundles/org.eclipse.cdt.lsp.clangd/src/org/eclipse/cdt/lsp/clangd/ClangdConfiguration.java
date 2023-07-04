@@ -14,10 +14,12 @@
 package org.eclipse.cdt.lsp.clangd;
 
 import java.net.URI;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.preferences.IPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
 
 /**
  * Provides access to the clangd options according to the required scope
@@ -63,5 +65,13 @@ public interface ClangdConfiguration {
 	 * @return preference qualifier
 	 */
 	String qualifier();
+
+	/**
+	 * Provides list of commands suitable for {@link ProcessStreamConnectionProvider} for the given context like {@link IResource} or {@link URI}, must not return <code>null</code>
+	 * @param context to be adapter to the proper scope
+	 *
+	 * @return list of commands
+	 */
+	List<String> commands(Object context);
 
 }

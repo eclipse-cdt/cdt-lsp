@@ -56,8 +56,4 @@ public class ClangdOptionsDefaults implements ClangdOptions {
 		return Collections.emptyList();
 	}
 
-	@Override
-	public List<String> toList() {
-		throw new RuntimeException("This method is not intended to be called by clients"); //$NON-NLS-1$
-	}
 }

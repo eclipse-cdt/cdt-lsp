@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.internal.clangd;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
@@ -79,6 +81,27 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 	@Override
 	public String qualifier() {
 		return qualifier;
+	}
+
+	@Override
+	public List<String> commands(Object context) {
+		ClangdOptions options = options(context);
+		List<String> list = new ArrayList<>();
+		list.add(options.clangdPath());
+		if (options.useTidy()) {
+			list.add("--clang-tidy"); //$NON-NLS-1$
+		}
+		if (options.useBackgroundIndex()) {
+			list.add("--background-index"); //$NON-NLS-1$
+		}
+		list.add(NLS.bind("--completion-style={0}", options.completionStyle())); //$NON-NLS-1$
+		if (options.prettyPrint()) {
+			list.add("--pretty"); //$NON-NLS-1$
+		}
+		list.add(NLS.bind("--query-driver={0}", options.queryDriver())); //$NON-NLS-1$
+
+		list.addAll(options.additionalOptions());
+		return list;
 	}
 
 	private Optional<ProjectScope> projectScope(Object context) {
