@@ -15,8 +15,6 @@ package org.eclipse.cdt.lsp.clangd;
 
 import java.util.List;
 
-import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
-
 /**
  * Options to configure clangd
  *
@@ -78,12 +76,5 @@ public interface ClangdOptions {
 	 * @return list of additional options
 	 */
 	List<String> additionalOptions();
-
-	/**
-	 * Provides list of commands suitable for {@link ProcessStreamConnectionProvider}
-	 *
-	 * @return list of commands
-	 */
-	List<String> toList();
 
 }

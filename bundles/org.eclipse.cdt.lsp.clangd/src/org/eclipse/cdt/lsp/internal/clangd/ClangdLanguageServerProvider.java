@@ -42,7 +42,7 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 	@Override
 	public List<String> getCommands(URI rootUri) {
 		List<String> result = new ArrayList<>();
-		configuration.call(c -> result.addAll(c.options(rootUri).toList()));
+		configuration.call(c -> result.addAll(c.commands(rootUri)));
 		return result;
 	}
 

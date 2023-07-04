@@ -25,11 +25,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component
 public final class ClangdMetadataDefaults implements ClangdMetadata {
 
-	@Reference
+	@Reference(target = "(isDefaultOptions=true)")
 	private ClangdOptions defaults;
-
-	public ClangdMetadataDefaults() {
-	}
 
 	@Override
 	public PreferenceMetadata<Boolean> preferClangd() {

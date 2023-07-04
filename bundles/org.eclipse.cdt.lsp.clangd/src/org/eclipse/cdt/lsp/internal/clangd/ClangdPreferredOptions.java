@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.internal.clangd;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +22,6 @@ import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
-import org.eclipse.osgi.util.NLS;
 
 final class ClangdPreferredOptions implements ClangdOptions {
 
@@ -96,26 +94,6 @@ final class ClangdPreferredOptions implements ClangdOptions {
 				.map(this::stringValue)//
 				.map(Boolean::valueOf)//
 				.orElseGet(meta::defaultValue);
-	}
-
-	@Override
-	public List<String> toList() {
-		List<String> list = new ArrayList<>();
-		list.add(clangdPath());
-		if (useTidy()) {
-			list.add("--clang-tidy"); //$NON-NLS-1$
-		}
-		if (useBackgroundIndex()) {
-			list.add("--background-index"); //$NON-NLS-1$
-		}
-		list.add(NLS.bind("--completion-style={0}", completionStyle())); //$NON-NLS-1$
-		if (prettyPrint()) {
-			list.add("--pretty"); //$NON-NLS-1$
-		}
-		list.add(NLS.bind("--query-driver={0}", queryDriver())); //$NON-NLS-1$
-
-		list.addAll(additionalOptions());
-		return list;
 	}
 
 }
