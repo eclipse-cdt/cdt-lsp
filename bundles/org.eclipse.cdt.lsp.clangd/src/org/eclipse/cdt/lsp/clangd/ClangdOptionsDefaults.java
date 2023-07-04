@@ -8,7 +8,7 @@ import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.runtime.IPath;
 import org.osgi.service.component.annotations.Component;
 
-@Component
+@Component(property = { "service.ranking:Integer=0", "isDefaultOptions:Boolean=true" })
 public class ClangdOptionsDefaults implements ClangdOptions {
 
 	@Override

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.cdt.lsp.examples.preferences.MyClangdOptionsDefaults">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.cdt.lsp.examples.preferences.MyClangdOptionsDefaults">
+   <property name="service.ranking" type="Integer" value="100"/>
+   <property name="isDefaultOptions" type="Boolean" value="true"/>
    <service>
       <provide interface="org.eclipse.cdt.lsp.clangd.ClangdOptions"/>
    </service>
-   <property name="service.ranking" type="Integer" value="100"/>
-   <property name="isDefaultOptions" type="Boolean" value="true"/>
    <implementation class="org.eclipse.cdt.lsp.examples.preferences.MyClangdOptionsDefaults"/>
 </scr:component>
