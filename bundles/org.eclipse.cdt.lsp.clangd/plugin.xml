@@ -24,7 +24,7 @@
       <page
             category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
             class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
-            id="org.eclipse.cdt.lsp.clangd.editor"
+            id="org.eclipse.cdt.lsp.clangd.editor.preference"
             name="Editor (LSP)">
       </page>
    </extension>
@@ -34,7 +34,7 @@
       <page
             category="org.eclipse.cdt.ui.newui.Page_head_general"
             class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
-            id="org.eclipse.cdt.lsp.clangd.editor"
+            id="org.eclipse.cdt.lsp.clangd.editor.property"
             name="Editor (LSP)">
          <filter
                name="projectNature"
@@ -133,8 +133,8 @@
       </activity>
       <activityPatternBinding
             activityId="org.eclipse.cdt.lsp.clangd.ClangdLanguageProvider"
-            isEqualityPattern="true"
-            pattern="org.eclipse.cdt.lsp.clangd/org.eclipse.cdt.lsp.clangd.editor">
+            isEqualityPattern="false"
+            pattern="org.eclipse.cdt.lsp.clangd/org.eclipse.cdt.lsp.clangd.editor.*">
       </activityPatternBinding>
    </extension>
 

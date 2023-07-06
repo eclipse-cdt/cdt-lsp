@@ -54,7 +54,7 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public final class ClangdConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
 
-	private final String id = "org.eclipse.cdt.lsp.clangd.editor"; //$NON-NLS-1$
+	private final String id = "org.eclipse.cdt.lsp.clangd.editor.preference"; //$NON-NLS-1$
 
 	private ClangdConfiguration configuration;
 	private IWorkspace workspace;
