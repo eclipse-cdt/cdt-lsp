@@ -34,10 +34,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -65,13 +67,25 @@ public final class ClangdConfigurationArea {
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		this.prefer = createCheckbox(metadata.preferClangd(), composite);
-		this.path = createFileSelector(metadata.clangdPath(), composite, this::selectClangdExecutable);
-		this.tidy = createCheckbox(metadata.useTidy(), composite);
-		this.index = createCheckbox(metadata.useBackgroundIndex(), composite);
-		this.completion = createText(metadata.completionStyle(), composite, false);
-		this.pretty = createCheckbox(metadata.prettyPrint(), composite);
-		this.driver = createText(metadata.queryDriver(), composite, false);
-		this.additional = createText(metadata.additionalOptions(), composite, true);
+		Group group = createGroup(composite, LspEditorUiMessages.LspEditorPreferencePage_clangd_options_label);
+		this.path = createFileSelector(metadata.clangdPath(), group, this::selectClangdExecutable);
+		this.tidy = createCheckbox(metadata.useTidy(), group);
+		this.index = createCheckbox(metadata.useBackgroundIndex(), group);
+		this.completion = createText(metadata.completionStyle(), group, false);
+		this.pretty = createCheckbox(metadata.prettyPrint(), group);
+		this.driver = createText(metadata.queryDriver(), group, false);
+		this.additional = createText(metadata.additionalOptions(), group, true);
+	}
+
+	private Group createGroup(Composite parent, String label) {
+		Group group = new Group(parent, SWT.NONE);
+		group.setFont(parent.getFont());
+		group.setText(label);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 3;
+		group.setLayout(layout);
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		return group;
 	}
 
 	private Button createCheckbox(PreferenceMetadata<Boolean> meta, Composite composite) {
@@ -96,7 +110,7 @@ public final class ClangdConfigurationArea {
 		text.addKeyListener(KeyListener.keyReleasedAdapter(this::changed));
 		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 2, 1).create());
 		Button button = new Button(composite, SWT.NONE);
-		button.setText("Browse...");
+		button.setText(LspEditorUiMessages.LspEditorPreferencePage_browse_button);
 		button.setLayoutData(new GridData());
 		button.addSelectionListener(SelectionListener.widgetSelectedAdapter(selector));
 		return text;
@@ -167,6 +181,15 @@ public final class ClangdConfigurationArea {
 		listeners.clear();
 		buttons.clear();
 		texts.clear();
+	}
+
+	public boolean optionsChanged(ClangdOptions options) {
+		return !options.clangdPath().equals(path.getText()) || options.useTidy() != tidy.getSelection()
+				|| options.useBackgroundIndex() != index.getSelection()
+				|| !options.completionStyle().equals(completion.getText())
+				|| options.prettyPrint() != pretty.getSelection() || !options.queryDriver().equals(driver.getText())
+				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
+						.equals(additional.getText());
 	}
 
 }

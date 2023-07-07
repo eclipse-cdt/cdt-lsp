@@ -16,6 +16,8 @@ package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import java.util.Optional;
 
+import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.internal.clangd.ResolveProjectScope;
@@ -27,11 +29,14 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
+import org.eclipse.lsp4e.LanguageServiceAccessor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -100,10 +105,10 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			specific = new Button(composite, SWT.CHECK);
 			specific.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, true, false));
-			specific.setText("Enable project-specific settings");
+			specific.setText(LspEditorUiMessages.LspEditorPreferencePage_enable_project_specific);
 			specific.setFont(JFaceResources.getDialogFont());
 			specific.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> specificSelected()));
-			link = createLink(composite, "Configure Workspace Settings...");
+			link = createLink(composite, LspEditorUiMessages.LspEditorPreferencePage_configure_ws_specific);
 			link.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
 			Label line = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			line.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
@@ -185,6 +190,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	@Override
 	public boolean performOk() {
+		var restartRequired = area.optionsChanged(configuration.options(getElement())) && isLspEditorOpen();
 		IEclipsePreferences prefs;
 		if (projectScope().isPresent()) {
 			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
@@ -210,7 +216,27 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 			Platform.getLog(getClass()).error("Unable to save preferences.", e); //$NON-NLS-1$
 			return false;
 		}
+		if (restartRequired) {
+			openRestartDialog();
+		}
 		return true;
+	}
+
+	private boolean isLspEditorOpen() {
+		return LspUtils.getEditors().stream().anyMatch(e -> LspPlugin.LSP_C_EDITOR_ID.equals(e.getId()));
+	}
+
+	private void openRestartDialog() {
+		final var dialog = new MessageDialog(getShell(),
+				LspEditorUiMessages.LspEditorPreferencePage_restart_dialog_title, null,
+				LspEditorUiMessages.LspEditorPreferencePage_restart_dialog_message, MessageDialog.INFORMATION,
+				new String[] { IDialogConstants.NO_LABEL, LspEditorUiMessages.LspEditorPreferencePage_restart_button },
+				1);
+		if (dialog.open() == 1) {
+			LanguageServiceAccessor.getStartedWrappers(null, null, true).stream()
+					.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)) //$NON-NLS-1$
+					.forEach(w -> w.stop());
+		}
 	}
 
 	private IScopeContext scope() {
