@@ -247,5 +247,11 @@
             isBefore="org.eclipse.lsp4e.operations.hover.LSPTextHover">
       </hoverProvider>
    </extension>
+   <extension
+         point="org.eclipse.cdt.ui.CFileImageProvider">
+      <imageDescriptor
+            class="org.eclipse.cdt.lsp.editor.LspEditorFileImageDescriptor">
+      </imageDescriptor>
+   </extension>
 </plugin>
 
