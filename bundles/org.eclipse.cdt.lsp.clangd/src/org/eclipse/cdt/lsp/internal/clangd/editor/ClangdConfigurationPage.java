@@ -140,13 +140,14 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	@Override
 	protected Control createContents(Composite parent) {
+		var isProjectScope = projectScope().isPresent();
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(3).create());
 		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		composite.setFont(parent.getFont());
-		control = createPreferenceContent(composite);
+		control = createPreferenceContent(composite, isProjectScope);
 		control.setLayoutData(new GridData(GridData.FILL_BOTH));
-		if (projectScope().isPresent()) {
+		if (isProjectScope) {
 			enableProjectSpecificSettings(hasProjectSpecificOptions());
 		}
 		refreshWidgets(configuration.options(getElement()));
@@ -154,11 +155,11 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 		return composite;
 	}
 
-	private Control createPreferenceContent(Composite parent) {
+	private Control createPreferenceContent(Composite parent, boolean isProjectScope) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
 		composite.setFont(parent.getFont());
-		area = new ClangdConfigurationArea(composite, configuration.metadata());
+		area = new ClangdConfigurationArea(composite, configuration.metadata(), isProjectScope);
 		return composite;
 	}
 
