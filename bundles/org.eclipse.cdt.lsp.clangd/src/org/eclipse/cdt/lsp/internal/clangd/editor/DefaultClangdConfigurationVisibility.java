@@ -10,12 +10,13 @@
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.clangd;
+package org.eclipse.cdt.lsp.internal.clangd.editor;
 
+import org.eclipse.cdt.lsp.clangd.ClangdConfigurationVisibility;
 import org.osgi.service.component.annotations.Component;
 
 @Component(property = { "service.ranking:Integer=0" })
-public class DefaultClangdConfigurationVisibility implements ClangdConfigurationVisibility {
+public final class DefaultClangdConfigurationVisibility implements ClangdConfigurationVisibility {
 
 	@Override
 	public boolean showPreferClangd(boolean isProjectScope) {
