@@ -49,25 +49,15 @@
 					<version>32.1.1-jre</version>
 					<type>jar</type>
 				</dependency>
-			</dependencies>
-			<dependency>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>2.0</version>
-				<type>jar</type>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>5.4.0</version>
-				<type>jar</type>
-			</dependency>				
+			</dependencies>			
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2023-09"/>
 			<unit id="net.bytebuddy.byte-buddy" version="0.0.0"/>
 			<unit id="net.bytebuddy.byte-buddy-agent" version="0.0.0"/>
 			<unit id="org.objenesis" version="0.0.0"/>
+			<unit id="org.mockito.mockito-core" version="0.0.0"/>
+			<unit id="org.yaml.snakeyaml" version="0.0.0"/>
 		</location>					
 	</locations>
 </target>
