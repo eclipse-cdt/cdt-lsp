@@ -94,11 +94,15 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 		if (options.useBackgroundIndex()) {
 			list.add("--background-index"); //$NON-NLS-1$
 		}
-		list.add(NLS.bind("--completion-style={0}", options.completionStyle())); //$NON-NLS-1$
+		if (!options.completionStyle().isBlank()) {
+			list.add(NLS.bind("--completion-style={0}", options.completionStyle())); //$NON-NLS-1$
+		}
 		if (options.prettyPrint()) {
 			list.add("--pretty"); //$NON-NLS-1$
 		}
-		list.add(NLS.bind("--query-driver={0}", options.queryDriver())); //$NON-NLS-1$
+		if (!options.queryDriver().isBlank()) {
+			list.add(NLS.bind("--query-driver={0}", options.queryDriver())); //$NON-NLS-1$
+		}
 
 		list.addAll(options.additionalOptions());
 		return list;
