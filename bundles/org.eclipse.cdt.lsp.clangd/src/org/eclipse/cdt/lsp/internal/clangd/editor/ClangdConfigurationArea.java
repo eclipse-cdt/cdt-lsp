@@ -201,9 +201,10 @@ public final class ClangdConfigurationArea {
 
 	private String selectFile(String path) {
 		FileDialog dialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.SAVE);
+		dialog.setText(LspEditorUiMessages.LspEditorPreferencePage_select_clangd_executable);
 		File file = new File(path);
 		if (file.isFile()) {
-			dialog.setFilterPath(file.toString());
+			dialog.setFilterPath(file.getParent());
 		}
 		return dialog.open();
 	}
