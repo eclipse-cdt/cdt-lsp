@@ -41,8 +41,8 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 	public PreferenceMetadata<String> clangdPath() {
 		return new PreferenceMetadata<>(String.class, //
 				"clangd_path", //$NON-NLS-1$
-				defaults.clangdPath(), "Path", //
-				"Path to clangd executable");
+				defaults.clangdPath(), LspEditorUiMessages.LspEditorPreferencePage_path, //
+				LspEditorUiMessages.LspEditorPreferencePage_path_description);
 	}
 
 	@Override
@@ -50,8 +50,8 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"use_tidy", //$NON-NLS-1$
 				defaults.useTidy(), //
-				"Enable clang-tidy diagnostics", //
-				"Enable clang-tidy diagnostics");
+				LspEditorUiMessages.LspEditorPreferencePage_enable_tidy, //
+				LspEditorUiMessages.LspEditorPreferencePage_enable_tidy);
 	}
 
 	@Override
@@ -59,8 +59,8 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"background_index", //$NON-NLS-1$
 				defaults.useBackgroundIndex(), //
-				"Index project code in the background and persist index on disk", //
-				"Index project code in the background and persist index on disk.");
+				LspEditorUiMessages.LspEditorPreferencePage_background_index, //
+				LspEditorUiMessages.LspEditorPreferencePage_background_index);
 	}
 
 	@Override
@@ -68,8 +68,8 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 		return new PreferenceMetadata<>(String.class, //
 				"completion_style", //$NON-NLS-1$
 				defaults.completionStyle(), //
-				"Completion", //
-				"Granularity of code completion suggestions");
+				LspEditorUiMessages.LspEditorPreferencePage_completion, //
+				LspEditorUiMessages.LspEditorPreferencePage_completion_description);
 	}
 
 	@Override
@@ -77,16 +77,16 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"pretty_print", //$NON-NLS-1$
 				defaults.prettyPrint(), //
-				"Pretty-print JSON output", //
-				"Pretty-print JSON output");
+				LspEditorUiMessages.LspEditorPreferencePage_pretty_print, //
+				LspEditorUiMessages.LspEditorPreferencePage_pretty_print);
 	}
 
 	@Override
 	public PreferenceMetadata<String> queryDriver() {
 		return new PreferenceMetadata<>(String.class, //
 				"query_driver", //$NON-NLS-1$
-				defaults.queryDriver(), "Drivers", //
-				"Comma separated list of globs for white-listing gcc-compatible drivers that are safe to execute");
+				defaults.queryDriver(), LspEditorUiMessages.LspEditorPreferencePage_drivers, //
+				LspEditorUiMessages.LspEditorPreferencePage_drivers_description);
 	}
 
 	@Override
@@ -94,8 +94,8 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 		return new PreferenceMetadata<>(String.class, //
 				"additional_options", //$NON-NLS-1$
 				defaults.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())), //$NON-NLS-1$
-				"Additional", //
-				"Newline separated list of additional options for clangd");
+				LspEditorUiMessages.LspEditorPreferencePage_additional, //
+				LspEditorUiMessages.LspEditorPreferencePage_additional_description);
 	}
 
 }
