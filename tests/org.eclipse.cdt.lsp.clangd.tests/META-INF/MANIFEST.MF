@@ -9,9 +9,6 @@ Bundle-Copyright: %Bundle-Copyright
 Fragment-Host: org.eclipse.cdt.lsp.clangd;bundle-version="0.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: junit-jupiter-api,
- net.bytebuddy.byte-buddy,
- net.bytebuddy.byte-buddy-agent,
  org.eclipse.cdt.lsp,
- org.objenesis,
  org.yaml.snakeyaml,
  org.mockito.mockito-core
