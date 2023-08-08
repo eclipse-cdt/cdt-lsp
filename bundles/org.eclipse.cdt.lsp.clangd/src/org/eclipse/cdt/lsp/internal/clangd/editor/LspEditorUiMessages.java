@@ -23,11 +23,19 @@ public class LspEditorUiMessages extends NLS {
 		NLS.initializeMessages(BUNDLE_NAME, LspEditorUiMessages.class);
 	}
 
-	public static String LspEditorPreferencePage_description;
 	public static String LspEditorPreferencePage_preferLspEditor;
 	public static String LspEditorPreferencePage_preferLspEditor_description;
-	public static String LspEditorPreferencePage_server_options;
-	public static String LspEditorPreferencePage_server_path;
+	public static String LspEditorPreferencePage_path;
+	public static String LspEditorPreferencePage_path_description;
+	public static String LspEditorPreferencePage_enable_tidy;
+	public static String LspEditorPreferencePage_background_index;
+	public static String LspEditorPreferencePage_completion;
+	public static String LspEditorPreferencePage_completion_description;
+	public static String LspEditorPreferencePage_pretty_print;
+	public static String LspEditorPreferencePage_drivers;
+	public static String LspEditorPreferencePage_drivers_description;
+	public static String LspEditorPreferencePage_additional;
+	public static String LspEditorPreferencePage_additional_description;
 	public static String LspEditorPreferencePage_restart_dialog_title;
 	public static String LspEditorPreferencePage_restart_dialog_message;
 	public static String LspEditorPreferencePage_browse_button;
@@ -35,9 +43,10 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_clangd_options_label;
 	public static String LspEditorPreferencePage_enable_project_specific;
 	public static String LspEditorPreferencePage_configure_ws_specific;
-	public static String LspEditorPreferencePage_select_clangd_executable;
-
-	public static String LspEditorPropertiesPage_projectSpecificSettings;
+	public static String LspEditorPreferencePage_completion_detailed;
+	public static String LspEditorPreferencePage_completion_bundled;
+	public static String LspEditorPreferencePage_completion_default;
+  public static String LspEditorPreferencePage_select_clangd_executable;
 
 	public static String CProjectChangeMonitor_yaml_scanner_error;
 	public static String CProjectChangeMonitor_yaml_scanner_error_message;

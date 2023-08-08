@@ -39,6 +39,7 @@ import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -53,7 +54,7 @@ public final class ClangdConfigurationArea {
 	private final Button prefer;
 	private final Text path;
 	private final Button tidy;
-	private final Text completion;
+	private final Combo completion;
 	private final Button index;
 	private final Button pretty;
 	private final Text driver;
@@ -64,13 +65,25 @@ public final class ClangdConfigurationArea {
 
 	private final Map<PreferenceMetadata<Boolean>, Button> buttons;
 	private final Map<PreferenceMetadata<String>, Text> texts;
+	private final Map<PreferenceMetadata<String>, Combo> combos;
 	private final List<Consumer<TypedEvent>> listeners;
+
+	private final static String[] completionOptions = { "detailed", "bundled", "" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	private final static String[] completionsKeys = { LspEditorUiMessages.LspEditorPreferencePage_completion_detailed,
+			LspEditorUiMessages.LspEditorPreferencePage_completion_bundled,
+			LspEditorUiMessages.LspEditorPreferencePage_completion_default };
+	private final Map<String, String> completions;
 
 	public ClangdConfigurationArea(Composite parent, ClangdMetadata metadata, boolean isProjectScope) {
 		this.visibility = PlatformUI.getWorkbench().getService(ClangdConfigurationVisibility.class);
 		this.buttons = new HashMap<>();
 		this.texts = new HashMap<>();
+		this.combos = new HashMap<>();
 		this.listeners = new ArrayList<>();
+		this.completions = new HashMap<>();
+		for (int i = 0; i < completionsKeys.length; i++) {
+			completions.put(completionsKeys[i], completionOptions[i]);
+		}
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
@@ -92,7 +105,7 @@ public final class ClangdConfigurationArea {
 		this.path = createFileSelector(metadata.clangdPath(), group, this::selectClangdExecutable);
 		this.tidy = createCheckbox(metadata.useTidy(), group);
 		this.index = createCheckbox(metadata.useBackgroundIndex(), group);
-		this.completion = createText(metadata.completionStyle(), group, false);
+		this.completion = createCombo(metadata.completionStyle(), group, completionsKeys);
 		this.pretty = createCheckbox(metadata.prettyPrint(), group);
 		this.driver = createText(metadata.queryDriver(), group, false);
 		this.additional = createText(metadata.additionalOptions(), group, true);
@@ -162,6 +175,21 @@ public final class ClangdConfigurationArea {
 		return text;
 	}
 
+	private Combo createCombo(PreferenceMetadata<String> meta, Composite parent, String[] items) {
+		Label label = new Label(parent, SWT.NONE);
+		label.setText(meta.name());
+		label.setToolTipText(meta.description());
+		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
+
+		Combo combo = new Combo(parent, SWT.READ_ONLY);
+		combo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
+		combo.setItems(items);
+		combo.setData(meta);
+		combos.put(meta, combo);
+
+		return combo;
+	}
+
 	private void selectClangdExecutable(SelectionEvent e) {
 		String selected = selectFile(path.getText());
 		if (selected != null) {
@@ -201,7 +229,11 @@ public final class ClangdConfigurationArea {
 		path.setText(options.clangdPath());
 		tidy.setSelection(options.useTidy());
 		index.setSelection(options.useBackgroundIndex());
-		completion.setText(options.completionStyle());
+		for (int i = 0; i < completionOptions.length; i++) {
+			if (completionOptions[i].equals(options.completionStyle())) {
+				completion.select(i);
+			}
+		}
 		pretty.setSelection(options.prettyPrint());
 		driver.setText(options.queryDriver());
 		additional.setText(options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
@@ -211,12 +243,14 @@ public final class ClangdConfigurationArea {
 		OsgiPreferenceMetadataStore store = new OsgiPreferenceMetadataStore(prefs);
 		buttons.entrySet().forEach(e -> store.save(e.getValue().getSelection(), e.getKey()));
 		texts.entrySet().forEach(e -> store.save(e.getValue().getText(), e.getKey()));
+		combos.entrySet().forEach(e -> store.save(completions.get(e.getValue().getText()), e.getKey()));
 	}
 
 	void dispose() {
 		listeners.clear();
 		buttons.clear();
 		texts.clear();
+		combos.clear();
 	}
 
 	public boolean optionsChanged(ClangdOptions options) {
@@ -225,7 +259,7 @@ public final class ClangdConfigurationArea {
 		}
 		return !options.clangdPath().equals(path.getText()) || options.useTidy() != tidy.getSelection()
 				|| options.useBackgroundIndex() != index.getSelection()
-				|| !options.completionStyle().equals(completion.getText())
+				|| !options.completionStyle().equals(completions.get(completion.getText()))
 				|| options.prettyPrint() != pretty.getSelection() || !options.queryDriver().equals(driver.getText())
 				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
 						.equals(additional.getText());
