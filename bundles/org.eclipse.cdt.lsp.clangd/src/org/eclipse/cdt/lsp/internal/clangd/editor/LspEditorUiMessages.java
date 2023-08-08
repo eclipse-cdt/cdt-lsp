@@ -35,6 +35,7 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_clangd_options_label;
 	public static String LspEditorPreferencePage_enable_project_specific;
 	public static String LspEditorPreferencePage_configure_ws_specific;
+	public static String LspEditorPreferencePage_select_clangd_executable;
 
 	public static String LspEditorPropertiesPage_projectSpecificSettings;
 
