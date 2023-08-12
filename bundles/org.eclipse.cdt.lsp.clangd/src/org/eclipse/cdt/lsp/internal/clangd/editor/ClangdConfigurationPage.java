@@ -165,7 +165,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	private void refreshWidgets(ClangdOptions options) {
 		setErrorMessage(null);
-		area.load(options);
+		area.load(options, useProjectSettings() || !projectScope().isPresent());
 	}
 
 	private Optional<ProjectScope> projectScope() {
@@ -259,21 +259,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	private void enableProjectSpecificSettings(boolean use) {
 		specific.setSelection(use);
-		enablePreferenceContent(use);
 		updateLinkVisibility();
-	}
-
-	private void enablePreferenceContent(boolean enable) {
-		if (enable) {
-			if (state != null) {
-				state.restore();
-				state = null;
-			}
-		} else {
-			if (state == null) {
-				state = ControlEnableState.disable(control);
-			}
-		}
 	}
 
 	private void updateLinkVisibility() {
