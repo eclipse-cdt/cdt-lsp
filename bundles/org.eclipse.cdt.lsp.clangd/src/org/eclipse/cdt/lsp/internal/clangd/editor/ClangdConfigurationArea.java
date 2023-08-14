@@ -111,6 +111,15 @@ public final class ClangdConfigurationArea {
 		this.additional = createText(metadata.additionalOptions(), group, true);
 	}
 
+	void enablePreferenceContent(boolean enable) {
+		if (prefer != null) {
+			prefer.setEnabled(enable);
+			enableClangdOptionsGroup(prefer.getSelection() && enable);
+		} else {
+			enableClangdOptionsGroup(enable);
+		}
+	}
+
 	private void enableClangdOptionsGroup(boolean enable) {
 		if (enableState != null) {
 			enableState.restore();
@@ -221,10 +230,9 @@ public final class ClangdConfigurationArea {
 		listeners.forEach(c -> c.accept(event));
 	}
 
-	void load(ClangdOptions options) {
+	void load(ClangdOptions options, boolean enable) {
 		if (prefer != null) {
 			prefer.setSelection(options.preferClangd());
-			enableClangdOptionsGroup(prefer.getSelection());
 		}
 		path.setText(options.clangdPath());
 		tidy.setSelection(options.useTidy());
@@ -237,6 +245,7 @@ public final class ClangdConfigurationArea {
 		pretty.setSelection(options.prettyPrint());
 		driver.setText(options.queryDriver());
 		additional.setText(options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
+		enablePreferenceContent(enable);
 	}
 
 	void store(IEclipsePreferences prefs) {

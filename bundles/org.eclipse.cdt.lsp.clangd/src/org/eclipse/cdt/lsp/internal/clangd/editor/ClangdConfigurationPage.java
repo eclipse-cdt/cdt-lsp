@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -69,7 +68,6 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 	private Link link;
 	private Button specific;
 	private Control control;
-	private ControlEnableState state;
 	private ClangdConfigurationArea area;
 
 	@Override
@@ -165,7 +163,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	private void refreshWidgets(ClangdOptions options) {
 		setErrorMessage(null);
-		area.load(options);
+		area.load(options, useProjectSettings() || !projectScope().isPresent());
 	}
 
 	private Optional<ProjectScope> projectScope() {
@@ -259,21 +257,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	private void enableProjectSpecificSettings(boolean use) {
 		specific.setSelection(use);
-		enablePreferenceContent(use);
 		updateLinkVisibility();
-	}
-
-	private void enablePreferenceContent(boolean enable) {
-		if (enable) {
-			if (state != null) {
-				state.restore();
-				state = null;
-			}
-		} else {
-			if (state == null) {
-				state = ControlEnableState.disable(control);
-			}
-		}
 	}
 
 	private void updateLinkVisibility() {
