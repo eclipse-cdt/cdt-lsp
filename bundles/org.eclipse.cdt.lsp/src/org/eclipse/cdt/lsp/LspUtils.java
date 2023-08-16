@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -48,6 +49,20 @@ public class LspUtils {
 		// https://github.com/eclipse/tm4e/pull/500 has been merged.
 		return (id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header"))) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				|| "lng.cpp".equals(id); //$NON-NLS-1$
+	}
+
+	/**
+	 * Checks if the given {@link IContentType} is a C/C++ content type.
+	 * Returns {@code false} if {@link IContentType} is {@code null}
+	 *
+	 * @param contentType
+	 * @return {@code true} if C/C++ content type
+	 */
+	public static boolean isCElement(IContentType contentType) {
+		if (contentType == null) {
+			return false;
+		}
+		return LspUtils.isCContentType(contentType.getId());
 	}
 
 	/**

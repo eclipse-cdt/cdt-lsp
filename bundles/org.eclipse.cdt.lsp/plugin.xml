@@ -263,5 +263,13 @@
             class="org.eclipse.cdt.lsp.editor.LspEditorFileImageDescriptor">
       </imageDescriptor>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors.documentProviders">
+      <provider
+            class="org.eclipse.cdt.lsp.editor.LspDocumentProvider"
+            id="org.eclipse.cdt.lsp.document.provider"
+            inputTypes="org.eclipse.ui.part.FileEditorInput">
+      </provider>
+   </extension>
 </plugin>
 
