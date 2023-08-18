@@ -66,10 +66,15 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	private HashMap<URI, SymbolsContainer> cachedSymbols = new HashMap<>();
 
 	private final IFileBufferListener fileBufferListener = new FileBufferListenerAdapter() {
+
 		@Override
 		public void dirtyStateChanged(IFileBuffer buffer, boolean isDirty) {
 			try {
-				if (isDirty && isCElement(buffer.getContentType())) {
+				// Note: resourceExists must be called prior to buffer.getContentType(),
+				// because getContentType() throws an exception when the underlying resource does not exists.
+				// This can be the case if 'Save as..' has been performed on a file.
+				// Then isDirty is true and dirtyStateChanged gets called for the new, not yet existing file.
+				if (isDirty && resourceExists(buffer) && isCElement(buffer.getContentType())) {
 					var uri = LSPEclipseUtils.toUri(buffer);
 					if (uri != null) {
 						var cachedSymbol = cachedSymbols.get(uri);
@@ -82,6 +87,10 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 				Platform.getLog(getClass()).error(e.getMessage(), e);
 			}
 
+		}
+
+		private boolean resourceExists(IFileBuffer buffer) {
+			return Optional.ofNullable(buffer.getLocation()).map(l -> l.toFile().exists()).orElse(false);
 		}
 
 		private boolean isCElement(IContentType contentType) {
