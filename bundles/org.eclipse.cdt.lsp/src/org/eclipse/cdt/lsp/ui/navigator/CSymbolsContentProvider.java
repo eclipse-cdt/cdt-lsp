@@ -15,7 +15,6 @@ package org.eclipse.cdt.lsp.ui.navigator;
 
 import java.util.Set;
 
-import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -83,17 +82,14 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof DocumentSymbolWithURI) {
 			return symbolsManager.getChildren(parentElement);
-		} else if (parentElement instanceof ITranslationUnit) {
-			try {
-				return getTranslationUnitChildren((ITranslationUnit) parentElement);
-			} catch (CModelException e) {
-			}
+		} else if (parentElement instanceof ITranslationUnit unit) {
+			return getTranslationUnitChildren(unit);
 		}
 		return NO_CHILDREN;
 	}
 
 	@Override
-	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) throws CModelException {
+	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) {
 		if (loader != null) {
 			return loader.getChildren(unit);
 		}
