@@ -17,8 +17,6 @@ import java.util.Set;
 
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
@@ -50,16 +48,6 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 		currentInput = newInput;
 		if (viewer instanceof AbstractTreeViewer && newInput != null) {
 			loader = new DeferredCSymbolLoader((AbstractTreeViewer) viewer, (IDeferredWorkbenchAdapter) symbolsManager);
-			loader.addUpdateCompleteListener(new JobChangeAdapter() {
-
-				@Override
-				public void done(IJobChangeEvent event) {
-					if (event.getResult().isOK()) {
-						// Force a selection event
-						viewer.setSelection(viewer.getSelection());
-					}
-				}
-			});
 		}
 		super.inputChanged(viewer, oldInput, newInput);
 	}
