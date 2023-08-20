@@ -147,7 +147,7 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 			if (control == null || control.isDisposed()) {
 				return;
 			}
-			control.getDisplay().syncExec(() -> {
+			control.getDisplay().asyncExec(() -> {
 				if (!control.isDisposed()) {
 					try {
 						control.setRedraw(false);
