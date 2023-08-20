@@ -44,6 +44,7 @@ import org.eclipse.lsp4e.outline.SymbolsModel;
 import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
@@ -109,8 +110,7 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 		}
 	};
 
-	private volatile CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> symbols;
-	private HashMap<URI, CompileUnit> cachedSymbols = new HashMap<>();
+	private volatile HashMap<URI, CompileUnit> cachedSymbols = new HashMap<>();
 	public static final SymbolsManager INSTANCE = new SymbolsManager();
 
 	public SymbolsManager() {
@@ -237,12 +237,10 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 				temporaryLoadedDocument = true;
 			}
 			if (document != null) {
-				final var params = new DocumentSymbolParams(
-						LSPEclipseUtils.toTextDocumentIdentifier(compileUnit.file.getLocationURI()));
+				CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> symbols;
+				final var params = new DocumentSymbolParams(LSPEclipseUtils.toTextDocumentIdentifier(document));
 				CompletableFuture<Optional<LanguageServerWrapper>> languageServer = LanguageServers
-						.forDocument(document)
-						.withFilter(
-								capabilities -> LSPEclipseUtils.hasCapability(capabilities.getDocumentSymbolProvider()))
+						.forDocument(document).withCapability(ServerCapabilities::getDocumentSymbolProvider)
 						.computeFirst((w, ls) -> CompletableFuture.completedFuture(w));
 				try {
 					symbols = languageServer.get(500, TimeUnit.MILLISECONDS).filter(Objects::nonNull)
