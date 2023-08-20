@@ -17,9 +17,13 @@ import java.util.Set;
 
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider;
+import org.eclipse.cdt.lsp.internal.messages.LspUiMessages;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.model.WorkbenchAdapter;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 
@@ -28,6 +32,14 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	private final SymbolsManager symbolsManager = SymbolsManager.INSTANCE;
 	private DeferredCSymbolLoader loader;
 	private Object currentInput;
+
+	private static final WorkbenchAdapter ERROR_ELEMENT = new WorkbenchAdapter() {
+
+		@Override
+		public String getLabel(Object object) {
+			return LspUiMessages.NavigatorView_ErrorOnLoad;
+		}
+	};
 
 	@Override
 	public void dispose() {
@@ -95,18 +107,59 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	 * we avoid to implement an adapter for {@link ITranslationUnit} to {@code IDeferredWorkbenchAdapter}.
 	 * This would also fail, because {@code cdt} has already a registered adapter from {@code ITranslationUnit}
 	 * to {@code IDeferredWorkbenchAdapter}.
+	 * It doesn't use a separate UI job to fill in the tree. With UI jobs, it's simply impossible
+	 * to know what has already been added when there are several loading jobs.
+	 * For our use case (load the whole symbols, then add it to the tree) a
+	 * {@link org.eclipse.swt.widgets.Display#syncExec(Runnable) syncExec()} is
+	 * sufficient.
 	 */
 	private static class DeferredCSymbolLoader extends DeferredTreeContentManager {
 		private final IDeferredWorkbenchAdapter adapter;
+		private final AbstractTreeViewer viewer;
 
 		public DeferredCSymbolLoader(AbstractTreeViewer viewer, IDeferredWorkbenchAdapter adapter) {
 			super(viewer);
+			this.viewer = viewer;
 			this.adapter = adapter;
 		}
 
 		@Override
 		protected IDeferredWorkbenchAdapter getAdapter(Object element) {
 			return adapter;
+		}
+
+		/**
+		 * Add child nodes, removing the error element if appropriate. Contrary
+		 * to the super implementation, this does <em>not</em> use a UI job but
+		 * a simple {@link org.eclipse.swt.widgets.Display#syncExec(Runnable)
+		 * syncExec()}.
+		 *
+		 * @param parent
+		 *            to add the {@code children} to
+		 * @param children
+		 *            to add to the {@code parent}
+		 * @param monitor
+		 *            is ignored
+		 */
+		@Override
+		protected void addChildren(Object parent, Object[] children, IProgressMonitor monitor) {
+			Control control = viewer.getControl();
+			if (control == null || control.isDisposed()) {
+				return;
+			}
+			control.getDisplay().syncExec(() -> {
+				if (!control.isDisposed()) {
+					try {
+						control.setRedraw(false);
+						if (children.length != 1 || children[0] != ERROR_ELEMENT) {
+							viewer.remove(ERROR_ELEMENT);
+						}
+						viewer.add(parent, children);
+					} finally {
+						control.setRedraw(true);
+					}
+				}
+			});
 		}
 	}
 
