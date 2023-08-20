@@ -84,9 +84,9 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 				if (isDirty && resourceExists(buffer) && isCElement(buffer.getContentType())) {
 					var uri = LSPEclipseUtils.toUri(buffer);
 					if (uri != null) {
-						var cachedSymbol = getCompileUnit(uri);
-						if (cachedSymbol != null) {
-							cachedSymbol.isDirty = true;
+						var cachedCompileUnit = getCompileUnit(uri);
+						if (cachedCompileUnit != null) {
+							cachedCompileUnit.isDirty = true;
 						}
 					}
 				}
@@ -97,7 +97,8 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 		}
 
 		private boolean resourceExists(IFileBuffer buffer) {
-			return Optional.ofNullable(buffer.getLocation()).map(l -> l.toFile().exists()).orElse(false);
+			return Optional.ofNullable(LSPEclipseUtils.getFile(buffer.getLocation())).map(file -> file.exists())
+					.orElse(false);
 		}
 
 		private boolean isCElement(IContentType contentType) {
@@ -117,6 +118,7 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 	}
 
 	public void dispose() {
+		cachedSymbols.clear();
 		FileBuffers.getTextFileBufferManager().removeFileBufferListener(fileBufferListener);
 	}
 
@@ -143,6 +145,26 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 			return file;
 		}
 		return null;
+	}
+
+	public Object[] getTranslationUnitElements(ITranslationUnit translationUnit) {
+		if (translationUnit.getFile() != null) {
+			CompileUnit compileUnit = getCompileUnit(translationUnit.getFile().getLocationURI());
+			if (compileUnit != null) {
+				return compileUnit.getElements();
+			}
+		}
+		return null;
+	}
+
+	public boolean isDirty(ITranslationUnit translationUnit) {
+		if (translationUnit.getFile() != null) {
+			CompileUnit compileUnit = getCompileUnit(translationUnit.getFile().getLocationURI());
+			if (compileUnit != null) {
+				return compileUnit.isDirty;
+			}
+		}
+		return true;
 	}
 
 	@Override

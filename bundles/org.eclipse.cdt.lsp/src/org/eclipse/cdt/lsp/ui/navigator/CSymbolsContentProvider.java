@@ -90,12 +90,24 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 
 	@Override
 	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) {
+		if (!symbolsManager.isDirty(unit)) {
+			var symbols = symbolsManager.getTranslationUnitElements(unit);
+			if (symbols != null) {
+				return symbols;
+			}
+		}
 		if (loader != null) {
 			return loader.getChildren(unit);
 		}
 		return NO_CHILDREN;
 	}
 
+	/**
+	 * A variant of {@link DeferredTreeContentManager}. By adding a fixed {@link IDeferredWorkbenchAdapter}
+	 * we avoid to implement an adapter for {@link ITranslationUnit} to {@code IDeferredWorkbenchAdapter}.
+	 * This would also fail, because {@code cdt} has already a registered adapter from {@code ITranslationUnit}
+	 * to {@code IDeferredWorkbenchAdapter}.
+	 */
 	private static class DeferredCSymbolLoader extends DeferredTreeContentManager {
 		private final IDeferredWorkbenchAdapter adapter;
 
