@@ -13,102 +13,55 @@
 
 package org.eclipse.cdt.lsp.ui.navigator;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.ui.navigator.CNavigatorContentProvider;
-import org.eclipse.cdt.lsp.LspUtils;
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.IFileBuffer;
-import org.eclipse.core.filebuffers.IFileBufferListener;
-import org.eclipse.core.filebuffers.LocationKind;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.content.IContentType;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.lsp4e.LSPEclipseUtils;
-import org.eclipse.lsp4e.LanguageServerWrapper;
-import org.eclipse.lsp4e.LanguageServers;
-import org.eclipse.lsp4e.outline.SymbolsModel;
+import org.eclipse.cdt.lsp.internal.messages.LspUiMessages;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
-import org.eclipse.lsp4j.DocumentSymbol;
-import org.eclipse.lsp4j.DocumentSymbolParams;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.model.WorkbenchAdapter;
+import org.eclipse.ui.progress.DeferredTreeContentManager;
+import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 
 public class CSymbolsContentProvider extends CNavigatorContentProvider {
 
-	class SymbolsContainer {
-		public final IFile file;
-		public final SymbolsModel symbolsModel;
-		public boolean isDirty = true;
+	private final SymbolsManager symbolsManager = SymbolsManager.INSTANCE;
+	private DeferredCSymbolLoader loader;
+	private Object currentInput;
 
-		SymbolsContainer(IFile file) {
-			this.file = file;
-			this.symbolsModel = new SymbolsModel();
-			this.symbolsModel.setUri(file.getLocationURI());
-		}
-	}
-
-	private volatile CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> symbols;
-	private HashMap<URI, SymbolsContainer> cachedSymbols = new HashMap<>();
-
-	private final IFileBufferListener fileBufferListener = new FileBufferListenerAdapter() {
+	private static final WorkbenchAdapter ERROR_ELEMENT = new WorkbenchAdapter() {
 
 		@Override
-		public void dirtyStateChanged(IFileBuffer buffer, boolean isDirty) {
-			try {
-				// Note: resourceExists must be called prior to buffer.getContentType(),
-				// because getContentType() throws an exception when the underlying resource does not exists.
-				// This can be the case if 'Save as..' has been performed on a file.
-				// Then isDirty is true and dirtyStateChanged gets called for the new, not yet existing file.
-				if (isDirty && resourceExists(buffer) && isCElement(buffer.getContentType())) {
-					var uri = LSPEclipseUtils.toUri(buffer);
-					if (uri != null) {
-						var cachedSymbol = cachedSymbols.get(uri);
-						if (cachedSymbol != null) {
-							cachedSymbol.isDirty = true;
-						}
-					}
-				}
-			} catch (CoreException e) {
-				Platform.getLog(getClass()).error(e.getMessage(), e);
-			}
-
-		}
-
-		private boolean resourceExists(IFileBuffer buffer) {
-			return Optional.ofNullable(buffer.getLocation()).map(l -> l.toFile().exists()).orElse(false);
-		}
-
-		private boolean isCElement(IContentType contentType) {
-			if (contentType == null) {
-				return false;
-			}
-			return LspUtils.isCContentType(contentType.getId());
+		public String getLabel(Object object) {
+			return LspUiMessages.NavigatorView_ErrorOnLoad;
 		}
 	};
 
-	public CSymbolsContentProvider() {
-		FileBuffers.getTextFileBufferManager().addFileBufferListener(fileBufferListener);
+	@Override
+	public void dispose() {
+		if (currentInput != null && loader != null) {
+			loader.cancel(currentInput);
+		}
+		currentInput = null;
+		symbolsManager.dispose();
+		loader = null;
+		super.dispose();
 	}
 
 	@Override
-	public void dispose() {
-		FileBuffers.getTextFileBufferManager().removeFileBufferListener(fileBufferListener);
-		super.dispose();
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		if (oldInput != null && loader != null) {
+			loader.cancel(oldInput);
+		}
+		currentInput = newInput;
+		if (viewer instanceof AbstractTreeViewer && newInput != null) {
+			loader = new DeferredCSymbolLoader((AbstractTreeViewer) viewer, (IDeferredWorkbenchAdapter) symbolsManager);
+		}
+		super.inputChanged(viewer, oldInput, newInput);
 	}
 
 	@Override
@@ -128,97 +81,85 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof DocumentSymbolWithURI) {
-			var file = LspUtils.getFile(((DocumentSymbolWithURI) parentElement).uri);
-			if (file.isPresent()) {
-				refreshTreeContentFromLS(getSymbolsContainer(file.get()));
-				var symbolsContainer = cachedSymbols.get(file.get().getLocationURI());
-				if (symbolsContainer != null) {
-					return symbolsContainer.symbolsModel.getChildren(parentElement);
-				}
-			}
-		} else if (parentElement instanceof ITranslationUnit) {
-			try {
-				return getTranslationUnitChildren((ITranslationUnit) parentElement);
-			} catch (CModelException e) {
-			}
+			return symbolsManager.getChildren(parentElement);
+		} else if (parentElement instanceof ITranslationUnit unit) {
+			return getTranslationUnitChildren(unit);
 		}
 		return NO_CHILDREN;
 	}
 
 	@Override
-	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) throws CModelException {
-		if (unit.getResource() instanceof IFile) {
-			var file = (IFile) unit.getResource();
-			refreshTreeContentFromLS(getSymbolsContainer(file));
-			var symbolsContainer = cachedSymbols.get(file.getLocationURI());
-			if (symbolsContainer != null)
-				return symbolsContainer.symbolsModel.getElements();
+	protected Object[] getTranslationUnitChildren(ITranslationUnit unit) {
+		if (!symbolsManager.isDirty(unit)) {
+			var symbols = symbolsManager.getTranslationUnitElements(unit);
+			if (symbols != null) {
+				return symbols;
+			}
+		}
+		if (loader != null) {
+			return loader.getChildren(unit);
 		}
 		return NO_CHILDREN;
 	}
 
-	protected SymbolsContainer getSymbolsContainer(IFile file) {
-		SymbolsContainer symbolsContainer = cachedSymbols.get(file.getLocationURI());
-		if (symbolsContainer == null) {
-			symbolsContainer = new SymbolsContainer(file);
-			cachedSymbols.put(file.getLocationURI(), symbolsContainer);
-		}
-		return symbolsContainer;
-	}
+	/**
+	 * A variant of {@link DeferredTreeContentManager}. By adding a fixed {@link IDeferredWorkbenchAdapter}
+	 * we avoid to implement an adapter for {@link ITranslationUnit} to {@code IDeferredWorkbenchAdapter}.
+	 * This would also fail, because {@code cdt} has already a registered adapter from {@code ITranslationUnit}
+	 * to {@code IDeferredWorkbenchAdapter}.
+	 * It doesn't use a separate UI job to fill in the tree. With UI jobs, it's simply impossible
+	 * to know what has already been added when there are several loading jobs.
+	 * For our use case (load the whole symbols, then add it to the tree) a
+	 * {@link org.eclipse.swt.widgets.Display#asyncExec(Runnable) asyncExec()} is
+	 * sufficient.
+	 */
+	private static class DeferredCSymbolLoader extends DeferredTreeContentManager {
+		private final IDeferredWorkbenchAdapter adapter;
+		private final AbstractTreeViewer viewer;
 
-	protected void refreshTreeContentFromLS(SymbolsContainer symbolsContainer) {
-		if (symbolsContainer == null || !symbolsContainer.isDirty) {
-			return;
+		public DeferredCSymbolLoader(AbstractTreeViewer viewer, IDeferredWorkbenchAdapter adapter) {
+			super(viewer);
+			this.viewer = viewer;
+			this.adapter = adapter;
 		}
-		boolean temporaryLoadedDocument = false;
 
-		try {
-			IDocument document = LSPEclipseUtils.getExistingDocument(symbolsContainer.file);
-			if (document == null) {
-				document = LSPEclipseUtils.getDocument(symbolsContainer.file);
-				temporaryLoadedDocument = true;
+		@Override
+		protected IDeferredWorkbenchAdapter getAdapter(Object element) {
+			return adapter;
+		}
+
+		/**
+		 * Add child nodes, removing the error element if appropriate. Contrary
+		 * to the super implementation, this does <em>not</em> use a UI job but
+		 * a simple {@link org.eclipse.swt.widgets.Display#asyncExec(Runnable)
+		 * asyncExec()}.
+		 *
+		 * @param parent
+		 *            to add the {@code children} to
+		 * @param children
+		 *            to add to the {@code parent}
+		 * @param monitor
+		 *            is ignored
+		 */
+		@Override
+		protected void addChildren(Object parent, Object[] children, IProgressMonitor monitor) {
+			Control control = viewer.getControl();
+			if (control == null || control.isDisposed()) {
+				return;
 			}
-			if (document != null) {
-				final var params = new DocumentSymbolParams(
-						LSPEclipseUtils.toTextDocumentIdentifier(symbolsContainer.file.getLocationURI()));
-				CompletableFuture<Optional<LanguageServerWrapper>> languageServer = LanguageServers
-						.forDocument(document)
-						.withFilter(
-								capabilities -> LSPEclipseUtils.hasCapability(capabilities.getDocumentSymbolProvider()))
-						.computeFirst((w, ls) -> CompletableFuture.completedFuture(w));
-				try {
-					symbols = languageServer.get(500, TimeUnit.MILLISECONDS).filter(Objects::nonNull)
-							.filter(LanguageServerWrapper::isActive)
-							.map(s -> s.execute(ls -> ls.getTextDocumentService().documentSymbol(params)))
-							.orElse(CompletableFuture.completedFuture(null));
-				} catch (TimeoutException | ExecutionException | InterruptedException e) {
-					Platform.getLog(getClass()).error(e.getMessage(), e);
-					symbols = CompletableFuture.completedFuture(null);
-					if (e instanceof InterruptedException) {
-						Thread.currentThread().interrupt();
+			control.getDisplay().asyncExec(() -> {
+				if (!control.isDisposed()) {
+					try {
+						control.setRedraw(false);
+						if (children.length != 1 || children[0] != ERROR_ELEMENT) {
+							viewer.remove(ERROR_ELEMENT);
+						}
+						viewer.add(parent, children);
+					} finally {
+						control.setRedraw(true);
 					}
 				}
-				symbols.thenAcceptAsync(response -> {
-					symbolsContainer.symbolsModel.update(response);
-					symbolsContainer.isDirty = false;
-				}).join();
-			} else {
-				temporaryLoadedDocument = false;
-				symbolsContainer.symbolsModel.update(null);
-			}
-		} catch (Exception e) {
-			Platform.getLog(getClass()).error(e.getMessage(), e);
-		} finally {
-			if (temporaryLoadedDocument) {
-				//Note: the LS will be terminated via the shutdown command by LSP4E, when all documents have been disconnected.
-				//This is the case when no file is opened in the LSP based C/C++ editor.
-				try {
-					FileBuffers.getTextFileBufferManager().disconnect(symbolsContainer.file.getFullPath(),
-							LocationKind.IFILE, new NullProgressMonitor());
-				} catch (CoreException e) {
-					Platform.getLog(getClass()).error(e.getMessage(), e);
-				}
-			}
+			});
 		}
 	}
 
