@@ -110,7 +110,7 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	 * It doesn't use a separate UI job to fill in the tree. With UI jobs, it's simply impossible
 	 * to know what has already been added when there are several loading jobs.
 	 * For our use case (load the whole symbols, then add it to the tree) a
-	 * {@link org.eclipse.swt.widgets.Display#syncExec(Runnable) syncExec()} is
+	 * {@link org.eclipse.swt.widgets.Display#asyncExec(Runnable) asyncExec()} is
 	 * sufficient.
 	 */
 	private static class DeferredCSymbolLoader extends DeferredTreeContentManager {
@@ -131,8 +131,8 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 		/**
 		 * Add child nodes, removing the error element if appropriate. Contrary
 		 * to the super implementation, this does <em>not</em> use a UI job but
-		 * a simple {@link org.eclipse.swt.widgets.Display#syncExec(Runnable)
-		 * syncExec()}.
+		 * a simple {@link org.eclipse.swt.widgets.Display#asyncExec(Runnable)
+		 * asyncExec()}.
 		 *
 		 * @param parent
 		 *            to add the {@code children} to
