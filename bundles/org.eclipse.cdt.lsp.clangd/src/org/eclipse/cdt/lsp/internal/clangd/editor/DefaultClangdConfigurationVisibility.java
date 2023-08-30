@@ -23,9 +23,4 @@ public final class DefaultClangdConfigurationVisibility implements ClangdConfigu
 		return true;
 	}
 
-	@Override
-	public boolean showClangdOptions(boolean isProjectScope) {
-		return !isProjectScope; // TODO: return true when multiple LS per workspace are supported
-	}
-
 }
