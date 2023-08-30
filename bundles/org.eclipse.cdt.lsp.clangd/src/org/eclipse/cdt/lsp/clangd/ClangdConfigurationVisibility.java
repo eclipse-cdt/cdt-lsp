@@ -25,11 +25,4 @@ public interface ClangdConfigurationVisibility {
 	 */
 	boolean showPreferClangd(boolean isProjectScope);
 
-	/**
-	 * Changes the visibility of the 'clangd options' group.
-	 * @param isProjectScope
-	 * @return true when the clangd options group should be displayed.
-	 */
-	boolean showClangdOptions(boolean isProjectScope);
-
 }

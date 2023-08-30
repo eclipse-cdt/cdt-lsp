@@ -101,7 +101,6 @@ public final class ClangdConfigurationArea {
 			this.prefer = null;
 		}
 		this.group = createGroup(composite, LspEditorUiMessages.LspEditorPreferencePage_clangd_options_label);
-		this.group.setVisible(visibility.showClangdOptions(isProjectScope));
 		this.path = createFileSelector(metadata.clangdPath(), group, this::selectClangdExecutable);
 		this.tidy = createCheckbox(metadata.useTidy(), group);
 		this.index = createCheckbox(metadata.useBackgroundIndex(), group);
