@@ -25,4 +25,30 @@ public interface EditorMetadata {
 	 */
 	PreferenceMetadata<Boolean> preferLspEditor();
 
+	/**
+	 * Returns the metadata for the "Format source code" option, must not return <code>null</code>.
+	 *
+	 * @return the metadata for the "Format source code" option
+	 *
+	 * @see EditorOptions#formatOnSave()
+	 */
+	PreferenceMetadata<Boolean> formatOnSave();
+
+	/**
+	 * Returns the metadata for the "Format all lines" option, must not return <code>null</code>.
+	 *
+	 * @return the metadata for the "Format all lines" option
+	 *
+	 * @see EditorOptions#formatAllLines()
+	 */
+	PreferenceMetadata<Boolean> formatAllLines();
+
+	/**
+	 * Returns the metadata for the "Format edited lines" option, must not return <code>null</code>.
+	 *
+	 * @return the metadata for the "Format edited lines" option
+	 *
+	 * @see EditorOptions#formatEditedLines()
+	 */
+	PreferenceMetadata<Boolean> formatEditedLines();
 }

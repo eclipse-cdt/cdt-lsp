@@ -12,7 +12,7 @@ Bundle-Activator: org.eclipse.cdt.lsp.LspPlugin
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.lsp4e;bundle-version="0.17.1",
+ org.eclipse.lsp4e;bundle-version="0.17.3",
  org.eclipse.tm4e.ui,
  org.eclipse.tm4e.languageconfiguration,
  org.eclipse.ui.genericeditor,
@@ -37,4 +37,5 @@ Service-Component: OSGI-INF/org.eclipse.cdt.lsp.editor.BuiltinEditorOptionsDefau
  OSGI-INF/org.eclipse.cdt.lsp.editor.DefaultConfigurationVisibility.xml,
  OSGI-INF/org.eclipse.cdt.lsp.editor.EditorConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.editor.EditorMetadataDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.editor.format.FormatOnSave.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.InitialFileManager.xml
