@@ -13,8 +13,9 @@
 package org.eclipse.cdt.lsp.clangd;
 
 /**
- * Provides access to the visibility of configuration elements in the UI taking into account the scope (project or workspace)
- *
+ * Provides access to the visibility of configuration elements in the UI taking into account the scope (project or workspace).
+ * Should be implemented as OSGi service when {@link ClangdEnable} service has been provided
+ * to hide the 'Prefer C/C++ Editor (LSP)' check-box.
  */
 public interface ClangdConfigurationVisibility {
 

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdEnable;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IProject;
@@ -49,7 +50,7 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 	@Override
 	public boolean isEnabledFor(IProject project) {
 		boolean[] enabled = new boolean[1];
-		configuration.call(c -> enabled[0] = c.options(project).preferClangd());
+		configuration.call(c -> enabled[0] = ((ClangdEnable) c.options(project)).isEnabledFor(project));
 		return enabled[0];
 	}
 

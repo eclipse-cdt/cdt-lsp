@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdEnable;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdQualifier;
@@ -32,6 +33,7 @@ import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 
 @Component
 public final class ClangdConfigurationAccess implements ClangdConfiguration {
@@ -42,6 +44,9 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 
 	@Reference
 	private IWorkspace workspace;
+
+	@Reference(cardinality = ReferenceCardinality.OPTIONAL)
+	private ClangdEnable enable;
 
 	public ClangdConfigurationAccess() {
 		this.qualifier = new ClangdQualifier().get();
@@ -54,7 +59,7 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 
 	@Override
 	public ClangdOptions defaults() {
-		return new ClangdPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata);
+		return new ClangdPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata, enable);
 	}
 
 	@Override
@@ -66,7 +71,7 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 		} else {
 			scopes = new IScopeContext[] { InstanceScope.INSTANCE, DefaultScope.INSTANCE };
 		}
-		return new ClangdPreferredOptions(qualifier, scopes, metadata);
+		return new ClangdPreferredOptions(qualifier, scopes, metadata, enable);
 	}
 
 	@Override
