@@ -29,4 +29,11 @@ public class LspUiMessages extends NLS {
 	public static String LspEditorConfigurationPage_preferLspEditor;
 	public static String LspEditorConfigurationPage_preferLspEditor_description;
 
+	public static String SaveActionsConfigurationPage_FormatSourceCode;
+	public static String SaveActionsConfigurationPage_FormatSourceCode_description;
+	public static String SaveActionsConfigurationPage_FormatAllLines;
+	public static String SaveActionsConfigurationPage_FormatAllLines_description;
+	public static String SaveActionsConfigurationPage_FormatEditedLines;
+	public static String SaveActionsConfigurationPage_FormatEditedLines_description;
+
 }

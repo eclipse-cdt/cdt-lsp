@@ -28,6 +28,9 @@ public final class EditorPreferenceInitializer extends AbstractPreferenceInitial
 		EditorMetadata metadata = (EditorMetadata) configuration.metadata();
 		String qualifier = configuration.qualifier();
 		initializeBoolean(metadata.preferLspEditor(), qualifier);
+		initializeBoolean(metadata.formatOnSave(), qualifier);
+		initializeBoolean(metadata.formatAllLines(), qualifier);
+		initializeBoolean(metadata.formatEditedLines(), qualifier);
 	}
 
 	private void initializeBoolean(PreferenceMetadata<Boolean> preference, String qualifier) {
