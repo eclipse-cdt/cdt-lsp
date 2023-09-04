@@ -22,9 +22,4 @@ public class HidePreferClangd implements ClangdConfigurationVisibility {
 		return false;
 	}
 
-	@Override
-	public boolean showClangdOptions(boolean isProjectScope) {
-		return true;
-	}
-
 }
