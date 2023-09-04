@@ -19,8 +19,8 @@ import java.util.Optional;
 import org.eclipse.cdt.core.build.ICBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
 import org.eclipse.cdt.core.parser.IScannerInfo;
-import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.ExistingResource;
+import org.eclipse.cdt.lsp.InitialUri;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -45,11 +45,13 @@ public final class ClangdFallbackManager implements ClangdFallbackFlags {
 		final String fallbackFlags[];
 
 		FallbackFlags(String[] systemIncludes) {
-			this.fallbackFlags = systemIncludes;
 			if (systemIncludes != null) {
+				fallbackFlags = new String[systemIncludes.length];
 				for (int i = 0; i < systemIncludes.length; i++) {
 					this.fallbackFlags[i] = ISYSTEM.concat(systemIncludes[i]);
 				}
+			} else {
+				fallbackFlags = null;
 			}
 		}
 	}
