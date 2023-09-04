@@ -42,7 +42,7 @@ public final class ClangdFallbackManager implements ClangdFallbackFlags {
 	class FallbackFlags {
 		// fallbackFlags is used as element name in the initialize jsonrpc call:
 		// "initializationOptions":{"fallbackFlags":[...
-		String fallbackFlags[];
+		final String fallbackFlags[];
 
 		FallbackFlags(String[] systemIncludes) {
 			if (systemIncludes != null) {
@@ -50,6 +50,8 @@ public final class ClangdFallbackManager implements ClangdFallbackFlags {
 				for (int i = 0; i < systemIncludes.length; i++) {
 					this.fallbackFlags[i] = ISYSTEM.concat(systemIncludes[i]);
 				}
+			} else {
+				fallbackFlags = null;
 			}
 		}
 	}
