@@ -78,7 +78,7 @@ pipeline {
   post {
     always {
       container('cdt') {
-        archiveArtifacts '**/*.log,**/target/repository/**'
+        archiveArtifacts '**/*.log,releng/org.eclipse.cdt.lsp.repository/target/**'
         junit '**/target/surefire-reports/*.xml'
       }
     }
