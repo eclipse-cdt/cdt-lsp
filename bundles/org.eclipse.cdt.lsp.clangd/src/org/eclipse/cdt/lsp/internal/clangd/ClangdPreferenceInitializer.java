@@ -30,7 +30,6 @@ public final class ClangdPreferenceInitializer extends AbstractPreferenceInitial
 	private void initializeDefaults(ClangdConfiguration configuration) {
 		ClangdMetadata metadata = configuration.metadata();
 		String qualifier = configuration.qualifier();
-		initializeBoolean(metadata.preferClangd(), qualifier);
 		initializeString(metadata.clangdPath(), qualifier);
 		initializeBoolean(metadata.useTidy(), qualifier);
 		initializeBoolean(metadata.useBackgroundIndex(), qualifier);

@@ -22,13 +22,6 @@ import java.util.List;
 public interface ClangdOptions {
 
 	/**
-	 * Prefer to use clangd language server and related editor implementation
-	 *
-	 * @return if clangd language server should be preferred
-	 */
-	boolean preferClangd();
-
-	/**
 	 * Path to clangd executable to be launched, must not return <code>null</code>
 	 *
 	 * @return path to clangd

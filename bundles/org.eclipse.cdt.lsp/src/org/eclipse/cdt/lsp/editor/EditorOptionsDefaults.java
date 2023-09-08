@@ -9,17 +9,9 @@
  * Contributors:
  *   See git history
  *******************************************************************************/
-package org.eclipse.cdt.lsp.examples.preferences;
 
-import org.eclipse.cdt.lsp.clangd.ClangdConfigurationVisibility;
-import org.osgi.service.component.annotations.Component;
+package org.eclipse.cdt.lsp.editor;
 
-@Component(property = { "service.ranking:Integer=100" })
-public class HidePreferClangd implements ClangdConfigurationVisibility {
-
-	@Override
-	public boolean showPreferClangd(boolean isProjectScope) {
-		return false;
-	}
+public interface EditorOptionsDefaults extends EditorOptions {
 
 }

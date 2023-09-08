@@ -11,13 +11,12 @@
  * Contributors:
  *     Alexander Fedorov (ArSysOp) - Initial API and implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.internal.clangd;
+package org.eclipse.cdt.lsp;
 
 import java.net.URI;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;

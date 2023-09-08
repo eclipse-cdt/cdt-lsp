@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.eclipse.cdt.lsp.clangd.ClangdConfigurationVisibility;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -32,7 +31,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TypedEvent;
@@ -46,12 +44,10 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 
 public final class ClangdConfigurationArea {
 
 	private final int columns = 3;
-	private final Button prefer;
 	private final Text path;
 	private final Button tidy;
 	private final Combo completion;
@@ -61,7 +57,6 @@ public final class ClangdConfigurationArea {
 	private final Text additional;
 	private final Group group;
 	private ControlEnableState enableState;
-	private ClangdConfigurationVisibility visibility;
 
 	private final Map<PreferenceMetadata<Boolean>, Button> buttons;
 	private final Map<PreferenceMetadata<String>, Text> texts;
@@ -75,7 +70,6 @@ public final class ClangdConfigurationArea {
 	private final Map<String, String> completions;
 
 	public ClangdConfigurationArea(Composite parent, ClangdMetadata metadata, boolean isProjectScope) {
-		this.visibility = PlatformUI.getWorkbench().getService(ClangdConfigurationVisibility.class);
 		this.buttons = new HashMap<>();
 		this.texts = new HashMap<>();
 		this.combos = new HashMap<>();
@@ -87,19 +81,6 @@ public final class ClangdConfigurationArea {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
-		if (visibility.showPreferClangd(isProjectScope)) {
-			final SelectionAdapter listener = new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					enableClangdOptionsGroup(prefer.getSelection());
-				}
-			};
-
-			this.prefer = createCheckbox(metadata.preferClangd(), composite);
-			this.prefer.addSelectionListener(listener);
-		} else {
-			this.prefer = null;
-		}
 		this.group = createGroup(composite, LspEditorUiMessages.LspEditorPreferencePage_clangd_options_label);
 		this.path = createFileSelector(metadata.clangdPath(), group, this::selectClangdExecutable);
 		this.tidy = createCheckbox(metadata.useTidy(), group);
@@ -111,12 +92,7 @@ public final class ClangdConfigurationArea {
 	}
 
 	void enablePreferenceContent(boolean enable) {
-		if (prefer != null) {
-			prefer.setEnabled(enable);
-			enableClangdOptionsGroup(prefer.getSelection() && enable);
-		} else {
-			enableClangdOptionsGroup(enable);
-		}
+		enableClangdOptionsGroup(enable);
 	}
 
 	private void enableClangdOptionsGroup(boolean enable) {
@@ -230,9 +206,6 @@ public final class ClangdConfigurationArea {
 	}
 
 	void load(ClangdOptions options, boolean enable) {
-		if (prefer != null) {
-			prefer.setSelection(options.preferClangd());
-		}
 		path.setText(options.clangdPath());
 		tidy.setSelection(options.useTidy());
 		index.setSelection(options.useBackgroundIndex());
@@ -262,7 +235,7 @@ public final class ClangdConfigurationArea {
 	}
 
 	public boolean optionsChanged(ClangdOptions options) {
-		if (!group.isVisible() || (prefer != null && !prefer.getSelection())) {
+		if (!group.isVisible()) {
 			return false;
 		}
 		return !options.clangdPath().equals(path.getText()) || options.useTidy() != tidy.getSelection()

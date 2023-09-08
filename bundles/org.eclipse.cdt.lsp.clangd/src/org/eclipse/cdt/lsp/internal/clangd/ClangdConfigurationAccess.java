@@ -18,14 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdEnable;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdQualifier;
+import org.eclipse.cdt.lsp.editor.ConfigurationAccess;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -33,11 +32,9 @@ import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 
 @Component
-public final class ClangdConfigurationAccess implements ClangdConfiguration {
-	private final String qualifier;
+public final class ClangdConfigurationAccess extends ConfigurationAccess implements ClangdConfiguration {
 
 	@Reference
 	private ClangdMetadata metadata;
@@ -45,11 +42,8 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 	@Reference
 	private IWorkspace workspace;
 
-	@Reference(cardinality = ReferenceCardinality.OPTIONAL)
-	private ClangdEnable enable;
-
 	public ClangdConfigurationAccess() {
-		this.qualifier = new ClangdQualifier().get();
+		super(new ClangdQualifier().get());
 	}
 
 	@Override
@@ -59,26 +53,26 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 
 	@Override
 	public ClangdOptions defaults() {
-		return new ClangdPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata, enable);
+		return new ClangdPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata);
 	}
 
 	@Override
 	public ClangdOptions options(Object context) {
-		Optional<ProjectScope> project = projectScope(context);
+		Optional<ProjectScope> project = projectScope(workspace, context);
 		IScopeContext[] scopes;
 		if (project.isPresent()) {
 			scopes = new IScopeContext[] { project.get(), InstanceScope.INSTANCE, DefaultScope.INSTANCE };
 		} else {
 			scopes = new IScopeContext[] { InstanceScope.INSTANCE, DefaultScope.INSTANCE };
 		}
-		return new ClangdPreferredOptions(qualifier, scopes, metadata, enable);
+		return new ClangdPreferredOptions(qualifier, scopes, metadata);
 	}
 
 	@Override
 	public IPreferenceMetadataStore storage(Object context) {
 		return new OsgiPreferenceMetadataStore(//
 				preferences(//
-						projectScope(context)//
+						projectScope(workspace, context)//
 								.map(IScopeContext.class::cast)//
 								.orElse(InstanceScope.INSTANCE)));
 	}
@@ -111,19 +105,6 @@ public final class ClangdConfigurationAccess implements ClangdConfiguration {
 
 		list.addAll(options.additionalOptions());
 		return list;
-	}
-
-	private Optional<ProjectScope> projectScope(Object context) {
-		return new ResolveProjectScope(workspace).apply(context);
-	}
-
-	private IEclipsePreferences preferences(IScopeContext scope) {
-		return Optional.ofNullable(scope.getNode(qualifier))//
-				.filter(IEclipsePreferences.class::isInstance)//
-				.map(IEclipsePreferences.class::cast)//
-				.orElseThrow(() -> new IllegalStateException(//
-						NLS.bind("Unable to get preferences for node: {0}", //
-								qualifier)));
 	}
 
 }

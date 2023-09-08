@@ -11,6 +11,12 @@
    SPDX-License-Identifier: EPL-2.0
 -->
 <plugin>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.eclipse.cdt.lsp.editor.EditorPreferenceInitializer">
+      </initializer>
+   </extension>
    <extension-point id="serverProvider" name="C/C++ Language Server" schema="schema/serverProvider.exsd"/>
    <extension
          point="org.eclipse.ui.editors">
@@ -262,6 +268,49 @@
       <imageDescriptor
             class="org.eclipse.cdt.lsp.editor.LspEditorFileImageDescriptor">
       </imageDescriptor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
+            class="org.eclipse.cdt.lsp.editor.EditorPropertyPage"
+            id="org.eclipse.cdt.lsp.editor.preferencePage"
+            name="%EditorPreferencePage.name">
+      </page>
+      <page
+	        name="%SaveActionsPreferencePage.name"
+	        category="org.eclipse.cdt.lsp.editor.preferencePage"
+	        class="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
+	        id="org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage">
+	      <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
+	      <keywordReference id="org.eclipse.cdt.ui.common"/>
+      </page>      
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            category="org.eclipse.cdt.ui.newui.Page_head_general"
+            class="org.eclipse.cdt.lsp.editor.EditorPropertyPage"
+            id="org.eclipse.cdt.lsp.editor.propertyPage"
+            name="%EditorPreferencePage.name">
+         <filter
+               name="projectNature"
+               value="org.eclipse.cdt.core.cnature">
+         </filter>
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+            </adapt>
+         </enabledWhen>
+      </page>
+      <page
+            category="org.eclipse.cdt.lsp.editor.propertyPage"
+            class="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
+            id="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
+            name="%SaveActionsPreferencePage.name">
+          <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
+	      <keywordReference id="org.eclipse.cdt.ui.common"/>
+      </page>
    </extension>
 </plugin>
 

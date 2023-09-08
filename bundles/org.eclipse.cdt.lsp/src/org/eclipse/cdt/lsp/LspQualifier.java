@@ -11,25 +11,15 @@
  * Contributors:
  *     Alexander Fedorov (ArSysOp) - Initial API and implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.internal.clangd;
+package org.eclipse.cdt.lsp;
 
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ProjectScope;
-
-public final class ResolveProjectScope implements Function<Object, Optional<ProjectScope>> {
-
-	private final ResolveProject project;
-
-	public ResolveProjectScope(IWorkspace workspace) {
-		this.project = new ResolveProject(workspace);
-	}
+public final class LspQualifier implements Supplier<String> {
 
 	@Override
-	public Optional<ProjectScope> apply(Object context) {
-		return project.apply(context).map(ProjectScope::new);
+	public String get() {
+		return "org.eclipse.cdt.lsp"; //$NON-NLS-1$
 	}
 
 }

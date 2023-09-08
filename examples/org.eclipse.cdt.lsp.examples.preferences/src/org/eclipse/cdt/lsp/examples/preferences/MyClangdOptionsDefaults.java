@@ -22,11 +22,6 @@ import org.osgi.service.component.annotations.Component;
 public class MyClangdOptionsDefaults extends BuiltinClangdOptionsDefaults {
 
 	@Override
-	public boolean preferClangd() {
-		return true;
-	}
-
-	@Override
 	public List<String> additionalOptions() {
 		return List.of("--header-insertion=never", "--default-config");
 	}

@@ -25,10 +25,6 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(property = { "service.ranking:Integer=0" })
 public class BuiltinClangdOptionsDefaults implements ClangdOptionsDefaults {
-	@Override
-	public boolean preferClangd() {
-		return false;
-	}
 
 	@Override
 	public String clangdPath() {

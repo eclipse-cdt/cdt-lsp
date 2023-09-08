@@ -12,14 +12,11 @@
  *     Alexander Fedorov (ArSysOp) - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd.editor;
+package org.eclipse.cdt.lsp.editor;
 
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.LspUtils;
-import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.editor.ResolveProjectScope;
+import org.eclipse.cdt.lsp.internal.messages.LspUiMessages;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Platform;
@@ -27,8 +24,6 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
@@ -54,11 +49,11 @@ import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
 import org.osgi.service.prefs.BackingStoreException;
 
-public final class ClangdConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
+public class EditorPropertyPage extends PropertyPage implements IWorkbenchPreferencePage {
 
-	private final String id = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
+	private final String id = "org.eclipse.cdt.lsp.editor.preferencePage"; //$NON-NLS-1$
 
-	private ClangdConfiguration configuration;
+	protected EditorConfiguration configuration;
 	private IWorkspace workspace;
 
 	private IWorkingCopyManager manager;
@@ -66,11 +61,11 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 	private Link link;
 	private Button specific;
 	private Control control;
-	private ClangdConfigurationArea area;
+	private ConfigurationArea area;
 
 	@Override
 	public void init(IWorkbench workbench) {
-		this.configuration = workbench.getService(ClangdConfiguration.class);
+		this.configuration = workbench.getService(EditorConfiguration.class);
 		this.workspace = workbench.getService(IWorkspace.class);
 	}
 
@@ -85,7 +80,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 					.orElseGet(WorkingCopyManager::new);
 		}
 		if (configuration == null) {
-			configuration = PlatformUI.getWorkbench().getService(ClangdConfiguration.class);
+			configuration = PlatformUI.getWorkbench().getService(EditorConfiguration.class);
 		}
 		if (workspace == null) {
 			workspace = PlatformUI.getWorkbench().getService(IWorkspace.class);
@@ -101,10 +96,10 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			specific = new Button(composite, SWT.CHECK);
 			specific.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, true, false));
-			specific.setText(LspEditorUiMessages.LspEditorPreferencePage_enable_project_specific);
+			specific.setText(LspUiMessages.LspEditorConfigurationPage_enable_project_specific);
 			specific.setFont(JFaceResources.getDialogFont());
 			specific.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> specificSelected()));
-			link = createLink(composite, LspEditorUiMessages.LspEditorPreferencePage_configure_ws_specific);
+			link = createLink(composite, LspUiMessages.LspEditorConfigurationPage_configure_ws_specific);
 			link.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
 			Label line = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			line.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
@@ -125,13 +120,17 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null)
+				if (PreferencesUtil.createPreferenceDialogOn(getShell(), getPreferenceId(), new String[] { id }, null)
 						.open() == Window.OK) {
 					refreshWidgets(configuration.options(getElement()));
 				}
 			}
 		});
 		return link;
+	}
+
+	protected String getPreferenceId() {
+		return id;
 	}
 
 	@Override
@@ -151,15 +150,19 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 		return composite;
 	}
 
+	protected ConfigurationArea getConfigurationArea(Composite composite, boolean isProjectScope) {
+		return new EditorConfigurationArea(composite, configuration.metadata(), isProjectScope);
+	}
+
 	private Control createPreferenceContent(Composite parent, boolean isProjectScope) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
 		composite.setFont(parent.getFont());
-		area = new ClangdConfigurationArea(composite, configuration.metadata(), isProjectScope);
+		area = getConfigurationArea(composite, isProjectScope);
 		return composite;
 	}
 
-	private void refreshWidgets(ClangdOptions options) {
+	private void refreshWidgets(EditorOptions options) {
 		setErrorMessage(null);
 		area.load(options, useProjectSettings() || !projectScope().isPresent());
 	}
@@ -187,7 +190,6 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	@Override
 	public boolean performOk() {
-		var restartRequired = area.optionsChanged(configuration.options(getElement())) && isLsActive();
 		IEclipsePreferences prefs;
 		if (projectScope().isPresent()) {
 			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
@@ -213,25 +215,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 			Platform.getLog(getClass()).error("Unable to save preferences.", e); //$NON-NLS-1$
 			return false;
 		}
-		if (restartRequired) {
-			openRestartDialog();
-		}
 		return true;
-	}
-
-	private boolean isLsActive() {
-		return LspUtils.getLanguageServers().findAny().isPresent();
-	}
-
-	private void openRestartDialog() {
-		final var dialog = new MessageDialog(getShell(),
-				LspEditorUiMessages.LspEditorPreferencePage_restart_dialog_title, null,
-				LspEditorUiMessages.LspEditorPreferencePage_restart_dialog_message, MessageDialog.INFORMATION,
-				new String[] { IDialogConstants.NO_LABEL, LspEditorUiMessages.LspEditorPreferencePage_restart_button },
-				1);
-		if (dialog.open() == 1) {
-			LspUtils.getLanguageServers().forEach(w -> w.stop());
-		}
 	}
 
 	private IScopeContext scope() {
@@ -241,7 +225,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 	private boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(configuration.metadata().clangdPath().identifer(), null))//
+				.map(n -> n.get(configuration.metadata().preferLspEditor().identifer(), null))//
 				.isPresent();
 	}
 
@@ -264,7 +248,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	@Override
 	public void dispose() {
-		Optional.ofNullable(area).ifPresent(ClangdConfigurationArea::dispose);
+		Optional.ofNullable(area).ifPresent(ConfigurationArea::dispose);
 		super.dispose();
 	}
 
