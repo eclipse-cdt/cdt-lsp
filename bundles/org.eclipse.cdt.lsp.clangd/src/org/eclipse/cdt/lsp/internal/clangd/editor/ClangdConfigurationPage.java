@@ -16,8 +16,6 @@ package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.internal.clangd.ResolveProjectScope;
@@ -189,7 +187,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 
 	@Override
 	public boolean performOk() {
-		var restartRequired = area.optionsChanged(configuration.options(getElement())) && isLspEditorOpen();
+		var restartRequired = area.optionsChanged(configuration.options(getElement())) && isLsActive();
 		IEclipsePreferences prefs;
 		if (projectScope().isPresent()) {
 			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
@@ -221,8 +219,9 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 		return true;
 	}
 
-	private boolean isLspEditorOpen() {
-		return LspUtils.getEditors().stream().anyMatch(e -> LspPlugin.LSP_C_EDITOR_ID.equals(e.getId()));
+	private boolean isLsActive() {
+		return LanguageServiceAccessor.getStartedWrappers(null, null, true).stream()
+				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)).findAny().isPresent(); //$NON-NLS-1$
 	}
 
 	private void openRestartDialog() {
