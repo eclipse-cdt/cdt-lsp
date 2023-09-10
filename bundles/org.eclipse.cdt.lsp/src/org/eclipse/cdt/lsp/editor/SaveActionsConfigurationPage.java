@@ -2,7 +2,7 @@ package org.eclipse.cdt.lsp.editor;
 
 import org.eclipse.swt.widgets.Composite;
 
-public class SaveActionsPropertyPage extends EditorPropertyPage {
+public class SaveActionsConfigurationPage extends EditorConfigurationPage {
 	private final String id = "org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage"; //$NON-NLS-1$
 
 	@Override

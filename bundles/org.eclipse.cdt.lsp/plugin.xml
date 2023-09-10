@@ -273,14 +273,14 @@
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
-            class="org.eclipse.cdt.lsp.editor.EditorPropertyPage"
+            class="org.eclipse.cdt.lsp.editor.EditorConfigurationPage"
             id="org.eclipse.cdt.lsp.editor.preferencePage"
             name="%EditorPreferencePage.name">
       </page>
       <page
 	        name="%SaveActionsPreferencePage.name"
 	        category="org.eclipse.cdt.lsp.editor.preferencePage"
-	        class="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
+	        class="org.eclipse.cdt.lsp.editor.SaveActionsConfigurationPage"
 	        id="org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage">
 	      <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
@@ -290,7 +290,7 @@
          point="org.eclipse.ui.propertyPages">
       <page
             category="org.eclipse.cdt.ui.newui.Page_head_general"
-            class="org.eclipse.cdt.lsp.editor.EditorPropertyPage"
+            class="org.eclipse.cdt.lsp.editor.EditorConfigurationPage"
             id="org.eclipse.cdt.lsp.editor.propertyPage"
             name="%EditorPreferencePage.name">
          <filter
@@ -305,7 +305,7 @@
       </page>
       <page
             category="org.eclipse.cdt.lsp.editor.propertyPage"
-            class="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
+            class="org.eclipse.cdt.lsp.editor.SaveActionsConfigurationPage"
             id="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
             name="%SaveActionsPreferencePage.name">
           <keywordReference id="org.eclipse.cdt.ui.saveactions"/>

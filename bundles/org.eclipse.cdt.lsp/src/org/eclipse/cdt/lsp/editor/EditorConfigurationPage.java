@@ -49,7 +49,7 @@ import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class EditorPropertyPage extends PropertyPage implements IWorkbenchPreferencePage {
+public class EditorConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
 
 	private final String id = "org.eclipse.cdt.lsp.editor.preferencePage"; //$NON-NLS-1$
 
