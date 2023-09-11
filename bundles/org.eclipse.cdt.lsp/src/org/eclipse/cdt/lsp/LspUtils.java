@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -26,6 +27,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.lsp4e.LanguageServerWrapper;
+import org.eclipse.lsp4e.LanguageServiceAccessor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
@@ -166,6 +169,11 @@ public class LspUtils {
 		ServiceCaller.callOnce(LspUtils.class, IWorkspace.class, //
 				w -> Arrays.stream(w.getRoot().findFilesForLocationURI(uri)).forEach(found::add));
 		return found.stream().findFirst();
+	}
+
+	public static Stream<LanguageServerWrapper> getLanguageServers() {
+		return LanguageServiceAccessor.getStartedWrappers(null, null, true).stream()
+				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)); //$NON-NLS-1$
 	}
 
 }
