@@ -10,6 +10,8 @@
  *   See git history
  *******************************************************************************/
 
+//TODO: comment this code in when https://github.com/eclipse/lsp4e/pull/783 has been merged
+
 //package org.eclipse.cdt.lsp.editor;
 //
 //import org.eclipse.jface.text.IDocument;
