@@ -71,14 +71,6 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	}
 
 	@Override
-	protected void performDefaults() {
-		super.performDefaults();
-		if (isRestartRequired()) {
-			openRestartDialog();
-		}
-	}
-
-	@Override
 	public boolean performOk() {
 		var restartRequired = isRestartRequired();
 		var done = super.performOk();
