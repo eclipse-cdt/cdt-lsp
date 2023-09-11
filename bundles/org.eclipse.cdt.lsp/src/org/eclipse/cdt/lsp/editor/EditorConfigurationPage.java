@@ -80,11 +80,15 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 					.orElseGet(WorkingCopyManager::new);
 		}
 		if (configuration == null) {
-			configuration = PlatformUI.getWorkbench().getService(Configuration.class);
+			configuration = getConfiguration();
 		}
 		if (workspace == null) {
 			workspace = PlatformUI.getWorkbench().getService(IWorkspace.class);
 		}
+	}
+
+	protected Configuration getConfiguration() {
+		return PlatformUI.getWorkbench().getService(Configuration.class);
 	}
 
 	@Override

@@ -14,23 +14,19 @@
 
 package org.eclipse.cdt.lsp.internal.clangd.editor;
 
-import java.util.Optional;
-
 import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
+import org.eclipse.cdt.lsp.editor.Configuration;
 import org.eclipse.cdt.lsp.editor.ConfigurationArea;
 import org.eclipse.cdt.lsp.editor.EditorConfigurationPage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
-import org.eclipse.ui.preferences.WorkingCopyManager;
 
 public final class ClangdConfigurationPage extends EditorConfigurationPage {
 
@@ -43,21 +39,8 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	}
 
 	@Override
-	public void setContainer(IPreferencePageContainer container) {
-		super.setContainer(container);
-		if (manager == null) {
-			manager = Optional.ofNullable(container)//
-					.filter(IWorkbenchPreferenceContainer.class::isInstance)//
-					.map(IWorkbenchPreferenceContainer.class::cast)//
-					.map(IWorkbenchPreferenceContainer::getWorkingCopyManager)//
-					.orElseGet(WorkingCopyManager::new);
-		}
-		if (configuration == null) {
-			configuration = PlatformUI.getWorkbench().getService(ClangdConfiguration.class);
-		}
-		if (workspace == null) {
-			workspace = PlatformUI.getWorkbench().getService(IWorkspace.class);
-		}
+	protected Configuration getConfiguration() {
+		return PlatformUI.getWorkbench().getService(ClangdConfiguration.class);
 	}
 
 	@Override
