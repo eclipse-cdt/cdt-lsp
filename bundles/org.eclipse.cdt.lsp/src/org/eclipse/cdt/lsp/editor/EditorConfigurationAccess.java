@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 
 @Component
-public class EditorConfigurationAccess extends ConfigurationAccess implements EditorConfiguration {
+public class EditorConfigurationAccess extends ConfigurationAccess implements Configuration {
 
 	@Reference
 	private EditorMetadata metadata;

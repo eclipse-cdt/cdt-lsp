@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.cdt.lsp.editor.EditorConfigurationAccess">
    <service>
-      <provide interface="org.eclipse.cdt.lsp.editor.EditorConfiguration"/>
+      <provide interface="org.eclipse.cdt.lsp.editor.Configuration"/>
    </service>
    <reference cardinality="0..1" field="enable" interface="org.eclipse.cdt.lsp.editor.LanguageServerEnable" name="enable"/>
    <reference cardinality="1..1" field="metadata" interface="org.eclipse.cdt.lsp.editor.EditorMetadata" name="metadata"/>

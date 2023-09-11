@@ -14,15 +14,14 @@
 package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
+import org.eclipse.cdt.lsp.editor.ConfigurationArea;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
@@ -33,9 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -45,9 +42,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public final class ClangdConfigurationArea {
+public final class ClangdConfigurationArea extends ConfigurationArea {
 
-	private final int columns = 3;
 	private final Text path;
 	private final Button tidy;
 	private final Combo completion;
@@ -58,10 +54,8 @@ public final class ClangdConfigurationArea {
 	private final Group group;
 	private ControlEnableState enableState;
 
-	private final Map<PreferenceMetadata<Boolean>, Button> buttons;
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private final Map<PreferenceMetadata<String>, Combo> combos;
-	private final List<Consumer<TypedEvent>> listeners;
 
 	private final static String[] completionOptions = { "detailed", "bundled", "" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	private final static String[] completionsKeys = { LspEditorUiMessages.LspEditorPreferencePage_completion_detailed,
@@ -70,10 +64,9 @@ public final class ClangdConfigurationArea {
 	private final Map<String, String> completions;
 
 	public ClangdConfigurationArea(Composite parent, ClangdMetadata metadata, boolean isProjectScope) {
-		this.buttons = new HashMap<>();
+		super(3);
 		this.texts = new HashMap<>();
 		this.combos = new HashMap<>();
-		this.listeners = new ArrayList<>();
 		this.completions = new HashMap<>();
 		for (int i = 0; i < completionsKeys.length; i++) {
 			completions.put(completionsKeys[i], completionOptions[i]);
@@ -81,12 +74,12 @@ public final class ClangdConfigurationArea {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
-		this.group = createGroup(composite, LspEditorUiMessages.LspEditorPreferencePage_clangd_options_label);
+		this.group = createGroup(composite, LspEditorUiMessages.LspEditorPreferencePage_clangd_options_label, 3);
 		this.path = createFileSelector(metadata.clangdPath(), group, this::selectClangdExecutable);
-		this.tidy = createCheckbox(metadata.useTidy(), group);
-		this.index = createCheckbox(metadata.useBackgroundIndex(), group);
+		this.tidy = createButton(metadata.useTidy(), group, SWT.CHECK, 0);
+		this.index = createButton(metadata.useBackgroundIndex(), group, SWT.CHECK, 0);
 		this.completion = createCombo(metadata.completionStyle(), group, completionsKeys);
-		this.pretty = createCheckbox(metadata.prettyPrint(), group);
+		this.pretty = createButton(metadata.prettyPrint(), group, SWT.CHECK, 0);
 		this.driver = createText(metadata.queryDriver(), group, false);
 		this.additional = createText(metadata.additionalOptions(), group, true);
 	}
@@ -104,27 +97,6 @@ public final class ClangdConfigurationArea {
 		} else {
 			enableState = ControlEnableState.disable(group);
 		}
-	}
-
-	private Group createGroup(Composite parent, String label) {
-		Group group = new Group(parent, SWT.NONE);
-		group.setFont(parent.getFont());
-		group.setText(label);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 3;
-		group.setLayout(layout);
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		return group;
-	}
-
-	private Button createCheckbox(PreferenceMetadata<Boolean> meta, Composite composite) {
-		Button button = new Button(composite, SWT.CHECK);
-		button.setLayoutData(GridDataFactory.fillDefaults().span(columns, 1).create());
-		button.setData(meta);
-		button.setText(meta.name());
-		button.setToolTipText(meta.description());
-		buttons.put(meta, button);
-		return button;
 	}
 
 	private Text createFileSelector(PreferenceMetadata<String> meta, Composite composite,
@@ -193,43 +165,36 @@ public final class ClangdConfigurationArea {
 		return dialog.open();
 	}
 
-	void addChangeListener(Consumer<TypedEvent> listener) {
-		listeners.add(listener);
-	}
-
-	void removeChangeListener(Consumer<TypedEvent> listener) {
-		listeners.add(listener);
-	}
-
-	void changed(TypedEvent event) {
-		listeners.forEach(c -> c.accept(event));
-	}
-
-	void load(ClangdOptions options, boolean enable) {
-		path.setText(options.clangdPath());
-		tidy.setSelection(options.useTidy());
-		index.setSelection(options.useBackgroundIndex());
-		for (int i = 0; i < completionOptions.length; i++) {
-			if (completionOptions[i].equals(options.completionStyle())) {
-				completion.select(i);
+	@Override
+	public void load(Object options, boolean enable) {
+		if (options instanceof ClangdOptions clangdOptions) {
+			path.setText(clangdOptions.clangdPath());
+			tidy.setSelection(clangdOptions.useTidy());
+			index.setSelection(clangdOptions.useBackgroundIndex());
+			for (int i = 0; i < completionOptions.length; i++) {
+				if (completionOptions[i].equals(clangdOptions.completionStyle())) {
+					completion.select(i);
+				}
 			}
+			pretty.setSelection(clangdOptions.prettyPrint());
+			driver.setText(clangdOptions.queryDriver());
+			additional.setText(
+					clangdOptions.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
+			enablePreferenceContent(enable);
 		}
-		pretty.setSelection(options.prettyPrint());
-		driver.setText(options.queryDriver());
-		additional.setText(options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
-		enablePreferenceContent(enable);
 	}
 
-	void store(IEclipsePreferences prefs) {
+	@Override
+	public void store(IEclipsePreferences prefs) {
 		OsgiPreferenceMetadataStore store = new OsgiPreferenceMetadataStore(prefs);
 		buttons.entrySet().forEach(e -> store.save(e.getValue().getSelection(), e.getKey()));
 		texts.entrySet().forEach(e -> store.save(e.getValue().getText(), e.getKey()));
 		combos.entrySet().forEach(e -> store.save(completions.get(e.getValue().getText()), e.getKey()));
 	}
 
-	void dispose() {
-		listeners.clear();
-		buttons.clear();
+	@Override
+	public void dispose() {
+		super.dispose();
 		texts.clear();
 		combos.clear();
 	}

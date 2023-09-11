@@ -53,19 +53,19 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 
 	private final String id = "org.eclipse.cdt.lsp.editor.preferencePage"; //$NON-NLS-1$
 
-	protected EditorConfiguration configuration;
-	private IWorkspace workspace;
+	protected Configuration configuration;
+	protected IWorkspace workspace;
 
-	private IWorkingCopyManager manager;
+	protected IWorkingCopyManager manager;
 
 	private Link link;
 	private Button specific;
 	private Control control;
-	private ConfigurationArea area;
+	protected ConfigurationArea area;
 
 	@Override
 	public void init(IWorkbench workbench) {
-		this.configuration = workbench.getService(EditorConfiguration.class);
+		this.configuration = workbench.getService(Configuration.class);
 		this.workspace = workbench.getService(IWorkspace.class);
 	}
 
@@ -80,7 +80,7 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 					.orElseGet(WorkingCopyManager::new);
 		}
 		if (configuration == null) {
-			configuration = PlatformUI.getWorkbench().getService(EditorConfiguration.class);
+			configuration = PlatformUI.getWorkbench().getService(Configuration.class);
 		}
 		if (workspace == null) {
 			workspace = PlatformUI.getWorkbench().getService(IWorkspace.class);
@@ -151,7 +151,7 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 	}
 
 	protected ConfigurationArea getConfigurationArea(Composite composite, boolean isProjectScope) {
-		return new EditorConfigurationArea(composite, configuration.metadata(), isProjectScope);
+		return new EditorConfigurationArea(composite, (EditorMetadata) configuration.metadata(), isProjectScope);
 	}
 
 	private Control createPreferenceContent(Composite parent, boolean isProjectScope) {
@@ -162,12 +162,12 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 		return composite;
 	}
 
-	private void refreshWidgets(EditorOptions options) {
+	protected void refreshWidgets(Object options) {
 		setErrorMessage(null);
 		area.load(options, useProjectSettings() || !projectScope().isPresent());
 	}
 
-	private Optional<ProjectScope> projectScope() {
+	protected Optional<ProjectScope> projectScope() {
 		return new ResolveProjectScope(workspace).apply(getElement());
 	}
 
@@ -222,20 +222,20 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 		return projectScope().map(IScopeContext.class::cast).orElse(InstanceScope.INSTANCE);
 	}
 
-	private boolean hasProjectSpecificOptions() {
+	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(configuration.metadata().preferLspEditor().identifer(), null))//
+				.map(n -> n.get(((EditorMetadata) configuration.metadata()).preferLspEditor().identifer(), null))//
 				.isPresent();
 	}
 
-	private boolean useProjectSettings() {
+	protected boolean useProjectSettings() {
 		return Optional.ofNullable(specific)//
 				.map(s -> s.getSelection())//
 				.orElse(Boolean.FALSE);
 	}
 
-	private void enableProjectSpecificSettings(boolean use) {
+	protected void enableProjectSpecificSettings(boolean use) {
 		specific.setSelection(use);
 		updateLinkVisibility();
 	}

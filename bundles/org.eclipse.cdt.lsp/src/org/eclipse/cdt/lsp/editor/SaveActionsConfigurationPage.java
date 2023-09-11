@@ -7,7 +7,7 @@ public class SaveActionsConfigurationPage extends EditorConfigurationPage {
 
 	@Override
 	protected ConfigurationArea getConfigurationArea(Composite composite, boolean isProjectScope) {
-		return new SaveActionsConfigurationArea(composite, configuration.metadata(), isProjectScope);
+		return new SaveActionsConfigurationArea(composite, (EditorMetadata) configuration.metadata(), isProjectScope);
 	}
 
 	@Override

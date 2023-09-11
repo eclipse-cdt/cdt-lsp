@@ -21,11 +21,11 @@ public final class EditorPreferenceInitializer extends AbstractPreferenceInitial
 
 	@Override
 	public void initializeDefaultPreferences() {
-		ServiceCaller.callOnce(getClass(), EditorConfiguration.class, this::initializeDefaults);
+		ServiceCaller.callOnce(getClass(), Configuration.class, this::initializeDefaults);
 	}
 
-	private void initializeDefaults(EditorConfiguration configuration) {
-		EditorMetadata metadata = configuration.metadata();
+	private void initializeDefaults(Configuration configuration) {
+		EditorMetadata metadata = (EditorMetadata) configuration.metadata();
 		String qualifier = configuration.qualifier();
 		initializeBoolean(metadata.preferLspEditor(), qualifier);
 		initializeBoolean(metadata.formatOnSave(), qualifier);

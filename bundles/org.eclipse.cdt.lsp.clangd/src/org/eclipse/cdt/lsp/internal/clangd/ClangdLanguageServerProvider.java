@@ -22,7 +22,7 @@ import java.util.Objects;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
-import org.eclipse.cdt.lsp.editor.EditorConfiguration;
+import org.eclipse.cdt.lsp.editor.Configuration;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IProject;
@@ -33,8 +33,8 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
 			ClangdConfiguration.class);
 
-	private final ServiceCaller<EditorConfiguration> editorConfiguration = new ServiceCaller<>(getClass(),
-			EditorConfiguration.class);
+	private final ServiceCaller<Configuration> editorConfiguration = new ServiceCaller<>(getClass(),
+			Configuration.class);
 
 	@Override
 	public Object getInitializationOptions(URI rootUri) {
