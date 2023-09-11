@@ -16,6 +16,7 @@ package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import java.util.Optional;
 
+import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.internal.clangd.ResolveProjectScope;
@@ -33,7 +34,6 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
-import org.eclipse.lsp4e.LanguageServiceAccessor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -220,8 +220,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 	}
 
 	private boolean isLsActive() {
-		return LanguageServiceAccessor.getStartedWrappers(null, null, true).stream()
-				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)).findAny().isPresent(); //$NON-NLS-1$
+		return LspUtils.getLanguageServers().findAny().isPresent();
 	}
 
 	private void openRestartDialog() {
@@ -231,9 +230,7 @@ public final class ClangdConfigurationPage extends PropertyPage implements IWork
 				new String[] { IDialogConstants.NO_LABEL, LspEditorUiMessages.LspEditorPreferencePage_restart_button },
 				1);
 		if (dialog.open() == 1) {
-			LanguageServiceAccessor.getStartedWrappers(null, null, true).stream()
-					.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)) //$NON-NLS-1$
-					.forEach(w -> w.stop());
+			LspUtils.getLanguageServers().forEach(w -> w.stop());
 		}
 	}
 
