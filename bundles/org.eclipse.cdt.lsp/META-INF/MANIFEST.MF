@@ -37,4 +37,5 @@ Service-Component: OSGI-INF/org.eclipse.cdt.lsp.editor.BuiltinEditorOptionsDefau
  OSGI-INF/org.eclipse.cdt.lsp.editor.DefaultConfigurationVisibility.xml,
  OSGI-INF/org.eclipse.cdt.lsp.editor.EditorConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.editor.EditorMetadataDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.editor.format.FormatOnSave.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.InitialFileManager.xml

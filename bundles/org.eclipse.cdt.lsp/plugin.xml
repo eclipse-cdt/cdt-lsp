@@ -277,6 +277,14 @@
             id="org.eclipse.cdt.lsp.editor.preferencePage"
             name="%EditorPreferencePage.name">
       </page>
+      <page
+	        name="%SaveActionsPreferencePage.name"
+	        category="org.eclipse.cdt.lsp.editor.preferencePage"
+	        class="org.eclipse.cdt.lsp.editor.SaveActionsConfigurationPage"
+	        id="org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage">
+	      <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
+	      <keywordReference id="org.eclipse.cdt.ui.common"/>
+      </page>      
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
@@ -295,6 +303,14 @@
             </adapt>
          </enabledWhen>
       </page>
+      <page
+            category="org.eclipse.cdt.lsp.editor.propertyPage"
+            class="org.eclipse.cdt.lsp.editor.SaveActionsConfigurationPage"
+            id="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
+            name="%SaveActionsPreferencePage.name">
+          <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
+	      <keywordReference id="org.eclipse.cdt.ui.common"/>
+      </page>      
    </extension>
 </plugin>
 
