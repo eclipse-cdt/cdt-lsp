@@ -124,8 +124,8 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (PreferencesUtil.createPreferenceDialogOn(getShell(), getPreferenceId(), new String[] { id }, null)
-						.open() == Window.OK) {
+				if (PreferencesUtil.createPreferenceDialogOn(getShell(), getPreferenceId(),
+						new String[] { id, getPreferenceId() }, null).open() == Window.OK) {
 					refreshWidgets(configuration.options(getElement()));
 				}
 			}

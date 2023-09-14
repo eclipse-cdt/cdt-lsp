@@ -15,4 +15,12 @@ public class SaveActionsConfigurationPage extends EditorConfigurationPage {
 		return id;
 	}
 
+	@Override
+	protected boolean hasProjectSpecificOptions() {
+		return projectScope()//
+				.map(p -> p.getNode(configuration.qualifier()))//
+				.map(n -> n.get(((EditorMetadata) configuration.metadata()).formatAllLines().identifer(), null))//
+				.isPresent();
+	}
+
 }
