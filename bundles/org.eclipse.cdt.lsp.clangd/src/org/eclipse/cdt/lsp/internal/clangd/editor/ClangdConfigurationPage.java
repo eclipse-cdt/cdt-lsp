@@ -55,17 +55,31 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 
 	@Override
 	public boolean performOk() {
-		var restartRequired = isRestartRequired();
+		var configSettingsChanged = configurationSettingsChanged();
+		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
 		var done = super.performOk();
-		if (done && restartRequired) {
+		if (done && isLsActive() && (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
+				|| projectOptionsDifferFromWorkspace)) {
 			openRestartDialog();
 		}
 		return done;
 	}
 
-	private boolean isRestartRequired() {
-		return ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions) configuration.options(getElement()))
-				&& isLsActive();
+	/**
+	 * Returns true when the page settings differ from the stored.
+	 * @return
+	 */
+	private boolean configurationSettingsChanged() {
+		return ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions) configuration.options(getElement()));
+	}
+
+	/**
+	 * Returns true when project scope AND the 'Enable project-specific settings' check-box has been modified AND
+	 *  the current project page settings differ from the stored options in workspace preferences.
+	 */
+	private boolean projectOptionsDifferFromWorkspace() {
+		return hasProjectSpecificOptions() != useProjectSettings()
+				&& ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions) configuration.options(null));
 	}
 
 	private boolean isLsActive() {

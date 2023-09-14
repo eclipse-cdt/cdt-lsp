@@ -200,9 +200,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 	}
 
 	public boolean optionsChanged(ClangdOptions options) {
-		if (!group.isVisible()) {
-			return false;
-		}
 		return !options.clangdPath().equals(path.getText()) || options.useTidy() != tidy.getSelection()
 				|| options.useBackgroundIndex() != index.getSelection()
 				|| !options.completionStyle().equals(completions.get(completion.getText()))
