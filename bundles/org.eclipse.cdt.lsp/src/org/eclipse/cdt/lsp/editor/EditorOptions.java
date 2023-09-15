@@ -21,25 +21,4 @@ public interface EditorOptions {
 	 */
 	boolean preferLspEditor();
 
-	/**
-	 * Format source code on file save action
-	 *
-	 * @return if source code should be formatted on file save action
-	 */
-	boolean formatOnSave();
-
-	/**
-	 * Format all lines in source file
-	 *
-	 * @return if all lines should be formatted
-	 */
-	boolean formatAllLines();
-
-	/**
-	 * Format edited lines only
-	 *
-	 * @return if only edited lines should be formatted
-	 */
-	boolean formatEditedLines();
-
 }

@@ -35,21 +35,6 @@ public class EditorPreferredOptions extends PreferredOptions implements EditorOp
 	}
 
 	@Override
-	public boolean formatOnSave() {
-		return booleanValue(metadata.formatOnSave());
-	}
-
-	@Override
-	public boolean formatAllLines() {
-		return booleanValue(metadata.formatAllLines());
-	}
-
-	@Override
-	public boolean formatEditedLines() {
-		return booleanValue(metadata.formatEditedLines());
-	}
-
-	@Override
 	public boolean isEnabledFor(IProject project) {
 		if (enable != null) {
 			return enable.isEnabledFor(project);

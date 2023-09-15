@@ -22,19 +22,4 @@ public class BuiltinEditorOptionsDefault implements EditorOptionsDefaults {
 		return false;
 	}
 
-	@Override
-	public boolean formatOnSave() {
-		return false;
-	}
-
-	@Override
-	public boolean formatAllLines() {
-		return true;
-	}
-
-	@Override
-	public boolean formatEditedLines() {
-		return false;
-	}
-
 }

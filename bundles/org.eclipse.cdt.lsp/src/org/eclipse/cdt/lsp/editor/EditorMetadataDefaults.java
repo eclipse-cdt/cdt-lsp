@@ -32,31 +32,4 @@ public class EditorMetadataDefaults implements EditorMetadata {
 				LspUiMessages.LspEditorConfigurationPage_preferLspEditor_description);
 	}
 
-	@Override
-	public PreferenceMetadata<Boolean> formatOnSave() {
-		return new PreferenceMetadata<>(Boolean.class, //
-				"format_source", //$NON-NLS-1$
-				defaults.formatOnSave(), //
-				LspUiMessages.SaveActionsPreferencePage_FormatSourceCode,
-				LspUiMessages.SaveActionsPreferencePage_FormatSourceCode_description);
-	}
-
-	@Override
-	public PreferenceMetadata<Boolean> formatAllLines() {
-		return new PreferenceMetadata<>(Boolean.class, //
-				"format_all_lines", //$NON-NLS-1$
-				defaults.formatAllLines(), //
-				LspUiMessages.SaveActionsPreferencePage_FormaAllLines,
-				LspUiMessages.SaveActionsPreferencePage_FormaAllLines_description);
-	}
-
-	@Override
-	public PreferenceMetadata<Boolean> formatEditedLines() {
-		return new PreferenceMetadata<>(Boolean.class, //
-				"format_edited_lines", //$NON-NLS-1$
-				defaults.formatEditedLines(), //
-				LspUiMessages.SaveActionsPreferencePage_FormaEditedLines,
-				LspUiMessages.SaveActionsPreferencePage_FormaEditedLines_description);
-	}
-
 }
