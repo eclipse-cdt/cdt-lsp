@@ -24,15 +24,6 @@ import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 public interface ClangdMetadata {
 
 	/**
-	 * Returns the metadata for the "Prefer clangd" option, must not return <code>null</code>.
-	 *
-	 * @return the metadata for the "Prefer clangd" option
-	 *
-	 * @see ClangdOptions#preferClangd()
-	 */
-	PreferenceMetadata<Boolean> preferClangd();
-
-	/**
 	 * Returns the metadata for the "Clangd path" option, must not return <code>null</code>.
 	 *
 	 * @return the metadata for the "Clangd path" option

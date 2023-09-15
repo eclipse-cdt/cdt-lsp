@@ -29,15 +29,6 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 	private ClangdOptionsDefaults defaults;
 
 	@Override
-	public PreferenceMetadata<Boolean> preferClangd() {
-		return new PreferenceMetadata<>(Boolean.class, //
-				"prefer_clangd", //$NON-NLS-1$
-				defaults.preferClangd(), //
-				LspEditorUiMessages.LspEditorPreferencePage_preferLspEditor,
-				LspEditorUiMessages.LspEditorPreferencePage_preferLspEditor_description);
-	}
-
-	@Override
 	public PreferenceMetadata<String> clangdPath() {
 		return new PreferenceMetadata<>(String.class, //
 				"clangd_path", //$NON-NLS-1$

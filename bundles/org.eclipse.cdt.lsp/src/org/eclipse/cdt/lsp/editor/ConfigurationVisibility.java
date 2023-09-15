@@ -10,20 +10,20 @@
  * Contributors:
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.clangd;
+package org.eclipse.cdt.lsp.editor;
 
 /**
  * Provides access to the visibility of configuration elements in the UI taking into account the scope (project or workspace).
- * Should be implemented as OSGi service when {@link ClangdEnable} service has been provided
+ * Should be implemented as OSGi service when {@link org.eclipse.cdt.lsp.editor.LanguageServerEnable} service has been provided
  * to hide the 'Prefer C/C++ Editor (LSP)' check-box.
  */
-public interface ClangdConfigurationVisibility {
+public interface ConfigurationVisibility {
 
 	/**
 	 * Changes the visibility of the 'Prefer C/C++ Editor (LSP)' check-box.
 	 * @param isProjectScope
 	 * @return true when the check-box should be displayed.
 	 */
-	boolean showPreferClangd(boolean isProjectScope);
+	boolean showPreferLsp(boolean isProjectScope);
 
 }

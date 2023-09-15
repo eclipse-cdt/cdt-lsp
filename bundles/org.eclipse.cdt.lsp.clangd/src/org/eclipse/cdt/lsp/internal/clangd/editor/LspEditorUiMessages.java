@@ -23,8 +23,6 @@ public class LspEditorUiMessages extends NLS {
 		NLS.initializeMessages(BUNDLE_NAME, LspEditorUiMessages.class);
 	}
 
-	public static String LspEditorPreferencePage_preferLspEditor;
-	public static String LspEditorPreferencePage_preferLspEditor_description;
 	public static String LspEditorPreferencePage_path;
 	public static String LspEditorPreferencePage_path_description;
 	public static String LspEditorPreferencePage_enable_tidy;
@@ -46,7 +44,7 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_completion_detailed;
 	public static String LspEditorPreferencePage_completion_bundled;
 	public static String LspEditorPreferencePage_completion_default;
-  public static String LspEditorPreferencePage_select_clangd_executable;
+	public static String LspEditorPreferencePage_select_clangd_executable;
 
 	public static String CProjectChangeMonitor_yaml_scanner_error;
 	public static String CProjectChangeMonitor_yaml_scanner_error_message;

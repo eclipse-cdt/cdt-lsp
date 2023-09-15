@@ -19,30 +19,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.clangd.ClangdEnable;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
-final class ClangdPreferredOptions implements ClangdOptions, ClangdEnable {
+final class ClangdPreferredOptions implements ClangdOptions {
 
 	private final String qualifier;
 	private final IScopeContext[] scopes;
 	private final ClangdMetadata metadata;
-	private final ClangdEnable enable;
 
-	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata metadata, ClangdEnable enable) {
+	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata metadata) {
 		this.qualifier = Objects.requireNonNull(qualifier);
 		this.scopes = Objects.requireNonNull(scopes);
 		this.metadata = Objects.requireNonNull(metadata);
-		this.enable = enable;
-	}
-
-	@Override
-	public boolean preferClangd() {
-		return booleanValue(metadata.preferClangd());
 	}
 
 	@Override
@@ -99,14 +90,6 @@ final class ClangdPreferredOptions implements ClangdOptions, ClangdEnable {
 				.map(this::stringValue)//
 				.map(Boolean::valueOf)//
 				.orElseGet(meta::defaultValue);
-	}
-
-	@Override
-	public boolean isEnabledFor(IProject project) {
-		if (enable != null) {
-			return enable.isEnabledFor(project);
-		}
-		return booleanValue(metadata.preferClangd());
 	}
 
 }

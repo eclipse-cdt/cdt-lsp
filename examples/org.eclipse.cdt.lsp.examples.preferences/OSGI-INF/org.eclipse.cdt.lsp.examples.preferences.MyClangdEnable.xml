@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.cdt.lsp.examples.preferences.MyClangdEnable">
+   <property name="service.ranking" type="Integer" value="100"/>
    <service>
-      <provide interface="org.eclipse.cdt.lsp.clangd.ClangdEnable"/>
+      <provide interface="org.eclipse.cdt.lsp.editor.LanguageServerEnable"/>
    </service>
    <implementation class="org.eclipse.cdt.lsp.examples.preferences.MyClangdEnable"/>
 </scr:component>

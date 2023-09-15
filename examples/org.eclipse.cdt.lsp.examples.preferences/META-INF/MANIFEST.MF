@@ -7,10 +7,11 @@ Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.cdt.lsp.clangd,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.eclipse.cdt.lsp
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp.examples.preferences
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.MyClangdOptionsDefaults.xml,
+Service-Component: OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.HidePreferLsp.xml,
  OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.MyClangdEnable.xml,
- OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.HidePreferClangd.xml
+ OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.MyClangdOptionsDefaults.xml

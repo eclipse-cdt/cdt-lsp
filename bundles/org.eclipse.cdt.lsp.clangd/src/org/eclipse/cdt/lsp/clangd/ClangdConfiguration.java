@@ -16,8 +16,8 @@ package org.eclipse.cdt.lsp.clangd;
 import java.net.URI;
 import java.util.List;
 
+import org.eclipse.cdt.lsp.editor.Configuration;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.preferences.IPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
 
@@ -28,43 +28,7 @@ import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
  * @see IScopeContext
  *
  */
-public interface ClangdConfiguration {
-
-	/**
-	 * Returns the clangd defaults
-	 *
-	 * @return clangd defaults
-	 */
-	ClangdOptions defaults();
-
-	/**
-	 * Returns the clangd options for the given context like {@link IResource} or {@link URI}, must not return <code>null</code>
-	 * @param context to be adapter to the proper scope
-	 *
-	 * @return clangd options
-	 */
-	ClangdOptions options(Object context);
-
-	/**
-	 * Returns the clangd preference store for the given context like {@link IResource} or {@link URI}, must not return <code>null</code>
-	 * @param context to be adapter to the proper scope
-	 *
-	 * @return preference store
-	 */
-	IPreferenceMetadataStore storage(Object context);
-
-	/**
-	 * Return the metadata for clangd options, must not return <code>null</code>
-	 *
-	 * @return the clangd option metadata
-	 */
-	ClangdMetadata metadata();
-
-	/**
-	 * Default qualifier to use for preference storage
-	 * @return preference qualifier
-	 */
-	String qualifier();
+public interface ClangdConfiguration extends Configuration {
 
 	/**
 	 * Provides list of commands suitable for {@link ProcessStreamConnectionProvider} for the given context like {@link IResource} or {@link URI}, must not return <code>null</code>

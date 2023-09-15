@@ -4,6 +4,7 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.cdt.lsp;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp,
+ org.eclipse.cdt.lsp.editor,
  org.eclipse.cdt.lsp.server,
  org.eclipse.cdt.lsp.server.enable,
  org.eclipse.cdt.lsp.services
@@ -32,4 +33,8 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.InitialFileManager.xml
+Service-Component: OSGI-INF/org.eclipse.cdt.lsp.editor.BuiltinEditorOptionsDefault.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.editor.DefaultConfigurationVisibility.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.editor.EditorConfigurationAccess.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.editor.EditorMetadataDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.InitialFileManager.xml

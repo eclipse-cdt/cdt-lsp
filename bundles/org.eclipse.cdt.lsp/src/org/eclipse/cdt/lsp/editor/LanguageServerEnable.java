@@ -9,21 +9,18 @@
  * Contributors:
  *   See git history
  *******************************************************************************/
-package org.eclipse.cdt.lsp.clangd;
+
+package org.eclipse.cdt.lsp.editor;
 
 import org.eclipse.core.resources.IProject;
 
-/**
- * Should be implemented by bundles as OSGi service to enable the Language
- * Server and LSP based C/C++ Editor via project properties.
- */
-public interface ClangdEnable {
+public interface LanguageServerEnable {
 
 	/**
-	 * Checks whether clangd and the LSP based C/C++ Editor should be enabled for the given project.
+	 * Checks whether the language server and the LSP based C/C++ Editor should be enabled for the given project.
 	 * The enable can be linked with certain project properties (e.g. project natures).
 	 * @param project
-	 * @return true when clangd and LSP based editor should be enabled for the given project
+	 * @return true when language server and LSP based editor should be enabled for the given project
 	 */
 	public boolean isEnabledFor(IProject project);
 }

@@ -11,13 +11,13 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.examples.preferences;
 
-import org.eclipse.cdt.lsp.clangd.ClangdEnable;
+import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.osgi.service.component.annotations.Component;
 
-@Component
-public class MyClangdEnable implements ClangdEnable {
+@Component(property = { "service.ranking:Integer=100" })
+public class MyClangdEnable implements LanguageServerEnable {
 
 	@Override
 	public boolean isEnabledFor(IProject project) {

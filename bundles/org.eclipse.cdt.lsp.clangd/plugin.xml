@@ -22,20 +22,19 @@
       <!-- FIXME: AF: Exract clangd-specific preferences -->
       <!-- FIXME: AF: Move commmon part to "org.eclipse.cdt.lsp[.editor]" -->
       <page
-            category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
+            category="org.eclipse.cdt.lsp.editor.preferencePage"
             class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
-            id="org.eclipse.cdt.lsp.clangd.editor.preference"
-            name="Editor (LSP)">
+            id="org.eclipse.cdt.lsp.clangd.editor.preferencePage"
+            name="%ClangdConfigurationPage.name">
       </page>
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
-      <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp[.editor]" -->
       <page
-            category="org.eclipse.cdt.ui.newui.Page_head_general"
+            category="org.eclipse.cdt.lsp.editor.propertyPage"
             class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
-            id="org.eclipse.cdt.lsp.clangd.editor.property"
-            name="Editor (LSP)">
+            id="org.eclipse.cdt.lsp.clangd.editor.propertyPage"
+            name="%ClangdConfigurationPage.name">
          <filter
                name="projectNature"
                value="org.eclipse.cdt.core.cnature">
@@ -49,8 +48,6 @@
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
-      <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp" -->
-      <!-- FIXME: AF: Move me to "org.eclipse.cdt.lsp[.editor]" -->
       <propertyTester
             class="org.eclipse.cdt.lsp.internal.clangd.editor.expressions.LspEditorActiveTester"
             id="org.eclipse.cdt.lsp.editor.active"

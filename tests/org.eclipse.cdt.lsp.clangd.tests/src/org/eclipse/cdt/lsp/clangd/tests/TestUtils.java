@@ -18,7 +18,9 @@ package org.eclipse.cdt.lsp.clangd.tests;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.editor.Configuration;
+import org.eclipse.cdt.lsp.editor.EditorMetadata;
+import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -31,14 +33,14 @@ import org.junit.jupiter.api.TestInfo;
 public final class TestUtils {
 
 	public static void setLspPreferred(IProject project, boolean value) {
-		ServiceCaller.callOnce(TestUtils.class, ClangdConfiguration.class, //
-				cc -> cc.storage(project).save(value, cc.metadata().preferClangd()));
+		ServiceCaller.callOnce(TestUtils.class, Configuration.class, //
+				cc -> cc.storage(project).save(value, ((EditorMetadata) cc.metadata()).preferLspEditor()));
 	}
 
 	public static boolean isLspPreferred(IProject project) {
 		boolean[] enabled = new boolean[1];
-		ServiceCaller.callOnce(TestUtils.class, ClangdConfiguration.class, //
-				c -> enabled[0] = c.options(project).preferClangd());
+		ServiceCaller.callOnce(TestUtils.class, Configuration.class, //
+				c -> enabled[0] = ((EditorOptions) c.options(project)).preferLspEditor());
 		return enabled[0];
 	}
 
