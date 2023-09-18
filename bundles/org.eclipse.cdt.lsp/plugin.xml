@@ -17,7 +17,7 @@
             class="org.eclipse.cdt.lsp.editor.EditorPreferenceInitializer">
       </initializer>
    </extension>
-   <extension-point id="serverProvider" name="C/C++ Language Server" schema="schema/serverProvider.exsd"/>
+   <extension-point id="serverProvider" name="%Server.name" schema="schema/serverProvider.exsd"/>
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -26,7 +26,7 @@
             default="false"
             icon="icons/c.png"
             id="org.eclipse.cdt.lsp.CEditor"
-            name="C/C++ Editor (LSP)">
+            name="%CEditor.name">
          <contentTypeBinding
                contentTypeId="org.eclipse.cdt.core.cSource">
          </contentTypeBinding>
@@ -150,7 +150,7 @@
             icon="icons/c.png"
             id="org.eclipse.cdt.lsp.navigator.content"
             labelProvider="org.eclipse.lsp4e.outline.SymbolsLabelProvider"
-            name="LS Symbols"
+            name="%SymbolsLabelProvider.name"
             priority="normal">
 	    <triggerPoints>
         <and>
