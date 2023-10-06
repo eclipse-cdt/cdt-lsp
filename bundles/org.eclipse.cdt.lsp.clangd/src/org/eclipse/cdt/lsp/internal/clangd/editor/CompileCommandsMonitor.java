@@ -13,9 +13,14 @@
 
 package org.eclipse.cdt.lsp.internal.clangd.editor;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.eclipse.cdt.lsp.LspUtils;
@@ -28,43 +33,81 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * Detects changes (add/delete/content) of JSON Compilation Database Format
  * Specification files ({@value #CDBF_SPECIFICATION_JSON_FILE}) in the
- * {@link IWorkspace workspace} and
- * {@link CompileCommandsMonitor#refreshEditor(IEditorPart) refreshes} open
- * editors if their {@link IEditorPart#getEditorInput()} is affected.
+ * {@link IWorkspace workspace} and {@link #restartLanguageServers() restarts
+ * the language servers} if any cpp file from the affected projects is  open
+ * in an editor.
  */
 public class CompileCommandsMonitor {
-	private static final String CDBF_SPECIFICATION_JSON_FILE = "compile_commands.json";
+	private static final String CDBF_SPECIFICATION_JSON_FILE = "compile_commands.json"; //$NON-NLS-1$
+
+	private static final long DEBOUNCE_DELAY = 2000; // ms
+
+	private final IWorkspace workspace;
+
+	/**
+	 * Utility class for postponing the execution of a {@link Runnable} to avoid
+	 * unnecessary or frequent invocation.
+	 */
+	private static final class Debouncer {
+		private long debounceDelay;
+		private ScheduledExecutorService scheduler;
+		private ScheduledFuture<?> debounceTimer;
+
+		public Debouncer(long debounceDelay) {
+			this.debounceDelay = debounceDelay;
+		}
+
+		public void run(Runnable runnable) {
+			if (debounceTimer != null && !debounceTimer.isDone()) {
+				debounceTimer.cancel(true);
+			}
+
+			debounceTimer = scheduler.schedule(runnable, debounceDelay, TimeUnit.MILLISECONDS);
+		}
+
+		public void start() {
+			scheduler = Executors.newScheduledThreadPool(1);
+		}
+
+		public void stop() {
+			scheduler.shutdown();
+		}
+	}
+
+	private final Debouncer debouncer;
 
 	private final IResourceChangeListener listener = new IResourceChangeListener() {
 		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
-			Set<IProject> projects = collectAffectedProjects(event);
+			Set<IProject> affectedProjects = collectAffectedProjects(event);
 
-			if (!projects.isEmpty()) {
-				// collect all open editors which have cpp files as input and refresh them
-				Arrays.stream(PlatformUI.getWorkbench().getWorkbenchWindows()).map(IWorkbenchWindow::getPages)
-						.flatMap(Arrays::stream).map(IWorkbenchPage::getEditorReferences).flatMap(Arrays::stream)
-						.flatMap(ref -> Stream.ofNullable(ref.getEditor(false))).forEach(editor -> {
-							IFile file = Adapters.adapt(editor.getEditorInput(), IFile.class);
-
-							if (isCppFile(file) && projects.contains(file.getProject())) {
-								refreshEditor(editor, file);
-							}
-						});
+			if (!affectedProjects.isEmpty()) {
+				if (getEditors().map(editor -> Adapters.adapt(editor.getEditorInput(), IFile.class))
+						.anyMatch(file -> isCppFile(file) && affectedProjects.contains(file.getProject()))) {
+					debouncer.run(() -> restartLanguageServers());
+				}
 			}
+		}
+
+		/**
+		 * Returns the editors in workbench without restoring them
+		 */
+		private Stream<IEditorPart> getEditors() {
+			return Arrays.stream(PlatformUI.getWorkbench().getWorkbenchWindows()).map(IWorkbenchWindow::getPages)
+					.flatMap(Arrays::stream).map(IWorkbenchPage::getEditorReferences).flatMap(Arrays::stream)
+					.flatMap(ref -> Stream.ofNullable(ref.getEditor(false)));
 		}
 
 		private boolean isCppFile(IResource resource) {
@@ -103,41 +146,31 @@ public class CompileCommandsMonitor {
 		}
 	};
 
-	private final IWorkspace workspace;
-
 	public CompileCommandsMonitor(IWorkspace workspace) {
 		this.workspace = workspace;
+		this.debouncer = new Debouncer(DEBOUNCE_DELAY);
+	}
+
+	protected void restartLanguageServers() {
+		LspUtils.getLanguageServers().forEach(w -> {
+			try {
+				w.restart();
+			} catch (IOException e) {
+				StatusManager.getManager().handle(
+						new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, "Could not restart language servers"),
+						StatusManager.LOG);
+			}
+		});
 	}
 
 	public CompileCommandsMonitor start() {
 		workspace.addResourceChangeListener(listener);
+		debouncer.start();
 		return this;
 	}
 
 	public void stop() {
 		workspace.removeResourceChangeListener(listener);
-	}
-
-	private static void refreshEditor(IEditorPart editor, IFile file) {
-		ITextViewer textViewer = Adapters.adapt(editor, ITextViewer.class);
-
-		// Notify clangd about the file change --> doesn't seem to work
-		//		org.eclipse.lsp4e.LanguageServers.forDocument(textViewer.getDocument()).computeFirst(server -> {
-		//			server.getWorkspaceService()
-		//					.didChangeWatchedFiles(new DidChangeWatchedFilesParams(Arrays.asList(new FileEvent(
-		//							file.getProject().getFile(CDBF_SPECIFICATION_JSON_FILE).getLocationURI().toASCIIString(),
-		//							FileChangeType.Changed))));
-		//			return new CompletableFuture<>();
-		//		});
-
-		// Refresh the editors after 5 seconds -> see https://reviews.llvm.org/D92663
-		UIJob.create("Refresh Editors", monitor -> {
-			if (textViewer.getDocument() == null)
-				return;
-			int rangeOffset = textViewer.getTopIndexStartOffset();
-			int rangeLength = textViewer.getBottomIndexEndOffset() - rangeOffset;
-			editor.getSite().getPage().reuseEditor((IReusableEditor) editor, editor.getEditorInput());
-			textViewer.revealRange(rangeOffset, rangeLength);
-		}).schedule(5000);
+		debouncer.stop();
 	}
 }
