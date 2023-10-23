@@ -19,6 +19,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
@@ -26,7 +27,9 @@ import org.eclipse.cdt.lsp.editor.Configuration;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ServiceCaller;
+import org.eclipse.core.variables.VariablesPlugin;
 
 public final class ClangdLanguageServerProvider implements ICLanguageServerProvider {
 
@@ -47,8 +50,17 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 	@Override
 	public List<String> getCommands(URI rootUri) {
 		List<String> result = new ArrayList<>();
-		configuration.call(c -> result.addAll(c.commands(rootUri)));
+		configuration.call(c -> result.addAll(c.commands(rootUri).stream()
+				.map(ClangdLanguageServerProvider::resolveVariables).collect(Collectors.toList())));
 		return result;
+	}
+
+	private static String resolveVariables(String cmd) {
+		try {
+			return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(cmd);
+		} catch (CoreException e) {
+			return cmd;
+		}
 	}
 
 	@Override
