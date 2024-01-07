@@ -27,11 +27,6 @@ class LspUtilsTest {
 	}
 
 	@Test
-	void testIsCContentType_CppContentTypeFromTM4E() {
-		assertTrue(LspUtils.isCContentType("lng.cpp"));
-	}
-
-	@Test
 	void testIsCContentType_CONTENT_TYPE_CSOURCE() {
 		assertTrue(LspUtils.isCContentType(CCorePlugin.CONTENT_TYPE_CSOURCE));
 	}

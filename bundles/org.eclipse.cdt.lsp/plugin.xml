@@ -33,16 +33,7 @@
          <contentTypeBinding
                contentTypeId="org.eclipse.cdt.core.cxxSource">
          </contentTypeBinding>
-         <contentTypeBinding
-               contentTypeId="lng.cpp"> <!-- // TODO: The content type definition from TM4E "lng.cpp" can be omitted here if either https://github.com/eclipse-cdt/cdt/pull/310 or 
-		// https://github.com/eclipse/tm4e/pull/500 has been merged. --> 
-         </contentTypeBinding>       
       </editor>
-      <editorContentTypeBinding
-            contentTypeId="lng.cpp"
-            editorId="org.eclipse.cdt.ui.editor.CEditor"> <!-- // TODO: The content type definition from TM4E "lng.cpp" can be omitted here if either https://github.com/eclipse-cdt/cdt/pull/310 or 
-		// https://github.com/eclipse/tm4e/pull/500 has been merged. --> 
-      </editorContentTypeBinding>
    </extension>
    <extension
          point="org.eclipse.lsp4e.languageServer">
