@@ -302,6 +302,13 @@
           <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
       </page>      
+   </extension>
+   <extension
+         point="org.eclipse.ui.genericeditor.reconcilers">
+      <reconciler
+            class="org.eclipse.cdt.lsp.editor.SpellingReconciler"
+            contentType="org.eclipse.core.runtime.text">
+      </reconciler>
    </extension>   
 </plugin>
 
