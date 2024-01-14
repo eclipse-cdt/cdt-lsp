@@ -32,7 +32,10 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
  org.eclipse.ui.workbench.texteditor;bundle-version="0.0.0",
  org.eclipse.core.variables
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.BuiltinClangdOptionsDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.ClangdConfigurationManager.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.DefaultCProjectChangeMonitor.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager.xml,
- OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdMetadataDefaults.xml
+ OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdMetadataDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.DefaultMacroResolver.xml
 Bundle-Activator: org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin
