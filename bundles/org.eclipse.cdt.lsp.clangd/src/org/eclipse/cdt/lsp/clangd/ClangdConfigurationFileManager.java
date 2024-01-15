@@ -19,6 +19,9 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.cdt.core.build.CBuildConfiguration;
+import org.eclipse.cdt.core.build.ICBuildConfiguration;
+import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
 import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
@@ -36,6 +39,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
@@ -55,6 +59,9 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	private static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String EMPTY = ""; //$NON-NLS-1$
+
+	@Reference
+	private ICBuildConfigurationManager build;
 
 	@Override
 	public void handleEvent(CProjectDescriptionEvent event, MacroResolver macroResolver) {
@@ -105,17 +112,43 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 		if (project != null && newCProjectDescription != null) {
 			ICConfigurationDescription config = newCProjectDescription.getDefaultSettingConfiguration();
 			var cwdBuilder = config.getBuildSetting().getBuilderCWD();
+			var projectLocation = project.getLocation().addTrailingSeparator().toOSString();
 			if (cwdBuilder != null) {
-				var projectLocation = project.getLocation().addTrailingSeparator().toOSString();
 				try {
 					var cwdString = macroResolver.resolveValue(cwdBuilder.toOSString(), EMPTY, null, config);
 					return cwdString.replace(projectLocation, EMPTY);
 				} catch (CdtVariableException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
 				}
+			} else {
+				//it is probably a cmake project:
+				return buildConfiguration(project)//
+						.filter(CBuildConfiguration.class::isInstance)//
+						.map(bc -> {
+							try {
+								return ((CBuildConfiguration) bc).getBuildContainer();
+							} catch (CoreException e) {
+								Platform.getLog(getClass()).log(e.getStatus());
+							}
+							return null;
+						})//
+						.map(c -> c.getLocation())//
+						.map(l -> l.toOSString().replace(projectLocation, EMPTY)).orElse(EMPTY);
 			}
 		}
 		return EMPTY;
+	}
+
+	private Optional<ICBuildConfiguration> buildConfiguration(IResource initial) {
+		try {
+			var active = initial.getProject().getActiveBuildConfig();
+			if (active != null && build != null) {
+				return Optional.ofNullable(build.getBuildConfiguration(active));
+			}
+		} catch (CoreException e) {
+			Platform.getLog(getClass()).error(e.getMessage(), e);
+		}
+		return Optional.empty();
 	}
 
 	/**
