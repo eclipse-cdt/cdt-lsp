@@ -50,7 +50,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
  * This class can be extended by vendors.
  */
 @Component(property = { "service.ranking:Integer=0" })
-public class ClangdConfigurationManager implements ClangdCProjectDescriptionListener {
+public class ClangdConfigurationFileManager implements ClangdCProjectDescriptionListener {
 	private static final String COMPILE_FLAGS = "CompileFlags"; //$NON-NLS-1$
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	private static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -130,7 +130,7 @@ public class ClangdConfigurationManager implements ClangdCProjectDescriptionList
 	 * @throws CoreException
 	 */
 	@SuppressWarnings("unchecked")
-	private void setCompilationDatabase(IProject project, String databasePath) {
+	public void setCompilationDatabase(IProject project, String databasePath) {
 		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
 		try {
 			if (createClangdConfigFile(configFile, project.getDefaultCharset(), databasePath, false)) {

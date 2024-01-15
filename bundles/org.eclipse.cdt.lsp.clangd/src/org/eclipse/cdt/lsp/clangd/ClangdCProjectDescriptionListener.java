@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IProject;
 /**
  * Vendors can implement this interface as OSGi service
  * with a service.ranking property > 0 to implement custom behavior
- * and to replace the {@link ClangdConfigurationManager}
+ * and to replace the {@link ClangdConfigurationFileManager}
  */
 public interface ClangdCProjectDescriptionListener {
 	String CLANGD_CONFIG_FILE_NAME = ".clangd"; //$NON-NLS-1$

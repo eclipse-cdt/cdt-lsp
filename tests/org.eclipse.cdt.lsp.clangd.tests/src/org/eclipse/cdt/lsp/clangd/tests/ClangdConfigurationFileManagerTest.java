@@ -14,6 +14,7 @@
 
 package org.eclipse.cdt.lsp.clangd.tests;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
+import org.eclipse.cdt.lsp.clangd.ClangdConfigurationFileManager;
 import org.eclipse.cdt.lsp.clangd.MacroResolver;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -46,11 +48,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
-final class ClangdConfigurationManagerTest {
+final class ClangdConfigurationFileManagerTest {
 
-	private static final String RELATIVE_DIR_PATH_BUILD_DEFAULT = "build/default";
-	private static final String RELATIVE_DIR_PATH_BUILD_DEBUG = "build/debug";
+	private static final String RELATIVE_DIR_PATH_BUILD_DEFAULT = "build" + File.separator + "default";
+	private static final String RELATIVE_DIR_PATH_BUILD_DEBUG = "build" + File.separator + "debug";
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}\n";
 	private static final String DEFAULT_CDB_SETTING = "CompileFlags: {CompilationDatabase: %s}";
 	private static final String MODIFIED_DEFAULT_CDB_SETTING = DEFAULT_CDB_SETTING + "\n";
@@ -82,8 +85,6 @@ final class ClangdConfigurationManagerTest {
 		project = TestUtils.createCProject(projectName);
 		TestUtils.setLspPreferred(project, true);
 		when(event.getProject()).thenReturn(project);
-		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
-		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 	}
 
 	@AfterEach
@@ -92,14 +93,28 @@ final class ClangdConfigurationManagerTest {
 	}
 
 	private static File createFile(File parent, String format, String cdbDirectoryPath) throws FileNotFoundException {
-		var file = new File(parent, ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME);
+		return createFile(parent, ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME, format, cdbDirectoryPath);
+	}
+
+	private static File createFile(File parent, String fileName, String format, String cdbDirectoryPath)
+			throws FileNotFoundException {
+		var file = new File(parent, fileName);
 		try (var writer = new PrintWriter(file)) {
 			writer.printf(format, cdbDirectoryPath);
 		}
 		return file;
 	}
 
-	private IFile createFile(String format, String cdbDirectoryPath)
+	/**
+	 * Creates a .clangd file in the current project
+	 * @param format
+	 * @param cdbDirectoryPath
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws IOException
+	 * @throws CoreException
+	 */
+	private IFile createConfigFile(String format, String cdbDirectoryPath)
 			throws UnsupportedEncodingException, IOException, CoreException {
 		var file = project.getFile(ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME);
 		try (final var data = new ByteArrayInputStream(
@@ -126,11 +141,12 @@ final class ClangdConfigurationManagerTest {
 		var configFile = new File(projectDir, ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME);
 		var refFile = createFile(TEMP_DIR, DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// The current working directory of the builder in the project is set to RELATIVE_DIR_PATH_BUILD_DEFAULT:
-		//cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
-		// WHEN the ClangdConfigurationManager.setCompilationDatabase method gets called:
+		// WHEN the ClangdConfigurationManager.handleEvent method gets called:
 		clangdConfigurationManager.handleEvent(event, macroResolver);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
@@ -151,12 +167,13 @@ final class ClangdConfigurationManagerTest {
 	void testEmptyClangdConfigFileInProject() throws IOException, CoreException {
 		var refFile = createFile(TEMP_DIR, DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// The current working directory of the builder in the project is set to RELATIVE_DIR_PATH_BUILD_DEFAULT:
-		//cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 
 		// GIVEN an existing but empty .clangd configuration file in the project:
-		var emptyConfigFile = createFile("%s", "  ");
-		// WHEN the ClangdConfigurationManager.setCompilationDatabase method gets called with a new cdb path "build/debug":
-		//clangdConfigurationManager.handleEvent(event, macroResolver);
+		var emptyConfigFile = createConfigFile("%s", "  ");
+		// WHEN the ClangdConfigurationManager.handleEvent method gets called with a new cdb path "build/debug":
+		clangdConfigurationManager.handleEvent(event, macroResolver);
 		// THEN the updated file matches the expected content with the given CompilationDatabase directory "build/debug":
 		assertTrue(Arrays.equals(Files.readAllBytes(emptyConfigFile.getLocation().toFile().toPath()),
 				Files.readAllBytes(refFile.toPath())));
@@ -175,10 +192,14 @@ final class ClangdConfigurationManagerTest {
 	void testUpdateClangdConfigFileInProject() throws IOException, CoreException {
 		var projectDir = project.getLocation().toPortableString();
 		var configFile = new File(projectDir, ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME);
-		var cwdDefault = createFile(TEMP_DIR, MODIFIED_DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
-		var cwdDebug = createFile(TEMP_DIR, MODIFIED_DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEBUG);
+		var refFileDefault = createFile(TEMP_DIR, ".clangdDefault", DEFAULT_CDB_SETTING,
+				RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		// Use MODIFIED_DEFAULT_CDB_SETTING here, because the org.yaml.snakeyaml.Yaml.dump appends a '\n' at the last line:
+		var refFileDebug = createFile(TEMP_DIR, ".clangdDebug", MODIFIED_DEFAULT_CDB_SETTING,
+				RELATIVE_DIR_PATH_BUILD_DEBUG);
 		// The current working directory of the builder in the project is set to RELATIVE_DIR_PATH_BUILD_DEFAULT:
-		//cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
@@ -186,18 +207,20 @@ final class ClangdConfigurationManagerTest {
 		clangdConfigurationManager.handleEvent(event, macroResolver);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
-		// THEN the file matches the expected content:
-		//assertTrue(Arrays.equals(Files.readAllBytes(configFile.toPath()), Files.readAllBytes(cwdDefault.toPath())));
-		// WHEN the active build configuration changes and the CWD is set to RELATIVE_DIR_PATH_BUILD_DEBUG:
-		//cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
+		// THEN the created file matches the expected content:
+		assertTrue(Arrays.equals(Files.readAllBytes(configFile.toPath()), Files.readAllBytes(refFileDefault.toPath())));
+
+		// WHEN the CWD in the build configuration changes to build/debug:
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 		// AND the handleEvent gets called again:
 		clangdConfigurationManager.handleEvent(event, macroResolver);
 		// THEN the updated file matches the expected content:
-		assertTrue(Arrays.equals(Files.readAllBytes(configFile.toPath()), Files.readAllBytes(cwdDebug.toPath())));
+		assertTrue(Arrays.equals(Files.readAllBytes(configFile.toPath()), Files.readAllBytes(refFileDebug.toPath())));
 
 		//clean up:
-		cwdDefault.delete();
-		cwdDebug.delete();
+		refFileDefault.delete();
+		refFileDebug.delete();
 	}
 
 	/**
@@ -211,9 +234,10 @@ final class ClangdConfigurationManagerTest {
 		var refFile = createFile(TEMP_DIR, EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEBUG);
 
 		// GIVEN an existing expanded .clangd configuration file in the project pointing to "build/default":
-		var configFile = createFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var configFile = createConfigFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// WHEN the ClangdConfigurationManager.handleEvent method gets called and the builder CWD points to "build/debug":
-		//cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 		clangdConfigurationManager.handleEvent(event, macroResolver);
 		// THEN the updated file matches the expected content:
 		assertTrue(Arrays.equals(Files.readAllBytes(configFile.getLocation().toFile().toPath()),
@@ -229,15 +253,16 @@ final class ClangdConfigurationManagerTest {
 	 * @throws IOException
 	 * @throws CoreException
 	 */
-	//	@Test
-	//	void testInvalidYamlSyntax() throws IOException, CoreException {
-	//		// GIVEN an existing .clangd configuration file with invalid yaml syntax (contains tab):
-	//		createFile(INVALID_YAML_SYNTAX_CONTAINS_TAB, RELATIVE_DIR_PATH_BUILD_DEFAULT);
-	//		// WHEN the ClangdConfigurationManager.setCompilationDatabase method gets called with a new cdb path "build/debug":
-	//		// THEN a ScannerExcpetion is expected:
-	//		assertThrows(ScannerException.class, () -> {
-	//			clangdConfigurationManager.handleEvent(event, macroResolver);//RELATIVE_DIR_PATH_BUILD_DEBUG);
-	//		});
-	//	}
+	@Test
+	void testInvalidYamlSyntax() throws IOException, CoreException {
+		// GIVEN an existing .clangd configuration file with invalid yaml syntax (contains tab):
+		createConfigFile(INVALID_YAML_SYNTAX_CONTAINS_TAB, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		// WHEN the ClangdConfigurationManager.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
+		// THEN a ScannerExcpetion is expected:
+		assertThrows(ScannerException.class, () -> {
+			((ClangdConfigurationFileManager) clangdConfigurationManager).setCompilationDatabase(project,
+					RELATIVE_DIR_PATH_BUILD_DEBUG);
+		});
+	}
 
 }
