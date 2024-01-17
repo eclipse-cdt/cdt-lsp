@@ -93,7 +93,7 @@ final class ClangdConfigurationFileManagerTest {
 	}
 
 	private static File createFile(File parent, String format, String cdbDirectoryPath) throws FileNotFoundException {
-		return createFile(parent, ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME, format, cdbDirectoryPath);
+		return createFile(parent, ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME, format, cdbDirectoryPath);
 	}
 
 	private static File createFile(File parent, String fileName, String format, String cdbDirectoryPath)
@@ -116,7 +116,7 @@ final class ClangdConfigurationFileManagerTest {
 	 */
 	private IFile createConfigFile(String format, String cdbDirectoryPath)
 			throws UnsupportedEncodingException, IOException, CoreException {
-		var file = project.getFile(ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME);
+		var file = project.getFile(ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME);
 		try (final var data = new ByteArrayInputStream(
 				String.format(format, cdbDirectoryPath).getBytes(project.getDefaultCharset()))) {
 			if (!file.exists()) {
@@ -138,7 +138,7 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testCreateClangdConfigFileInProject() throws IOException, CoreException {
 		var projectDir = project.getLocation().toPortableString();
-		var configFile = new File(projectDir, ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME);
+		var configFile = new File(projectDir, ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME);
 		var refFile = createFile(TEMP_DIR, DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// The current working directory of the builder in the project is set to RELATIVE_DIR_PATH_BUILD_DEFAULT:
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
@@ -191,7 +191,7 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testUpdateClangdConfigFileInProject() throws IOException, CoreException {
 		var projectDir = project.getLocation().toPortableString();
-		var configFile = new File(projectDir, ClangdCProjectDescriptionListener.CLANGD_CONFIG_FILE_NAME);
+		var configFile = new File(projectDir, ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME);
 		var refFileDefault = createFile(TEMP_DIR, ".clangdDefault", DEFAULT_CDB_SETTING,
 				RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// Use MODIFIED_DEFAULT_CDB_SETTING here, because the org.yaml.snakeyaml.Yaml.dump appends a '\n' at the last line:

@@ -45,7 +45,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  * Default implementation of the {@link ClangdCProjectDescriptionListener}.
- * Can be replaced by vendors if needed. This implementation sets the path to
+ * Can be extended by vendors if needed. This implementation sets the path to
  * the compile_commands.json in the .clangd file in the projects root directory.
  * This is needed by CDT projects since the compile_commands.json is generated in the build folder.
  * When the active build configuration changes in managed build projects, this manager updates the path to the database in
@@ -55,6 +55,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
  */
 @Component(property = { "service.ranking:Integer=0" })
 public class ClangdConfigurationFileManager implements ClangdCProjectDescriptionListener {
+	public static final String CLANGD_CONFIG_FILE_NAME = ".clangd"; //$NON-NLS-1$
 	private static final String COMPILE_FLAGS = "CompileFlags"; //$NON-NLS-1$
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	private static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -68,7 +69,19 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 		setCompilationDatabasePath(event.getProject(), event.getNewCProjectDescription(), macroResolver);
 	}
 
-	@Override
+	/**
+	 * Set the <code>CompilationDatabase</code> entry in the <code>.clangd</code> file which is located in the <code>project</code> root.
+	 * The <code>.clangd</code> file will be created, if it's not existing.
+	 * The <code>CompilationDatabase</code> points to the build folder of the active build configuration
+	 * (in case <code>project</code> is a managed C/C++ project).
+	 *
+	 * In the following example clangd uses the compile_commands.json file in the Debug folder:
+	 * <pre>CompileFlags: {CompilationDatabase: Debug}</pre>
+	 *
+	 * @param project managed C/C++ project
+	 * @param newCProjectDescription new CProject description
+	 * @param macroResolver helper to resolve macros in the CWD path of the builder
+	 */
 	public void setCompilationDatabasePath(IProject project, ICProjectDescription newCProjectDescription,
 			MacroResolver macroResolver) {
 		if (project != null && newCProjectDescription != null) {
@@ -93,7 +106,11 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 		}
 	}
 
-	@Override
+	/**
+	 * Enabler for {@link setCompilationDatabasePath}. Can be overriden for customization.
+	 * @param project
+	 * @return true if the database path should be written to .clangd file in the project root.
+	 */
 	public boolean enableSetCompilationDatabasePath(IProject project) {
 		return Optional.ofNullable(LspPlugin.getDefault()).map(LspPlugin::getCLanguageServerProvider)
 				.map(provider -> provider.isEnabledFor(project)).orElse(Boolean.FALSE);

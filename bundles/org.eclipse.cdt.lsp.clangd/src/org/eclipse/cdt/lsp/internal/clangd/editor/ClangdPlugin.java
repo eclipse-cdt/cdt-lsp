@@ -14,11 +14,8 @@
 
 package org.eclipse.cdt.lsp.internal.clangd.editor;
 
-import java.util.Optional;
-
-import org.eclipse.cdt.lsp.clangd.CProjectChangeMonitor;
+import org.eclipse.cdt.lsp.internal.clangd.CProjectChangeMonitor;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -29,7 +26,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class ClangdPlugin extends AbstractUIPlugin {
 	private IWorkspace workspace;
 	private CompileCommandsMonitor compileCommandsMonitor;
-	private Optional<CProjectChangeMonitor> cProjectChangeMonitor;
+	private CProjectChangeMonitor cProjectChangeMonitor;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.clangd"; //$NON-NLS-1$
@@ -51,15 +48,14 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		workspaceTracker.open();
 		workspace = workspaceTracker.getService();
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
-		cProjectChangeMonitor = Optional.ofNullable(PlatformUI.getWorkbench().getService(CProjectChangeMonitor.class))
-				.map(m -> m.start());
+		cProjectChangeMonitor = new CProjectChangeMonitor().start();
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		compileCommandsMonitor.stop();
-		cProjectChangeMonitor.ifPresent(m -> m.stop());
+		cProjectChangeMonitor.stop();
 		super.stop(context);
 	}
 

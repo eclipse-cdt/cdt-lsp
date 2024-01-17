@@ -13,12 +13,19 @@
 
 package org.eclipse.cdt.lsp.clangd;
 
+import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 
-public interface MacroResolver {
+/**
+ * Helper class to resolve macros in builder CWD
+ */
+public class MacroResolver {
 
 	public String resolveValue(String value, String nonexistentMacrosValue, String listDelimiter,
-			ICConfigurationDescription cfg) throws CdtVariableException;
+			ICConfigurationDescription cfg) throws CdtVariableException {
+		return CCorePlugin.getDefault().getCdtVariableManager().resolveValue(value, nonexistentMacrosValue,
+				listDelimiter, cfg);
+	}
 
 }

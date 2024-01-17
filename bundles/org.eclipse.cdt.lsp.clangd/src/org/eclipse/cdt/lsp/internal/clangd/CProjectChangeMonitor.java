@@ -11,44 +11,39 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd;
+package org.eclipse.cdt.lsp.internal.clangd;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
+import org.eclipse.cdt.lsp.clangd.MacroResolver;
+import org.eclipse.core.runtime.ServiceCaller;
 
 /**
- * This default monitor listens to C project description changes. Can be derived by vendors to add own listeners/behavior.
- * This can be done by using this class as superclass and add the new class as OSGi service with a service.ranking > 0.
+ * This monitor listens to C project description changes.
  */
-@Component(property = { "service.ranking:Integer=0" })
-public class DefaultCProjectChangeMonitor implements CProjectChangeMonitor {
+public class CProjectChangeMonitor {
+	MacroResolver macroResolver = new MacroResolver();
 
-	@Reference
-	MacroResolver macroResolver;
-
-	@Reference
-	private ClangdCProjectDescriptionListener clangdListener;
+	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdListener = new ServiceCaller<>(getClass(),
+			ClangdCProjectDescriptionListener.class);
 
 	private final ICProjectDescriptionListener listener = new ICProjectDescriptionListener() {
 
 		@Override
 		public void handleEvent(CProjectDescriptionEvent event) {
-			clangdListener.handleEvent(event, macroResolver);
+			clangdListener.call(c -> c.handleEvent(event, macroResolver));
 		}
 
 	};
 
-	@Override
 	public CProjectChangeMonitor start() {
 		CCorePlugin.getDefault().getProjectDescriptionManager().addCProjectDescriptionListener(listener,
 				CProjectDescriptionEvent.APPLIED);
 		return this;
 	}
 
-	@Override
 	public void stop() {
 		CCorePlugin.getDefault().getProjectDescriptionManager().removeCProjectDescriptionListener(listener);
 	}

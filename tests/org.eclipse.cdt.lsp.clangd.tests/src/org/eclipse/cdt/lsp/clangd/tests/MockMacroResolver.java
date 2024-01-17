@@ -17,7 +17,7 @@ import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.lsp.clangd.MacroResolver;
 
-public class MockMacroResolver implements MacroResolver {
+public class MockMacroResolver extends MacroResolver {
 
 	@Override
 	public String resolveValue(String value, String nonexistentMacrosValue, String listDelimiter,
