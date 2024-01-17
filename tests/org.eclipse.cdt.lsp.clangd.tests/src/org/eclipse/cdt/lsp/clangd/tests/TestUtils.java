@@ -61,24 +61,6 @@ public final class TestUtils {
 		return project;
 	}
 
-	//	static IProject createEmptyCMakeProject(String projectName) {
-	//		CMakeProjectGenerator generator = new CMakeProjectGenerator("templates/simple/manifest.xml");//"templates/simple/manifest.xml"); //$NON-NLS-1$
-	//		generator.setProjectName(projectName);
-	//		var uri = ResourcesPlugin.getWorkspace().getRoot().getLocation().append(projectName).toPath().toUri();
-	//		generator.setLocationURI(uri);
-	//		try {
-	//			generator.generate(new HashMap<>(), null);
-	//		} catch (CoreException e) {
-	//			e.printStackTrace();
-	//			return null;
-	//		}
-	//		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-	//		if (project.exists()) {
-	//			return project;
-	//		}
-	//		return null;
-	//	}
-
 	public static void deleteProject(IProject project) throws CoreException {
 		if (project != null) {
 			project.delete(true, new NullProgressMonitor());
