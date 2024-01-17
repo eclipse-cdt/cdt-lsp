@@ -78,11 +78,11 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	 * In the following example clangd uses the compile_commands.json file in the Debug folder:
 	 * <pre>CompileFlags: {CompilationDatabase: Debug}</pre>
 	 *
-	 * @param project managed C/C++ project
+	 * @param project C/C++ project
 	 * @param newCProjectDescription new CProject description
 	 * @param macroResolver helper to resolve macros in the CWD path of the builder
 	 */
-	public void setCompilationDatabasePath(IProject project, ICProjectDescription newCProjectDescription,
+	protected void setCompilationDatabasePath(IProject project, ICProjectDescription newCProjectDescription,
 			MacroResolver macroResolver) {
 		if (project != null && newCProjectDescription != null) {
 			if (enableSetCompilationDatabasePath(project)) {
@@ -111,7 +111,7 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	 * @param project
 	 * @return true if the database path should be written to .clangd file in the project root.
 	 */
-	public boolean enableSetCompilationDatabasePath(IProject project) {
+	protected boolean enableSetCompilationDatabasePath(IProject project) {
 		return Optional.ofNullable(LspPlugin.getDefault()).map(LspPlugin::getCLanguageServerProvider)
 				.map(provider -> provider.isEnabledFor(project)).orElse(Boolean.FALSE);
 	}
