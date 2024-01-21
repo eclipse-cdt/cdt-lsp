@@ -306,7 +306,7 @@
    <extension
          point="org.eclipse.ui.genericeditor.reconcilers">
       <reconcilingStrategy
-            class="org.eclipse.cdt.lsp.editor.CSpellingReconcilerStrategy"
+            class="org.eclipse.cdt.lsp.editor.CSpellingReconcileStrategy"
             contentType="org.eclipse.core.runtime.text">
       </reconcilingStrategy>
    </extension>  

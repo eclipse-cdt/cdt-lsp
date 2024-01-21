@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.eclipse.cdt.internal.ui.text.spelling.CSpellingService;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
@@ -38,15 +37,12 @@ import org.eclipse.ui.texteditor.spelling.SpellingService;
 /**
  * Copied from {@link SpellingReconcileStrategy} since we cannot extend it, because have no viewer available at construction time.
  */
-public class CSpellingReconcilerStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
+public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
 	/**
 	 * Spelling problem collector.
 	 */
-	private static class SpellingProblemCollector implements ISpellingProblemCollector {
-
-		/** Annotation model. */
-		private IAnnotationModel fAnnotationModel;
+	private class SpellingProblemCollector implements ISpellingProblemCollector {
 
 		/** Annotations to add. */
 		private Map<Annotation, Position> fAddAnnotations;
@@ -59,9 +55,7 @@ public class CSpellingReconcilerStrategy implements IReconcilingStrategy, IRecon
 		 *
 		 * @param annotationModel the annotation model
 		 */
-		public SpellingProblemCollector(IAnnotationModel annotationModel) {
-			Assert.isLegal(annotationModel != null);
-			fAnnotationModel = annotationModel;
+		public SpellingProblemCollector() {
 			if (fAnnotationModel instanceof ISynchronizable)
 				fLockObject = ((ISynchronizable) fAnnotationModel).getLockObject();
 			else
@@ -134,8 +128,8 @@ public class CSpellingReconcilerStrategy implements IReconcilingStrategy, IRecon
 	/** The spelling context containing the Java source content type. */
 	private SpellingContext fSpellingContext;
 
-	//private ISourceViewer viewer;
-	private IAnnotationModel annotationModel;
+	/** Annotation model. */
+	private IAnnotationModel fAnnotationModel;
 
 	/**
 	 * Region array, used to prevent us from creating a new array on each reconcile pass.
@@ -149,7 +143,7 @@ public class CSpellingReconcilerStrategy implements IReconcilingStrategy, IRecon
 	 * @param viewer the source viewer
 	 * @param spellingService the spelling service to use
 	 */
-	public CSpellingReconcilerStrategy() {
+	public CSpellingReconcileStrategy() {
 		fSpellingService = CSpellingService.getInstance();
 		fSpellingContext = new SpellingContext();
 		fSpellingContext.setContentType(getContentType());
@@ -223,9 +217,21 @@ public class CSpellingReconcilerStrategy implements IReconcilingStrategy, IRecon
 				.map(LSPEclipseUtils::getTextViewer).filter(Objects::nonNull).filter(ISourceViewer.class::isInstance)
 				.map(ISourceViewer.class::cast).findFirst().orElse(null);
 
+		//		var editor = LSPEclipseUtils.findOpenEditorsFor(LSPEclipseUtils.toUri(document)).stream().findFirst()
+		//				.orElse(null);
+		//
+		//		if (editor != null) {
+		//			var editorPart = editor.getEditor(true);
+		//			var e = editorPart.getAdapter(ITextEditor.class);
+		//			if (e != null) {
+		//				var p = e.getDocumentProvider();
+		//				System.out.print(p.toString());
+		//			}
+		//		}
+
 		if (viewer != null) {
-			annotationModel = viewer.getAnnotationModel();
-			fSpellingProblemCollector = new SpellingProblemCollector(annotationModel);
+			fAnnotationModel = viewer.getAnnotationModel();
+			fSpellingProblemCollector = new SpellingProblemCollector();
 		}
 		return fSpellingProblemCollector;
 	}
@@ -242,7 +248,7 @@ public class CSpellingReconcilerStrategy implements IReconcilingStrategy, IRecon
 	 *         <code>null</code> if none could be determined
 	 */
 	protected IAnnotationModel getAnnotationModel() {
-		return annotationModel;
+		return fAnnotationModel;
 	}
 
 }
