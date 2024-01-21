@@ -305,10 +305,10 @@
    </extension>
    <extension
          point="org.eclipse.ui.genericeditor.reconcilers">
-      <reconciler
-            class="org.eclipse.cdt.lsp.editor.SpellingReconciler"
+      <reconcilingStrategy
+            class="org.eclipse.cdt.lsp.editor.CSpellingReconcilerStrategy"
             contentType="org.eclipse.core.runtime.text">
-      </reconciler>
-   </extension>   
+      </reconcilingStrategy>
+   </extension>  
 </plugin>
 
