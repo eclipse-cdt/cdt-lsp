@@ -34,6 +34,7 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.BuiltinClangdOptionsDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.ClangdConfigurationFileManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdConfigurationAccess.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdEnable.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.clangd.ClangdMetadataDefaults.xml
 Bundle-Activator: org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin
