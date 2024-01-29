@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
-import org.eclipse.cdt.lsp.editor.Configuration;
-import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
+import org.eclipse.cdt.lsp.server.ICLanguageServerEnable;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -36,8 +35,8 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
 			ClangdConfiguration.class);
 
-	private final ServiceCaller<Configuration> editorConfiguration = new ServiceCaller<>(getClass(),
-			Configuration.class);
+	private final ServiceCaller<ICLanguageServerEnable> clangdEnable = new ServiceCaller<>(getClass(),
+			ICLanguageServerEnable.class);
 
 	@Override
 	public Object getInitializationOptions(URI rootUri) {
@@ -65,9 +64,7 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 
 	@Override
 	public boolean isEnabledFor(IProject project) {
-		boolean[] enabled = new boolean[1];
-		editorConfiguration.call(c -> enabled[0] = ((LanguageServerEnable) c.options(project)).isEnabledFor(project));
-		return enabled[0];
+		return clangdEnable.call(c -> c.isEnabledFor(project));
 	}
 
 }
