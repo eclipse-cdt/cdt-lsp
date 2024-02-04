@@ -45,10 +45,10 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 	private class SpellingProblemCollector implements ISpellingProblemCollector {
 
 		/** Annotations to add. */
-		private Map<Annotation, Position> fAddAnnotations;
+		private Map<Annotation, Position> addAnnotations;
 
 		/** Lock object for modifying the annotations. */
-		private Object fLockObject;
+		private Object lockObject;
 
 		/**
 		 * Initializes this collector with the given annotation model.
@@ -56,21 +56,20 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 		 * @param annotationModel the annotation model
 		 */
 		public SpellingProblemCollector() {
-			if (fAnnotationModel instanceof ISynchronizable)
-				fLockObject = ((ISynchronizable) fAnnotationModel).getLockObject();
+			if (annotationModel instanceof ISynchronizable)
+				lockObject = ((ISynchronizable) annotationModel).getLockObject();
 			else
-				fLockObject = fAnnotationModel;
+				lockObject = annotationModel;
 		}
 
 		@Override
 		public void accept(SpellingProblem problem) {
-			fAddAnnotations.put(new SpellingAnnotation(problem),
-					new Position(problem.getOffset(), problem.getLength()));
+			addAnnotations.put(new SpellingAnnotation(problem), new Position(problem.getOffset(), problem.getLength()));
 		}
 
 		@Override
 		public void beginCollecting() {
-			fAddAnnotations = new HashMap<>();
+			addAnnotations = new HashMap<>();
 		}
 
 		@Override
@@ -78,8 +77,8 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 
 			List<Annotation> toRemove = new ArrayList<>();
 
-			synchronized (fLockObject) {
-				Iterator<Annotation> iter = fAnnotationModel.getAnnotationIterator();
+			synchronized (lockObject) {
+				Iterator<Annotation> iter = annotationModel.getAnnotationIterator();
 				while (iter.hasNext()) {
 					Annotation annotation = iter.next();
 					if (SpellingAnnotation.TYPE.equals(annotation.getType()))
@@ -87,24 +86,20 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 				}
 				Annotation[] annotationsToRemove = toRemove.toArray(new Annotation[toRemove.size()]);
 
-				if (fAnnotationModel instanceof IAnnotationModelExtension)
-					((IAnnotationModelExtension) fAnnotationModel).replaceAnnotations(annotationsToRemove,
-							fAddAnnotations);
+				if (annotationModel instanceof IAnnotationModelExtension)
+					((IAnnotationModelExtension) annotationModel).replaceAnnotations(annotationsToRemove,
+							addAnnotations);
 				else {
 					for (Annotation element : annotationsToRemove) {
-						fAnnotationModel.removeAnnotation(element);
+						annotationModel.removeAnnotation(element);
 					}
-					for (Entry<Annotation, Position> entry : fAddAnnotations.entrySet()) {
-						fAnnotationModel.addAnnotation(entry.getKey(), entry.getValue());
+					for (Entry<Annotation, Position> entry : addAnnotations.entrySet()) {
+						annotationModel.addAnnotation(entry.getKey(), entry.getValue());
 					}
 				}
 			}
 
-			fAddAnnotations = null;
-		}
-
-		public IAnnotationModel getAnnotationModel() {
-			return fAnnotationModel;
+			addAnnotations = null;
 		}
 	}
 
@@ -112,30 +107,27 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 	private static final IContentType TEXT_CONTENT_TYPE = Platform.getContentTypeManager()
 			.getContentType(IContentTypeManager.CT_TEXT);
 
-	/** The text editor to operate on. */
-	//private ISourceViewer fViewer;
-
 	/** The document to operate on. */
-	private IDocument fDocument;
+	private IDocument document;
 
 	/** The progress monitor. */
-	private IProgressMonitor fProgressMonitor;
+	private IProgressMonitor progressMonitor;
 
-	private SpellingService fSpellingService;
+	private SpellingService spellingService;
 
-	private ISpellingProblemCollector fSpellingProblemCollector;
+	private ISpellingProblemCollector spellingProblemCollector;
 
 	/** The spelling context containing the Java source content type. */
-	private SpellingContext fSpellingContext;
+	private SpellingContext spellingContext;
 
 	/** Annotation model. */
-	private IAnnotationModel fAnnotationModel;
+	private IAnnotationModel annotationModel;
 
 	/**
 	 * Region array, used to prevent us from creating a new array on each reconcile pass.
 	 * @since 3.4
 	 */
-	private IRegion[] fRegions = new IRegion[1];
+	private IRegion[] regions = new IRegion[1];
 
 	/**
 	 * Creates a new comment reconcile strategy.
@@ -144,21 +136,21 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 	 * @param spellingService the spelling service to use
 	 */
 	public CSpellingReconcileStrategy() {
-		fSpellingService = CSpellingService.getInstance();
-		fSpellingContext = new SpellingContext();
-		fSpellingContext.setContentType(getContentType());
+		spellingService = CSpellingService.getInstance();
+		spellingContext = new SpellingContext();
+		spellingContext.setContentType(getContentType());
 	}
 
 	@Override
 	public void initialReconcile() {
-		reconcile(new Region(0, fDocument.getLength()));
+		reconcile(new Region(0, document.getLength()));
 	}
 
 	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		try {
-			IRegion startLineInfo = fDocument.getLineInformationOfOffset(subRegion.getOffset());
-			IRegion endLineInfo = fDocument
+			IRegion startLineInfo = document.getLineInformationOfOffset(subRegion.getOffset());
+			IRegion endLineInfo = document
 					.getLineInformationOfOffset(subRegion.getOffset() + Math.max(0, subRegion.getLength() - 1));
 			if (startLineInfo.getOffset() == endLineInfo.getOffset())
 				subRegion = startLineInfo;
@@ -167,18 +159,18 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 						endLineInfo.getOffset() + Math.max(0, endLineInfo.getLength() - 1) - startLineInfo.getOffset());
 
 		} catch (BadLocationException e) {
-			subRegion = new Region(0, fDocument.getLength());
+			subRegion = new Region(0, document.getLength());
 		}
 		reconcile(subRegion);
 	}
 
 	@Override
 	public void reconcile(IRegion region) {
-		if (getAnnotationModel() == null || fSpellingProblemCollector == null)
+		if (getAnnotationModel() == null || spellingProblemCollector == null)
 			return;
 
-		fRegions[0] = region;
-		fSpellingService.check(fDocument, fRegions, fSpellingContext, fSpellingProblemCollector, fProgressMonitor);
+		regions[0] = region;
+		spellingService.check(document, regions, spellingContext, spellingProblemCollector, progressMonitor);
 	}
 
 	/**
@@ -197,13 +189,13 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 	 * @return the document
 	 */
 	protected final IDocument getDocument() {
-		return fDocument;
+		return document;
 	}
 
 	@Override
 	public void setDocument(IDocument document) {
-		fDocument = document;
-		fSpellingProblemCollector = createSpellingProblemCollector(document);
+		this.document = document;
+		spellingProblemCollector = createSpellingProblemCollector(document);
 	}
 
 	/**
@@ -217,28 +209,16 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 				.map(LSPEclipseUtils::getTextViewer).filter(Objects::nonNull).filter(ISourceViewer.class::isInstance)
 				.map(ISourceViewer.class::cast).findFirst().orElse(null);
 
-		//		var editor = LSPEclipseUtils.findOpenEditorsFor(LSPEclipseUtils.toUri(document)).stream().findFirst()
-		//				.orElse(null);
-		//
-		//		if (editor != null) {
-		//			var editorPart = editor.getEditor(true);
-		//			var e = editorPart.getAdapter(ITextEditor.class);
-		//			if (e != null) {
-		//				var p = e.getDocumentProvider();
-		//				System.out.print(p.toString());
-		//			}
-		//		}
-
 		if (viewer != null) {
-			fAnnotationModel = viewer.getAnnotationModel();
-			fSpellingProblemCollector = new SpellingProblemCollector();
+			annotationModel = viewer.getAnnotationModel();
+			spellingProblemCollector = new SpellingProblemCollector();
 		}
-		return fSpellingProblemCollector;
+		return spellingProblemCollector;
 	}
 
 	@Override
 	public final void setProgressMonitor(IProgressMonitor monitor) {
-		fProgressMonitor = monitor;
+		progressMonitor = monitor;
 	}
 
 	/**
@@ -248,7 +228,7 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 	 *         <code>null</code> if none could be determined
 	 */
 	protected IAnnotationModel getAnnotationModel() {
-		return fAnnotationModel;
+		return annotationModel;
 	}
 
 }
