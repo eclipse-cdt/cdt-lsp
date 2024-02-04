@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Bachmann electronic GmbH and others.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *******************************************************************************/
+
 package org.eclipse.cdt.lsp.editor;
 
 import java.util.ArrayList;
@@ -45,7 +58,7 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 	private class SpellingProblemCollector implements ISpellingProblemCollector {
 
 		/** Annotations to add. */
-		private Map<Annotation, Position> addAnnotations;
+		private Map<Annotation, Position> annotationsToAdd;
 
 		/** Lock object for modifying the annotations. */
 		private Object lockObject;
@@ -64,16 +77,20 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 
 		@Override
 		public void accept(SpellingProblem problem) {
-			addAnnotations.put(new SpellingAnnotation(problem), new Position(problem.getOffset(), problem.getLength()));
+			annotationsToAdd.put(new SpellingAnnotation(problem),
+					new Position(problem.getOffset(), problem.getLength()));
 		}
 
 		@Override
 		public void beginCollecting() {
-			addAnnotations = new HashMap<>();
+			annotationsToAdd = new HashMap<>();
 		}
 
 		@Override
 		public void endCollecting() {
+			if (annotationModel == null) {
+				return;
+			}
 
 			List<Annotation> toRemove = new ArrayList<>();
 
@@ -88,18 +105,18 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 
 				if (annotationModel instanceof IAnnotationModelExtension)
 					((IAnnotationModelExtension) annotationModel).replaceAnnotations(annotationsToRemove,
-							addAnnotations);
+							annotationsToAdd);
 				else {
 					for (Annotation element : annotationsToRemove) {
 						annotationModel.removeAnnotation(element);
 					}
-					for (Entry<Annotation, Position> entry : addAnnotations.entrySet()) {
+					for (Entry<Annotation, Position> entry : annotationsToAdd.entrySet()) {
 						annotationModel.addAnnotation(entry.getKey(), entry.getValue());
 					}
 				}
 			}
 
-			addAnnotations = null;
+			annotationsToAdd = null;
 		}
 	}
 
@@ -115,17 +132,16 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 
 	private SpellingService spellingService;
 
-	private ISpellingProblemCollector spellingProblemCollector;
-
 	/** The spelling context containing the Java source content type. */
 	private SpellingContext spellingContext;
+
+	private ISpellingProblemCollector spellingProblemCollector;
 
 	/** Annotation model. */
 	private IAnnotationModel annotationModel;
 
 	/**
 	 * Region array, used to prevent us from creating a new array on each reconcile pass.
-	 * @since 3.4
 	 */
 	private IRegion[] regions = new IRegion[1];
 
@@ -166,7 +182,7 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 
 	@Override
 	public void reconcile(IRegion region) {
-		if (getAnnotationModel() == null || spellingProblemCollector == null)
+		if (annotationModel == null || spellingProblemCollector == null)
 			return;
 
 		regions[0] = region;
@@ -212,6 +228,8 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 		if (viewer != null) {
 			annotationModel = viewer.getAnnotationModel();
 			spellingProblemCollector = new SpellingProblemCollector();
+		} else {
+			spellingProblemCollector = null;
 		}
 		return spellingProblemCollector;
 	}
@@ -219,16 +237,6 @@ public class CSpellingReconcileStrategy implements IReconcilingStrategy, IReconc
 	@Override
 	public final void setProgressMonitor(IProgressMonitor monitor) {
 		progressMonitor = monitor;
-	}
-
-	/**
-	 * Returns the annotation model to be used by this reconcile strategy.
-	 *
-	 * @return the annotation model of the underlying editor input or
-	 *         <code>null</code> if none could be determined
-	 */
-	protected IAnnotationModel getAnnotationModel() {
-		return annotationModel;
 	}
 
 }
