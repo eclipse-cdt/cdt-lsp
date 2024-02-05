@@ -27,21 +27,12 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.UIJob;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.yaml.snakeyaml.Yaml;
@@ -95,17 +86,10 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 					try {
 						setCompilationDatabase(project, relativeDatabasePath);
 					} catch (Exception e) {
-						// catch all exceptions:
-						var status = new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, e.getMessage());
-						var projectLocation = project.getLocation().addTrailingSeparator().toPortableString();
-						showErrorDialog(LspEditorUiMessages.ClangdConfigurationFileManager_yaml_error,
-								LspEditorUiMessages.ClangdConfigurationFileManager_yaml_error_message + projectLocation
-										+ CLANGD_CONFIG_FILE_NAME,
-								status);
+						Platform.getLog(getClass()).error(e.getMessage(), e);
 					}
 				} else {
-					Platform.getLog(getClass()).log(new Status(Status.ERROR, ClangdPlugin.PLUGIN_ID,
-							"Cannot determine path to compile_commands.json")); //$NON-NLS-1$
+					Platform.getLog(getClass()).error("Cannot determine path to compile_commands.json"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -242,30 +226,4 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 		}
 		return false;
 	}
-
-	/**
-	 * Show error dialog to user
-	 * @param title
-	 * @param errorText
-	 * @param status
-	 */
-	private static void showErrorDialog(final String title, final String errorText, final Status status) {
-		UIJob job = new UIJob("Yaml error") //$NON-NLS-1$
-		{
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				ErrorDialog.openError(getActiveShell(), title, errorText, status);
-				return Status.OK_STATUS;
-			}
-		};
-		job.setSystem(true);
-		job.schedule();
-	}
-
-	private static Shell getActiveShell() {
-		if (PlatformUI.getWorkbench() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null)
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		return null;
-	}
-
 }
