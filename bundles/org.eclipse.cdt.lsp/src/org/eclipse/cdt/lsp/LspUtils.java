@@ -21,22 +21,16 @@ import java.util.stream.Stream;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.lsp4e.LanguageServiceAccessor;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.progress.UIJob;
 
 public class LspUtils {
 
@@ -48,31 +42,6 @@ public class LspUtils {
 	 */
 	public static boolean isCContentType(String id) {
 		return (id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	}
-
-	/**
-	 * Show error dialog to user
-	 * @param title
-	 * @param errorText
-	 * @param status
-	 */
-	public static void showErrorMessage(final String title, final String errorText, final Status status) {
-		UIJob job = new UIJob("LSP Utils") //$NON-NLS-1$
-		{
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				ErrorDialog.openError(getActiveShell(), title, errorText, status);
-				return Status.OK_STATUS;
-			}
-		};
-		job.setSystem(true);
-		job.schedule();
-	}
-
-	private static Shell getActiveShell() {
-		if (PlatformUI.getWorkbench() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null)
-			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		return null;
 	}
 
 	public static boolean isFileOpenedInLspEditor(URI uri) {

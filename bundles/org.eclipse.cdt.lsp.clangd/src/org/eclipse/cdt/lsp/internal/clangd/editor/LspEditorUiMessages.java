@@ -46,7 +46,4 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_completion_default;
 	public static String LspEditorPreferencePage_select_clangd_executable;
 
-	public static String CProjectChangeMonitor_yaml_scanner_error;
-	public static String CProjectChangeMonitor_yaml_scanner_error_message;
-
 }

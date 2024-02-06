@@ -27,17 +27,12 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.LspUtils;
-import org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.yaml.snakeyaml.Yaml;
@@ -70,7 +65,8 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	}
 
 	/**
-	 * Set the <code>CompilationDatabase</code> entry in the <code>.clangd</code> file which is located in the <code>project</code> root.
+	 * Set the <code>CompilationDatabase</code> entry in the <code>.clangd</code> file which is located in the <code>project</code> root,
+	 * if the yaml file syntax can be parsed.
 	 * The <code>.clangd</code> file will be created, if it's not existing.
 	 * The <code>CompilationDatabase</code> points to the build folder of the active build configuration
 	 * (in case <code>project</code> is a managed C/C++ project).
@@ -88,19 +84,9 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 			if (enableSetCompilationDatabasePath(project)) {
 				var relativeDatabasePath = getRelativeDatabasePath(project, newCProjectDescription, macroResolver);
 				if (!relativeDatabasePath.isEmpty()) {
-					try {
-						setCompilationDatabase(project, relativeDatabasePath);
-					} catch (ScannerException e) {
-						var status = new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, e.getMessage());
-						var projectLocation = project.getLocation().addTrailingSeparator().toPortableString();
-						LspUtils.showErrorMessage(LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error,
-								LspEditorUiMessages.CProjectChangeMonitor_yaml_scanner_error_message + projectLocation
-										+ CLANGD_CONFIG_FILE_NAME,
-								status);
-					}
+					setCompilationDatabase(project, relativeDatabasePath);
 				} else {
-					Platform.getLog(getClass()).log(new Status(Status.ERROR, ClangdPlugin.PLUGIN_ID,
-							"Cannot determine path to compile_commands.json")); //$NON-NLS-1$
+					Platform.getLog(getClass()).error("Cannot determine path to compile_commands.json"); //$NON-NLS-1$
 				}
 			}
 		}
@@ -189,8 +175,14 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 			Map<String, Object> data = null;
 			Yaml yaml = new Yaml();
 			try (var inputStream = configFile.getContents()) {
-				//throws ScannerException
-				data = yaml.load(inputStream);
+				//throws ScannerException and ParserException:
+				try {
+					data = yaml.load(inputStream);
+				} catch (Exception e) {
+					Platform.getLog(getClass()).error(e.getMessage(), e);
+					// return, since the file syntax is corrupted. The user has to fix it first:
+					return;
+				}
 			}
 			if (data == null) {
 				//empty file: (re)create .clangd file:
@@ -237,5 +229,4 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 		}
 		return false;
 	}
-
 }
