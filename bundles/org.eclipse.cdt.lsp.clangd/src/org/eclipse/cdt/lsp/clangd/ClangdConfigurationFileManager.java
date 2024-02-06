@@ -65,7 +65,8 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	}
 
 	/**
-	 * Set the <code>CompilationDatabase</code> entry in the <code>.clangd</code> file which is located in the <code>project</code> root.
+	 * Set the <code>CompilationDatabase</code> entry in the <code>.clangd</code> file which is located in the <code>project</code> root,
+	 * if the yaml file syntax can be parsed.
 	 * The <code>.clangd</code> file will be created, if it's not existing.
 	 * The <code>CompilationDatabase</code> points to the build folder of the active build configuration
 	 * (in case <code>project</code> is a managed C/C++ project).
@@ -83,11 +84,7 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 			if (enableSetCompilationDatabasePath(project)) {
 				var relativeDatabasePath = getRelativeDatabasePath(project, newCProjectDescription, macroResolver);
 				if (!relativeDatabasePath.isEmpty()) {
-					try {
-						setCompilationDatabase(project, relativeDatabasePath);
-					} catch (Exception e) {
-						Platform.getLog(getClass()).error(e.getMessage(), e);
-					}
+					setCompilationDatabase(project, relativeDatabasePath);
 				} else {
 					Platform.getLog(getClass()).error("Cannot determine path to compile_commands.json"); //$NON-NLS-1$
 				}
@@ -178,8 +175,14 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 			Map<String, Object> data = null;
 			Yaml yaml = new Yaml();
 			try (var inputStream = configFile.getContents()) {
-				//throws ScannerException
-				data = yaml.load(inputStream);
+				//throws ScannerException and ParserException:
+				try {
+					data = yaml.load(inputStream);
+				} catch (Exception e) {
+					Platform.getLog(getClass()).error(e.getMessage(), e);
+					// return, since the file syntax is corrupted. The user has to fix it first:
+					return;
+				}
 			}
 			if (data == null) {
 				//empty file: (re)create .clangd file:

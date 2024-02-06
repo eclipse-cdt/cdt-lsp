@@ -14,7 +14,7 @@
 
 package org.eclipse.cdt.lsp.clangd.tests;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -48,8 +48,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
-import org.yaml.snakeyaml.parser.ParserException;
-import org.yaml.snakeyaml.scanner.ScannerException;
 
 final class ClangdConfigurationFileManagerTest {
 
@@ -59,7 +57,7 @@ final class ClangdConfigurationFileManagerTest {
 	private static final String DEFAULT_CDB_SETTING = "CompileFlags: {CompilationDatabase: %s}";
 	private static final String MODIFIED_DEFAULT_CDB_SETTING = DEFAULT_CDB_SETTING + "\n";
 	private static final String INVALID_YAML_SYNTAX_CONTAINS_TAB = "CompileFlags:\n\tCompilationDatabase: %s";
-	private static final String INVALID_YAML_SYNTAX_MISSING_BRACE = "CompileFlags: {CompilationDatabase: Debug\r\n";
+	private static final String INVALID_YAML_SYNTAX_MISSING_BRACE = "CompileFlags: {CompilationDatabase: Release\r\n";
 	private final ClangdCProjectDescriptionListener clangdConfigurationManager = PlatformUI.getWorkbench()
 			.getService(ClangdCProjectDescriptionListener.class);
 	private final MacroResolver macroResolver = new MockMacroResolver();
@@ -258,13 +256,19 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testInvalidYamlSyntax() throws IOException, CoreException {
 		// GIVEN an existing .clangd configuration file with invalid yaml syntax (contains tab):
-		createConfigFile(INVALID_YAML_SYNTAX_CONTAINS_TAB, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var configFile = createConfigFile(INVALID_YAML_SYNTAX_CONTAINS_TAB, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		String beforeSet;
+		try (var inputStream = configFile.getContents()) {
+			beforeSet = new String(inputStream.readAllBytes());
+		}
 		// WHEN the ClangdConfigurationManager.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		// THEN a ScannerExcpetion is expected:
-		assertThrows(ScannerException.class, () -> {
-			((ClangdConfigurationFileManager) clangdConfigurationManager).setCompilationDatabase(project,
-					RELATIVE_DIR_PATH_BUILD_DEBUG);
-		});
+		((ClangdConfigurationFileManager) clangdConfigurationManager).setCompilationDatabase(project,
+				RELATIVE_DIR_PATH_BUILD_DEBUG);
+		// THEN the file has not been changed, because the user shall fix the errors first:
+		try (var inputStream = configFile.getContents()) {
+			var afterSet = new String(inputStream.readAllBytes());
+			assertEquals(beforeSet, afterSet);
+		}
 	}
 
 	/**
@@ -276,13 +280,19 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testInvalidYamlSyntax2() throws IOException, CoreException {
 		// GIVEN an existing .clangd configuration file with invalid yaml syntax (missing }):
-		createConfigFile(INVALID_YAML_SYNTAX_MISSING_BRACE, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var configFile = createConfigFile(INVALID_YAML_SYNTAX_MISSING_BRACE, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		String beforeSet;
+		try (var inputStream = configFile.getContents()) {
+			beforeSet = new String(inputStream.readAllBytes());
+		}
 		// WHEN the ClangdConfigurationManager.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		// THEN a ParserExcpetion is expected:
-		assertThrows(ParserException.class, () -> {
-			((ClangdConfigurationFileManager) clangdConfigurationManager).setCompilationDatabase(project,
-					RELATIVE_DIR_PATH_BUILD_DEBUG);
-		});
+		((ClangdConfigurationFileManager) clangdConfigurationManager).setCompilationDatabase(project,
+				RELATIVE_DIR_PATH_BUILD_DEBUG);
+		// THEN the file has not been changed, because the user shall fix the errors first:
+		try (var inputStream = configFile.getContents()) {
+			var afterSet = new String(inputStream.readAllBytes());
+			assertEquals(beforeSet, afterSet);
+		}
 	}
 
 }
