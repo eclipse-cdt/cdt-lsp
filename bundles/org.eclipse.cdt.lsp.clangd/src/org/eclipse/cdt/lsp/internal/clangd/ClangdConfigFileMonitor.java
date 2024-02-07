@@ -15,7 +15,6 @@ package org.eclipse.cdt.lsp.internal.clangd;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -25,8 +24,8 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * Monitor changes in <code>.clangd</code> files in the workspace and triggers a yaml checker
@@ -44,7 +43,7 @@ public class ClangdConfigFileMonitor {
 			if (event.getDelta() != null && event.getType() == IResourceChangeEvent.POST_CHANGE) {
 				try {
 					event.getDelta().accept(delta -> {
-						if ((delta.getKind() == IResourceDelta.ADDED || delta.getKind() == IResourceDelta.REMOVED
+						if ((delta.getKind() == IResourceDelta.ADDED
 								|| (delta.getFlags() & IResourceDelta.CONTENT) != 0)
 								&& CLANGD_CONFIG_FILE.equals(delta.getResource().getName())) {
 							if (delta.getResource() instanceof IFile file) {
@@ -55,7 +54,7 @@ public class ClangdConfigFileMonitor {
 						return true;
 					});
 				} catch (CoreException e) {
-					StatusManager.getManager().handle(e, ClangdPlugin.PLUGIN_ID);
+					Platform.getLog(getClass()).log(e.getStatus());
 				}
 			}
 		}
