@@ -35,6 +35,9 @@ public class ClangdConfigFileChecker {
 	 * @param configFile
 	 */
 	public void checkConfigFile(IFile configFile) {
+		if (!configFile.exists()) {
+			return;
+		}
 		Yaml yaml = new Yaml();
 		try (var inputStream = configFile.getContents()) {
 			try {
