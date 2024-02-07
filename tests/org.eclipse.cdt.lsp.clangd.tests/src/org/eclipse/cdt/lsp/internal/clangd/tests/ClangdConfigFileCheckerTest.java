@@ -25,6 +25,7 @@ import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
 import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigFileChecker;
 import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigFileMonitor;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -132,15 +133,19 @@ class ClangdConfigFileCheckerTest {
 		// GIVEN an existing .clangd configuration file with invalid yaml syntax (missing closing brace):
 		// WHEN a new .clang file gets added to the project (should trigger ClangdConfigFileMonitor.checkJob).
 		var configFile = createConfigFile(INVALID_YAML_SYNTAX_MISSING_BRACE);
-		// AND the UI thread sleeps for 1s:
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		int cnt = 0;
+		var marker = new IMarker[] {};
+		while (marker.length == 0 && cnt < 20) {
+			marker = configFile.findMarkers(ClangdConfigFileChecker.CLANGD_MARKER, false, IResource.DEPTH_ZERO);
+			cnt++;
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		// THEN we expect that an ClangdConfigFileChecker.CLANGD_MARKER has been added in the meantime,
 		// because the ClangdConfigFileMonitor.checkJob, which calls the ClangdConfigFileChecker().checkConfigFile, should have been run after a delay of 100ms:
-		var marker = configFile.findMarkers(ClangdConfigFileChecker.CLANGD_MARKER, false, IResource.DEPTH_ZERO);
 		assertNotNull(marker);
 		assertEquals(1, marker.length, ERROR_MSG);
 	}

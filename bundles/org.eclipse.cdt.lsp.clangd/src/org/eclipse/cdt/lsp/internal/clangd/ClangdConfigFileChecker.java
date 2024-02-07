@@ -44,23 +44,24 @@ public class ClangdConfigFileChecker {
 				removeMarkerFromClangdConfig(configFile);
 				//throws ScannerException and ParserException:
 				yaml.load(inputStream);
-			} catch (Exception exception) {
-				if (exception instanceof MarkedYAMLException yamlException) {
-					addMarkerToClangdConfig(configFile, yamlException);
-				} else {
-					//log unexpected exception:
-					Platform.getLog(getClass())
-							.error("Expected MarkedYAMLException, but was: " + exception.getMessage(), exception); //$NON-NLS-1$
+			} catch (MarkedYAMLException yamlException) {
+				// re-read the file, because the buffer which comes along with MarkedYAMLException is limited to ~800 bytes.
+				try (var reReadStream = configFile.getContents()) {
+					addMarkerToClangdConfig(configFile, yamlException, reReadStream.readAllBytes());
 				}
+			} catch (Exception exception) {
+				//log unexpected exception:
+				Platform.getLog(getClass()).error("Expected MarkedYAMLException, but was: " + exception.getMessage(), //$NON-NLS-1$
+						exception);
 			}
 		} catch (IOException | CoreException e) {
 			Platform.getLog(getClass()).error(e.getMessage(), e);
 		}
 	}
 
-	private void addMarkerToClangdConfig(IFile configFile, MarkedYAMLException yamlException) {
+	private void addMarkerToClangdConfig(IFile configFile, MarkedYAMLException yamlException, byte[] buffer) {
 		try {
-			var configMarker = parseYamlException(yamlException);
+			var configMarker = parseYamlException(yamlException, buffer);
 			var marker = configFile.createMarker(CLANGD_MARKER);
 			marker.setAttribute(IMarker.MESSAGE, configMarker.message);
 			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
@@ -93,21 +94,28 @@ public class ClangdConfigFileChecker {
 	 * @param file
 	 * @return
 	 */
-	private ClangdConfigMarker parseYamlException(MarkedYAMLException exception) {
+	private ClangdConfigMarker parseYamlException(MarkedYAMLException exception, byte[] buffer) {
 		var marker = new ClangdConfigMarker();
 		marker.message = exception.getProblem();
-		marker.line = exception.getProblemMark().getLine() + 1; //getLine() is zero based, IMarker wants 1-based
-		int index = exception.getProblemMark().getIndex();
-		var buffer = exception.getProblemMark().getBuffer();
+		var problemMark = exception.getProblemMark();
+		if (problemMark == null) {
+			return marker;
+		}
+		marker.line = problemMark.getLine() + 1; //getLine() is zero based, IMarker wants 1-based
+		int index = problemMark.getIndex();
 		if (index == buffer.length) {
-			index = getIndexOfLastPrintableChar(buffer);
+			// When index == buffer.length() the marker index points to the non visible
+			// \r or \n character and the marker is not displayed in the editor.
+			// Or, even worse, there is no next line and index + 1 would be > buffer.length
+			// Therefore we have to find the last visible char:
+			index = getIndexOfLastVisibleChar(buffer);
 		}
 		marker.charStart = index;
 		marker.charEnd = index + 1;
 		return marker;
 	}
 
-	private int getIndexOfLastPrintableChar(int[] buffer) {
+	private int getIndexOfLastVisibleChar(byte[] buffer) {
 		for (int i = buffer.length - 1; i >= 0; i--) {
 			if ('\r' != ((char) buffer[i]) && '\n' != ((char) buffer[i])) {
 				return i;
