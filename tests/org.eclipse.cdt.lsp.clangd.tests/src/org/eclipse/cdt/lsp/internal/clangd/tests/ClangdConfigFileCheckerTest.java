@@ -127,26 +127,22 @@ class ClangdConfigFileCheckerTest {
 	 *
 	 * @throws IOException
 	 * @throws CoreException
+	 * @throws InterruptedException
 	 */
 	@Test
-	void testInvalidYamlSyntaxMissingBrace() throws IOException, CoreException {
+	void testInvalidYamlSyntaxMissingBrace() throws IOException, CoreException, InterruptedException {
 		// GIVEN an existing .clangd configuration file with invalid yaml syntax (missing closing brace):
 		// WHEN a new .clang file gets added to the project (should trigger ClangdConfigFileMonitor.checkJob).
 		var configFile = createConfigFile(INVALID_YAML_SYNTAX_MISSING_BRACE);
-		int cnt = 0;
+		int timeoutCnt = 0;
 		var marker = new IMarker[] {};
-		while (marker.length == 0 && cnt < 20) {
+		do {
+			Thread.sleep(50);
 			marker = configFile.findMarkers(ClangdConfigFileChecker.CLANGD_MARKER, false, IResource.DEPTH_ZERO);
-			cnt++;
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+			timeoutCnt++;
+		} while (marker.length == 0 && timeoutCnt < 20);
 		// THEN we expect that an ClangdConfigFileChecker.CLANGD_MARKER has been added in the meantime,
 		// because the ClangdConfigFileMonitor.checkJob, which calls the ClangdConfigFileChecker().checkConfigFile, should have been run after a delay of 100ms:
-		assertNotNull(marker);
 		assertEquals(1, marker.length, ERROR_MSG);
 	}
 

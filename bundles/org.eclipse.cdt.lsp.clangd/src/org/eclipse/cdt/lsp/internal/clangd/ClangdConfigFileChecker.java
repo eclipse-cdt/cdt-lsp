@@ -75,7 +75,7 @@ public class ClangdConfigFileChecker {
 
 	private void removeMarkerFromClangdConfig(IFile configFile) {
 		try {
-			configFile.deleteMarkers(CLANGD_MARKER, false, IResource.DEPTH_INFINITE);
+			configFile.deleteMarkers(CLANGD_MARKER, false, IResource.DEPTH_ZERO);
 		} catch (CoreException e) {
 			Platform.getLog(getClass()).log(e.getStatus());
 		}
