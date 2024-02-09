@@ -312,15 +312,15 @@
    </extension>
    <extension
          point="org.eclipse.ui.genericeditor.reconcilers">
-      <reconcilingStrategy
-            class="org.eclipse.cdt.lsp.editor.CSpellingReconcileStrategy"
+      <reconciler
+            class="org.eclipse.cdt.lsp.editor.CSpellingReconciler"
             contentType="org.eclipse.core.runtime.text">
          <enabledWhen>
             <test
                   property="org.eclipse.cdt.lsp.editor.spelling.enabled">
             </test>
          </enabledWhen>
-      </reconcilingStrategy>
+      </reconciler>
    </extension>  
 </plugin>
 
