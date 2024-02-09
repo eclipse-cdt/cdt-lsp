@@ -96,7 +96,8 @@ public class ClangdConfigFileChecker {
 	 */
 	private ClangdConfigMarker parseYamlException(MarkedYAMLException exception, byte[] buffer) {
 		var marker = new ClangdConfigMarker();
-		marker.message = exception.getProblem();
+		var context = exception.getContext();
+		marker.message = context != null ? context + " " + exception.getProblem() : exception.getProblem(); //$NON-NLS-1$
 		var problemMark = exception.getProblemMark();
 		if (problemMark == null) {
 			return marker;
