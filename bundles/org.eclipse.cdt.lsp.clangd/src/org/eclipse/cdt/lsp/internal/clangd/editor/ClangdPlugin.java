@@ -15,6 +15,7 @@
 package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import org.eclipse.cdt.lsp.internal.clangd.CProjectChangeMonitor;
+import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigFileMonitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -27,6 +28,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 	private IWorkspace workspace;
 	private CompileCommandsMonitor compileCommandsMonitor;
 	private CProjectChangeMonitor cProjectChangeMonitor;
+	private ClangdConfigFileMonitor configFileMonitor;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.clangd"; //$NON-NLS-1$
@@ -49,6 +51,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		workspace = workspaceTracker.getService();
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
 		cProjectChangeMonitor = new CProjectChangeMonitor().start();
+		configFileMonitor = new ClangdConfigFileMonitor(workspace).start();
 	}
 
 	@Override
@@ -56,6 +59,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		plugin = null;
 		compileCommandsMonitor.stop();
 		cProjectChangeMonitor.stop();
+		configFileMonitor.stop();
 		super.stop(context);
 	}
 
