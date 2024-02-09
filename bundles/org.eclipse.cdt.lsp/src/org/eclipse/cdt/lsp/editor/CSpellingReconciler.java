@@ -2,7 +2,6 @@ package org.eclipse.cdt.lsp.editor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.Reconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 
@@ -17,10 +16,4 @@ public class CSpellingReconciler extends Reconciler {
 			this.setReconcilingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
 		}
 	}
-
-	@Override
-	public IReconcilingStrategy getReconcilingStrategy(String contentType) {
-		return strategy;
-	}
-
 }
