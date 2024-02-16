@@ -11,21 +11,19 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor;
+package org.eclipse.cdt.lsp.internal.editor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.Reconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-public class CSpellingReconciler extends Reconciler {
-	private CSpellingReconcileStrategy strategy;
+public final class CSpellingReconciler extends Reconciler {
 
 	@Override
 	public void install(ITextViewer textViewer) {
 		if (textViewer instanceof ISourceViewer sourceViewer) {
-			strategy = new CSpellingReconcileStrategy(sourceViewer);
-			this.setReconcilingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
+			this.setReconcilingStrategy(new CSpellingReconcileStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
 		}
 		// call super.install AFTER the CSpellingReconcileStrategy has been added to the super class via setReconcilingStrategy call,
 		// otherwise reconcilerDocumentChanged (which is called during super.install) would not be performed on our CSpellingReconcileStrategy

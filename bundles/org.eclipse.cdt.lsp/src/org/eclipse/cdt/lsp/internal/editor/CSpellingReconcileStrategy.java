@@ -11,13 +11,13 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor;
+package org.eclipse.cdt.lsp.internal.editor;
 
 import org.eclipse.cdt.internal.ui.text.spelling.CSpellingService;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 
-public class CSpellingReconcileStrategy extends SpellingReconcileStrategy {
+public final class CSpellingReconcileStrategy extends SpellingReconcileStrategy {
 
 	public CSpellingReconcileStrategy(ISourceViewer viewer) {
 		super(viewer, CSpellingService.getInstance());

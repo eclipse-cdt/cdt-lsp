@@ -216,7 +216,7 @@
             type="java.lang.Object">
       </propertyTester>
       <propertyTester
-            class="org.eclipse.cdt.lsp.editor.SpellingEnabled"
+            class="org.eclipse.cdt.lsp.internal.editor.SpellingEnabled"
             id="org.eclipse.cdt.lsp.editor.spelling.EnabledTester"
             namespace="org.eclipse.cdt.lsp.editor.spelling"
             properties="enabled"
@@ -313,7 +313,7 @@
    <extension
          point="org.eclipse.ui.genericeditor.reconcilers">
       <reconciler
-            class="org.eclipse.cdt.lsp.editor.CSpellingReconciler"
+            class="org.eclipse.cdt.lsp.internal.editor.CSpellingReconciler"
             contentType="org.eclipse.core.runtime.text">
          <enabledWhen>
             <test

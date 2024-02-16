@@ -11,13 +11,12 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.editor;
+package org.eclipse.cdt.lsp.internal.editor;
 
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.core.expressions.PropertyTester;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -25,33 +24,35 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
-public class SpellingEnabled extends PropertyTester {
+public final class SpellingEnabled extends PropertyTester {
+	private static final String EMPTY = ""; //$NON-NLS-1$
 
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+		return isSpellingEnabled() && isCContentType(receiver);
+	}
+
+	private static boolean isSpellingEnabled() {
+		return EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED);
+	}
+
+	private static boolean isCContentType(Object receiver) {
 		if (receiver instanceof TextEditor editor) {
-			var id = Optional.of(editor.getEditorInput()).map(i -> getFile(i)).map(f -> {
-				try {
-					return f.getContentDescription();
-				} catch (CoreException e) {
-					// do nothing
-				}
-				return null;
-			}).map(cd -> cd.getContentType()).map(ct -> ct.getId()).orElse(""); //$NON-NLS-1$
-			return isSpellingEnabled() && LspUtils.isCContentType(id);
+			return LspUtils.isCContentType(getContentType(editor.getEditorInput()));
 		}
 		return false;
 	}
 
-	private IFile getFile(IEditorInput editorInput) {
+	private static String getContentType(IEditorInput editorInput) {
 		if (editorInput instanceof IFileEditorInput fileEditorInput) {
-			return fileEditorInput.getFile();
+			try {
+				return Optional.ofNullable(fileEditorInput.getFile().getContentDescription())
+						.map(cd -> cd.getContentType()).map(ct -> ct.getId()).orElse(EMPTY);
+			} catch (CoreException e) {
+				// do nothing
+			}
 		}
-		return null;
-	}
-
-	private boolean isSpellingEnabled() {
-		return EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED);
+		return EMPTY;
 	}
 
 }
