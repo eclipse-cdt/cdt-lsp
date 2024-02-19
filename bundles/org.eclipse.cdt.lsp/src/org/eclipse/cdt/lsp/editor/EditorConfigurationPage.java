@@ -174,9 +174,8 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 	private Control createSpellingPreferencesLink(Composite parent) {
 		Link link = new Link(parent, SWT.NONE);
 		link.setText(LspUiMessages.LspEditorConfigurationPage_spelling_link);
-		link.addListener(SWT.Selection, event -> {
-			PreferencesUtil.createPreferenceDialogOn(getShell(), event.text, null, null);
-		});
+		link.addListener(SWT.Selection,
+				event -> PreferencesUtil.createPreferenceDialogOn(getShell(), event.text, null, null));
 		link.setToolTipText(LspUiMessages.LspEditorConfigurationPage_spelling_link_tooltip);
 		link.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		return link;
