@@ -215,6 +215,13 @@
             properties="hasLanguageServer"
             type="java.lang.Object">
       </propertyTester>
+      <propertyTester
+            class="org.eclipse.cdt.lsp.internal.editor.SpellingEnabled"
+            id="org.eclipse.cdt.lsp.editor.spelling.EnabledTester"
+            namespace="org.eclipse.cdt.lsp.editor.spelling"
+            properties="enabled"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
    <extension
          point="org.eclipse.core.expressions.definitions">
@@ -302,6 +309,18 @@
           <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
       </page>      
-   </extension>   
+   </extension>
+   <extension
+         point="org.eclipse.ui.genericeditor.reconcilers">
+      <reconciler
+            class="org.eclipse.cdt.lsp.internal.editor.CSpellingReconciler"
+            contentType="org.eclipse.core.runtime.text">
+         <enabledWhen>
+            <test
+                  property="org.eclipse.cdt.lsp.editor.spelling.enabled">
+            </test>
+         </enabledWhen>
+      </reconciler>
+   </extension>  
 </plugin>
 

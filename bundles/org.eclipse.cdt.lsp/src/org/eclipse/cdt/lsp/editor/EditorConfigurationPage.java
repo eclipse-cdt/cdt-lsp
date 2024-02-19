@@ -162,8 +162,23 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
 		composite.setFont(parent.getFont());
+		if (!isProjectScope) {
+			createSpellingPreferencesLink(composite);
+			Label line = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+			line.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
+		}
 		area = getConfigurationArea(composite, isProjectScope);
 		return composite;
+	}
+
+	private Control createSpellingPreferencesLink(Composite parent) {
+		Link link = new Link(parent, SWT.NONE);
+		link.setText(LspUiMessages.LspEditorConfigurationPage_spelling_link);
+		link.addListener(SWT.Selection,
+				event -> PreferencesUtil.createPreferenceDialogOn(getShell(), event.text, null, null));
+		link.setToolTipText(LspUiMessages.LspEditorConfigurationPage_spelling_link_tooltip);
+		link.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		return link;
 	}
 
 	protected void refreshWidgets(Object options) {
