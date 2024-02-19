@@ -7,7 +7,9 @@ Export-Package: org.eclipse.cdt.lsp,
  org.eclipse.cdt.lsp.editor,
  org.eclipse.cdt.lsp.server,
  org.eclipse.cdt.lsp.server.enable,
- org.eclipse.cdt.lsp.services
+ org.eclipse.cdt.lsp.services,
+ org.eclipse.cdt.lsp.services.ast,
+ org.eclipse.cdt.lsp.services.symbolinfo
 Bundle-Activator: org.eclipse.cdt.lsp.LspPlugin
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
