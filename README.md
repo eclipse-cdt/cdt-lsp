@@ -126,14 +126,11 @@ This file may be hidden by default, therefore to see the file uncheck the *.\* r
 ### Open a file
 
 By default C/C++ will be opened with the standard CEditor.
-The default can be changed per project or per workspace with the *C/C++ General* -> *Editor (LSP)* -> *Prefer C/C++ Editor (LSP)* checkbox in the project setting or preferences.
+The default can be changed per project or per workspace with the *C/C++ General* -> *Editor (LSP)* -> *Set C/C++ Editor (LSP) as default* checkbox in the project properties or workspace preference page.
 
 - Note: The workspace setting will be used for projects that have not checked the *Enable project specific settings* checkbox in the project properties -> *C/C++ General* -> *Editor (LSP)* page.
 
-Alternatively, you can choose which editor to open the file by using *Open With*:
-
-![open-with.png](images/open-with.png "open-with.png")
-
+**Note:** Opening a C/C++ file using *Open With* in the context menu of a file won't work for the LSP based editor, because the language server won't be started if *Set C/C++ Editor (LSP) as default* is not enabled!
 
 With the *C/C++ Editor (LSP)* open, the presentation of the C++ file will follow the LSP4E conventions augmented by the information returned from clangd.
 
@@ -148,6 +145,7 @@ For plug-in dependencies the MANIFEST.MF's dependency information will provide t
 | CDT LSP Version | clangd | cmake* | Eclipse IDE Release |
 |:-:|:-:|:-:|:-:|
 | 1.0.x | 15.0.x | 3.x | 2023-09 |
+| 1.1.x | 17.0.x | 3.x | 2023-12 |
 
 \* cmake is required to run through the demo flow, but any tool that can create compile_commands.json or otherwise feed settings to clangd is suitable.
 
