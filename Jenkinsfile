@@ -31,6 +31,7 @@ pipeline {
                   /usr/share/maven/bin/mvn \
                       clean verify -B -V -X -e \
                       -Dmaven.test.failure.ignore=true \
+                      -P api-baseline-check \
                       -P production \
                       -Dmaven.repo.local=/home/jenkins/.m2/repository \
                       --settings /home/jenkins/.m2/settings.xml \
