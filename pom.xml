@@ -18,7 +18,7 @@
  <packaging>pom</packaging>
 
  <properties>
-  <tycho.version>4.0.1</tycho.version>
+  <tycho.version>4.0.6</tycho.version>
   <cbi-plugins.version>1.3.4</cbi-plugins.version>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <comparator.repo>https://download.eclipse.org/tools/cdt/releases/cdt-lsp-latest/</comparator.repo>
