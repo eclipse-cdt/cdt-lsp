@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.cdt.lsp.clangd
 Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.cdt.lsp.clangd;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Export-Package: org.eclipse.cdt.lsp.clangd;x-internal:=true,
  org.eclipse.cdt.lsp.internal.clangd;x-internal:=true,
  org.eclipse.cdt.lsp.internal.clangd.editor;x-internal:=true,
