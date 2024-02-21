@@ -19,8 +19,19 @@
   <tycho.version>2.7.5</tycho.version>
   <cbi-plugins.version>1.3.4</cbi-plugins.version>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <comparator.repo>https://download.eclipse.org/tools/cdt/releases/cdt-lsp-latest/</comparator.repo>
   <api-baseline.repo>https://download.eclipse.org/tools/cdt/releases/cdt-lsp-latest/</api-baseline.repo>
-  <api-baseline.repo.simrel>https://download.eclipse.org/releases/latest/</api-baseline.repo.simrel>
+  <api-baseline.repo.simrel>https://download.eclipse.org/releases/2023-12/</api-baseline.repo.simrel>
+    <!-- these parameters are to control baseline replace and compare. On a local build you want
+       to avoid baseline replace and compare, especially if you have different versions of Java than
+    the baseline was built with. This is the default.
+
+    If you have the same version of Java as the build machine you can run baseline comparison and
+    replace. To do that run with the baseline-compare-and-replace profile.
+     -->
+  <compare-version-with-baselines.skip>true</compare-version-with-baselines.skip>
+  <replace-version-with-baselines.mode>disable</replace-version-with-baselines.mode>
+  <replace-version-with-baselines.replace>none</replace-version-with-baselines.replace>
  </properties>
 
   <pluginRepositories>
@@ -131,6 +142,26 @@
      </execution>
     </executions>
    </plugin>
+   <plugin>
+    <groupId>org.eclipse.tycho.extras</groupId>
+    <artifactId>tycho-p2-extras-plugin</artifactId>
+    <version>${tycho.version}</version>
+    <executions>
+     <execution> <!-- Checks versions are properly bumped from one stream to the other -->
+      <id>compare-attached-artifacts-with-release</id>
+      <goals>
+       <goal>compare-version-with-baselines</goal>
+      </goals>
+      <configuration>
+       <skip>${compare-version-with-baselines.skip}</skip>
+       <baselines>
+        <baseline>${comparator.repo}</baseline> <!-- Previous release) -->
+       </baselines>
+       <comparator>zip</comparator>
+      </configuration>
+     </execution>
+    </executions>
+   </plugin>
   </plugins>
  </build>
   <profiles>
@@ -201,6 +232,8 @@
               <baselines>
                 <repository>
                   <url>${api-baseline.repo}</url>
+                </repository>
+                <repository>
                   <url>${api-baseline.repo.simrel}</url>
                 </repository>
               </baselines>

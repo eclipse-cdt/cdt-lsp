@@ -27,4 +27,4 @@ jobs:
           export PATH=$PWD/clangd_15.0.6/bin:$PATH
           echo $PATH
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-          mvn -B -V -X -e clean verify
+          mvn -B -V -X -e clean verify -P baseline-compare-and-replace -P api-baseline-check
