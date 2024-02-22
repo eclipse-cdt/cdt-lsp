@@ -14,9 +14,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Setup Maven
-        uses: stCarolas/setup-maven@v.4.5
+        uses: stCarolas/setup-maven@v5
         with:
-          maven-version: 3.8.7          
+          maven-version: 3.9.6
       - name: Download clangd
         run: |
           curl -L https://github.com/clangd/clangd/releases/download/15.0.6/clangd-linux-15.0.6.zip > clangd.zip
