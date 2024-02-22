@@ -14,9 +14,9 @@ package org.eclipse.cdt.lsp.services.ast;
 import org.eclipse.cdt.lsp.services.ClangdLanguageServer;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.jsonrpc.util.Preconditions;
+import org.eclipse.lsp4j.jsonrpc.util.ToStringBuilder;
 import org.eclipse.lsp4j.jsonrpc.validation.NonNull;
-import org.eclipse.lsp4j.util.Preconditions;
-import org.eclipse.lsp4j.util.ToStringBuilder;
 
 /**
  * Parameter object type for the <em>textDocument/ast</em> request.
