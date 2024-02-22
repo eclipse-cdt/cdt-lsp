@@ -16,7 +16,7 @@ package org.eclipse.cdt.lsp.clangd;
 import java.net.URI;
 import java.util.List;
 
-import org.eclipse.cdt.lsp.editor.Configuration;
+import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;

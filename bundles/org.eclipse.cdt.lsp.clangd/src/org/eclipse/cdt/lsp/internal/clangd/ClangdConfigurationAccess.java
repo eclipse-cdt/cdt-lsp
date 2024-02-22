@@ -21,7 +21,7 @@ import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdQualifier;
-import org.eclipse.cdt.lsp.editor.ConfigurationAccess;
+import org.eclipse.cdt.lsp.config.ConfigurationAccess;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.DefaultScope;

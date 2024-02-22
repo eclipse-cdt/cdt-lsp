@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.editor.ConfigurationArea;
+import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;

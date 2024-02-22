@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
-import org.eclipse.cdt.lsp.editor.Configuration;
+import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IProject;

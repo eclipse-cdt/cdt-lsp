@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.internal.editor;
 
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.LspUtils;
+import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorInput;
