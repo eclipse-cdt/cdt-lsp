@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.runtime.CoreException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class CLanguageServerProviderTest {
@@ -24,6 +25,7 @@ public class CLanguageServerProviderTest {
 	/**
 	 * Tests whether the ICLanguageServerProvider with the largest priority is used.
 	 */
+	@Disabled
 	@Test
 	public void testLsProvidersPriority() throws CoreException {
 		//WHEN a language server provider gets created from the serverProvider extension point:

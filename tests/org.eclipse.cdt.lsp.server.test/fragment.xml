@@ -3,10 +3,6 @@
 <fragment>
    <extension
          point="org.eclipse.cdt.lsp.serverProvider">
-      <server
-            class="org.eclipse.cdt.lsp.server.test.MockCLanguageServerProvider"
-            priority="normal">
-      </server>
    </extension>
 
 </fragment>
