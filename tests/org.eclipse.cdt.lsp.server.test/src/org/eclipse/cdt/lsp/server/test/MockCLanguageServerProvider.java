@@ -11,7 +11,7 @@
  * Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.test.server;
+package org.eclipse.cdt.lsp.server.test;
 
 import java.net.URI;
 import java.util.Collections;

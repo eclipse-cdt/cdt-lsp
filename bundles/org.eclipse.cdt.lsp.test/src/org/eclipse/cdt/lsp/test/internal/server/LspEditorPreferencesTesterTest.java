@@ -12,7 +12,7 @@
  *     Alexander Fedorov (ArSysOp) - extract headless part
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd.editor.tests.expressions;
+package org.eclipse.cdt.lsp.test.internal.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,10 +22,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.clangd.editor.tests.EditorTestUtils;
-import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
+import org.eclipse.cdt.lsp.internal.server.HasLanguageServerPropertyTester;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
-import org.eclipse.cdt.lsp.server.enable.HasLanguageServerPropertyTester;
+import org.eclipse.cdt.lsp.test.TestUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.jupiter.api.AfterEach;
@@ -105,10 +104,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, MAIN_CPP, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor:
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	/**
@@ -123,10 +122,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, MAIN_CPP, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor (LSP):
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	/**
@@ -141,10 +140,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, HEADER_HPP, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor:
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	/**
@@ -159,10 +158,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, HEADER_HPP, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor (LSP):
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	/**
@@ -177,10 +176,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, MAIN_C, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor:
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	/**
@@ -194,10 +193,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, MAIN_C, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor (LSP):
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	/**
@@ -212,10 +211,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, HEADER_HPP, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor:
 		assertEquals(LspPlugin.C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	/**
@@ -230,10 +229,10 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exits in the given project:
 		var file = TestUtils.createFile(project, HEADER_H, FILE_CONTENT);
 		//WHEN this file will be opened:
-		var editorPart = EditorTestUtils.openInEditor(file);
+		var editorPart = TestUtils.openInEditor(file);
 		//THEN it will be opened in the C/C++ Editor (LSP):
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, editorPart.getEditorSite().getId());
-		EditorTestUtils.closeEditor(editorPart, false);
+		TestUtils.closeEditor(editorPart, false);
 	}
 
 	//**********************************************************************************************************************************
@@ -253,7 +252,7 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exists in the given project:
 		var lspProjectFile = TestUtils.createFile(project, MAIN_C, FILE_CONTENT);
 		//AND this file will be opened:
-		var lspEditorPart = EditorTestUtils.openInEditor(lspProjectFile);
+		var lspEditorPart = TestUtils.openInEditor(lspProjectFile);
 		//AND a second project with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 		var nonLspProject = TestUtils.createCProject("NonLspProject");
 		TestUtils.setLspPreferred(nonLspProject, false);
@@ -262,15 +261,15 @@ public final class LspEditorPreferencesTesterTest {
 		//THEN the LS won't be enabled for the non LSP project file:
 		assertTrue(!new HasLanguageServerPropertyTester().test(nonLspProjectFile.getLocationURI(), null, null, null));
 		//AND those file has been be opened:
-		var nonLspEditorPart = EditorTestUtils.openInEditor(nonLspProjectFile);
+		var nonLspEditorPart = TestUtils.openInEditor(nonLspProjectFile);
 		//THEN the file from the project with enabled "Prefer C/C++ Editor (LSP)" has been opened in the C/C++ Editor (LSP):
 		assertEquals(LspPlugin.LSP_C_EDITOR_ID, lspEditorPart.getEditorSite().getId());
 		//THEN the file from the project with disabled "Prefer C/C++ Editor (LSP)" has been opened in the C/C++ Editor:
 		assertEquals(LspPlugin.C_EDITOR_ID, nonLspEditorPart.getEditorSite().getId());
 
 		//clean-up:
-		EditorTestUtils.closeEditor(lspEditorPart, false);
-		EditorTestUtils.closeEditor(nonLspEditorPart, false);
+		TestUtils.closeEditor(lspEditorPart, false);
+		TestUtils.closeEditor(nonLspEditorPart, false);
 		TestUtils.deleteProject(nonLspProject);
 	}
 
@@ -286,7 +285,7 @@ public final class LspEditorPreferencesTesterTest {
 		//AND a file exists in the given project:
 		var lspProjectFile = TestUtils.createFile(project, MAIN_C, FILE_CONTENT);
 		//AND this file has been opened:
-		var lspEditorPart = EditorTestUtils.openInEditor(lspProjectFile);
+		var lspEditorPart = TestUtils.openInEditor(lspProjectFile);
 		//WHEN an external header file shall be opened in the C/C++ Editor:
 		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		externalFile.createNewFile();
@@ -294,7 +293,7 @@ public final class LspEditorPreferencesTesterTest {
 		assertTrue(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
 
 		//clean-up:
-		EditorTestUtils.closeEditor(lspEditorPart, false);
+		TestUtils.closeEditor(lspEditorPart, false);
 		externalFile.delete();
 	}
 

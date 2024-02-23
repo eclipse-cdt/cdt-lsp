@@ -11,12 +11,12 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.test;
+package org.eclipse.cdt.lsp.test.util;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.lsp.LspUtils;
+import org.eclipse.cdt.lsp.util.LspUtils;
 import org.junit.jupiter.api.Test;
 
 class LspUtilsTest {

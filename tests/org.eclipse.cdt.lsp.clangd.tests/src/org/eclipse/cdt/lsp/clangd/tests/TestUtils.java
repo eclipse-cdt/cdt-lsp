@@ -15,13 +15,8 @@
 
 package org.eclipse.cdt.lsp.clangd.tests;
 
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-
-import org.eclipse.cdt.lsp.editor.Configuration;
+import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
-import org.eclipse.cdt.lsp.editor.EditorOptions;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -35,13 +30,6 @@ public final class TestUtils {
 	public static void setLspPreferred(IProject project, boolean value) {
 		ServiceCaller.callOnce(TestUtils.class, Configuration.class, //
 				cc -> cc.storage(project).save(value, ((EditorMetadata) cc.metadata()).preferLspEditor()));
-	}
-
-	public static boolean isLspPreferred(IProject project) {
-		boolean[] enabled = new boolean[1];
-		ServiceCaller.callOnce(TestUtils.class, Configuration.class, //
-				c -> enabled[0] = ((EditorOptions) c.options(project)).preferLspEditor());
-		return enabled[0];
 	}
 
 	public static IProject createCProject(String projectName) throws CoreException {
@@ -65,13 +53,6 @@ public final class TestUtils {
 		if (project != null) {
 			project.delete(true, new NullProgressMonitor());
 		}
-	}
-
-	public static IFile createFile(IProject p, String name, String content)
-			throws CoreException, UnsupportedEncodingException {
-		IFile testFile = p.getFile(name);
-		testFile.create(new ByteArrayInputStream(content.getBytes(testFile.getCharset())), true, null);
-		return testFile;
 	}
 
 	public static String getName(TestInfo testInfo) {

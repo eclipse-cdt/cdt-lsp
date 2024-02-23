@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Language Server Provider Test
+Bundle-SymbolicName: org.eclipse.cdt.lsp.server.test;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Fragment-Host: org.eclipse.cdt.lsp;bundle-version="1.0.0"
+Require-Bundle: junit-jupiter-api
+Automatic-Module-Name: org.eclipse.cdt.lsp.server.test
+Bundle-RequiredExecutionEnvironment: JavaSE-17

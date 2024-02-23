@@ -10,7 +10,7 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.test.server.enable;
+package org.eclipse.cdt.lsp.test.internal.server;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.server.enable.HasLanguageServerPropertyTester;
+import org.eclipse.cdt.lsp.internal.server.HasLanguageServerPropertyTester;
 import org.eclipse.cdt.lsp.test.TestUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;

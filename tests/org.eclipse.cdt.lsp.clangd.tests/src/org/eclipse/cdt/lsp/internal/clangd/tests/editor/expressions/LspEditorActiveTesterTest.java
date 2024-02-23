@@ -11,7 +11,7 @@
  *     Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *     Alexander Fedorov (ArSysOp) - extract headless part
  *******************************************************************************/
-package org.eclipse.cdt.lsp.clangd.editor.tests.expressions;
+package org.eclipse.cdt.lsp.internal.clangd.tests.editor.expressions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

@@ -10,7 +10,7 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.test.server;
+package org.eclipse.cdt.lsp.server.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
