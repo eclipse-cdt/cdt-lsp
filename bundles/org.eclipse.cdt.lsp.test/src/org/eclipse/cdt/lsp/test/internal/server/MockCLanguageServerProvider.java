@@ -11,16 +11,21 @@
  * Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.server.test;
+package org.eclipse.cdt.lsp.test.internal.server;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.cdt.lsp.config.Configuration;
+import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.ServiceCaller;
 
 public class MockCLanguageServerProvider implements ICLanguageServerProvider {
+	private final ServiceCaller<Configuration> editorConfiguration = new ServiceCaller<>(getClass(),
+			Configuration.class);
 
 	@Override
 	public List<String> getCommands(URI rootUri) {
@@ -29,7 +34,9 @@ public class MockCLanguageServerProvider implements ICLanguageServerProvider {
 
 	@Override
 	public boolean isEnabledFor(IProject project) {
-		return false;
+		boolean[] enabled = new boolean[1];
+		editorConfiguration.call(c -> enabled[0] = ((LanguageServerEnable) c.options(project)).isEnabledFor(project));
+		return enabled[0];
 	}
 
 }

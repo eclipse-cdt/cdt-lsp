@@ -54,7 +54,7 @@ public class LspEditorFileImageDescriptor implements ICFileImageDescriptor {
 
 	@Override
 	public boolean isEnabled(IProject project) {
-		return cLanguageServerProvider.isEnabledFor(project);
+		return cLanguageServerProvider != null ? cLanguageServerProvider.isEnabledFor(project) : false;
 	}
 
 	private final void declareRegistryImage(String key, String path) {
