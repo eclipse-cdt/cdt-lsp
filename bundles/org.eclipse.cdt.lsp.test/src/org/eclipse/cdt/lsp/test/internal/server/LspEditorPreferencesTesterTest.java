@@ -21,8 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.internal.server.HasLanguageServerPropertyTester;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.lsp.test.TestUtils;
 import org.eclipse.core.resources.IProject;

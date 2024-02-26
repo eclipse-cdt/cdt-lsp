@@ -14,7 +14,7 @@ package org.eclipse.cdt.lsp.internal.editor;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.ui.lsp.ICFileImageDescriptor;
 import org.eclipse.core.resources.IProject;

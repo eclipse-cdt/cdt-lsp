@@ -13,7 +13,7 @@
 package org.eclipse.cdt.lsp.internal.editor;
 
 import org.eclipse.cdt.codan.core.model.IProblemReporter;
-import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IFile;

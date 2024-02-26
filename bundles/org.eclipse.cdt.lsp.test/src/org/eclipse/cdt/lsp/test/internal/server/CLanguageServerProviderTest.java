@@ -14,7 +14,7 @@ package org.eclipse.cdt.lsp.test.internal.server;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.jupiter.api.Test;

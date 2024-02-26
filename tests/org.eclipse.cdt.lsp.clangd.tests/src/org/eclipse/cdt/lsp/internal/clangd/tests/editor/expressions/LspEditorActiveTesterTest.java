@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.internal.clangd.editor.expressions.LspEditorActiveTester;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.texteditor.ITextEditor;

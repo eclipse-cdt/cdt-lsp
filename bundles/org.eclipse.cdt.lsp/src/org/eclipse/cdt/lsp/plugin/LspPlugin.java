@@ -11,7 +11,7 @@
  * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp;
+package org.eclipse.cdt.lsp.plugin;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

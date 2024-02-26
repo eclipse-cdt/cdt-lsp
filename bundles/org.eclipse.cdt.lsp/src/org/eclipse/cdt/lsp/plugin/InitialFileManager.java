@@ -11,14 +11,12 @@
  * Alexander Fedorov (ArSysOp) - rework to OSGi component
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal;
+package org.eclipse.cdt.lsp.plugin;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.InitialUri;
-import org.eclipse.cdt.lsp.LspPlugin;
 import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
