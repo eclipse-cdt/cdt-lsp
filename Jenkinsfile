@@ -28,7 +28,7 @@ pipeline {
                   export PATH=$PWD/clangd_15.0.6/bin:$PATH
                   which clangd
                   clangd --version
-                  /usr/share/maven/bin/mvn \
+                  /jipp/tools/apache-maven/latest/bin/mvn \
                       clean verify -B -V -X -e \
                       -Dmaven.test.failure.ignore=true \
                       -P production \
