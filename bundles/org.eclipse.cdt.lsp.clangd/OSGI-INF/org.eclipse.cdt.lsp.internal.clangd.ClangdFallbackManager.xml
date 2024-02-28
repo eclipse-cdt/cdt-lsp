@@ -4,7 +4,7 @@
       <provide interface="org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags"/>
    </service>
    <reference cardinality="1..1" field="build" interface="org.eclipse.cdt.core.build.ICBuildConfigurationManager" name="build"/>
-   <reference cardinality="1..1" field="uri" interface="org.eclipse.cdt.lsp.plugin.InitialUri" name="uri"/>
+   <reference cardinality="1..1" field="uri" interface="org.eclipse.cdt.lsp.editor.InitialUri" name="uri"/>
    <reference cardinality="1..1" field="workspace" interface="org.eclipse.core.resources.IWorkspace" name="workspace"/>
    <implementation class="org.eclipse.cdt.lsp.internal.clangd.ClangdFallbackManager"/>
 </scr:component>

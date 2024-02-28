@@ -9,7 +9,7 @@
  * Contributors:
  * Alexander Fedorov (ArSysOp) - initial API
  *******************************************************************************/
-package org.eclipse.cdt.lsp.plugin;
+package org.eclipse.cdt.lsp.editor;
 
 import java.net.URI;
 import java.util.Optional;

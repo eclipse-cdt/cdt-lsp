@@ -41,7 +41,7 @@ Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.editor.EditorMetadataDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.editor.FormatOnSave.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.editor.InitialFileManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.ui.BuiltinEditorOptionsDefault.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.ui.DefaultConfigurationVisibility.xml,
- OSGI-INF/org.eclipse.cdt.lsp.internal.ui.EditorConfigurationAccess.xml,
- OSGI-INF/org.eclipse.cdt.lsp.plugin.InitialFileManager.xml
+ OSGI-INF/org.eclipse.cdt.lsp.internal.ui.EditorConfigurationAccess.xml

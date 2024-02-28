@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.lsp.ExistingResource;
-import org.eclipse.cdt.lsp.plugin.InitialUri;
+import org.eclipse.cdt.lsp.editor.InitialUri;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.lsp.util.LspUtils;
