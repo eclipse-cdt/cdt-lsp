@@ -16,13 +16,13 @@ package org.eclipse.cdt.lsp.internal.clangd.editor;
 
 import java.io.IOException;
 
-import org.eclipse.cdt.lsp.LspUtils;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.editor.Configuration;
-import org.eclipse.cdt.lsp.editor.ConfigurationArea;
-import org.eclipse.cdt.lsp.editor.EditorConfigurationPage;
+import org.eclipse.cdt.lsp.config.Configuration;
+import org.eclipse.cdt.lsp.ui.ConfigurationArea;
+import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
+import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;

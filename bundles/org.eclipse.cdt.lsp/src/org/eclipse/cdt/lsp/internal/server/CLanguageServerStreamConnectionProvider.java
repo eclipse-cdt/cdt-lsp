@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.internal.server;
 
 import java.net.URI;
 
-import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
 

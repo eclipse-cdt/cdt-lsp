@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.internal.server;
 
 import java.util.HashMap;
 
-import org.eclipse.cdt.lsp.LspPlugin;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;

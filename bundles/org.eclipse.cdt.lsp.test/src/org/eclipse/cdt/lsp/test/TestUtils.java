@@ -17,12 +17,15 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
+import org.eclipse.cdt.lsp.config.Configuration;
+import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -32,6 +35,11 @@ import org.eclipse.ui.ide.IDE;
 import org.junit.jupiter.api.TestInfo;
 
 public class TestUtils {
+
+	public static void setLspPreferred(IProject project, boolean value) {
+		ServiceCaller.callOnce(TestUtils.class, Configuration.class, //
+				cc -> cc.storage(project).save(value, ((EditorMetadata) cc.metadata()).preferLspEditor()));
+	}
 
 	public static IProject createCProject(String projectName) throws CoreException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
