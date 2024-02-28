@@ -8,10 +8,10 @@ spec:
     args: ["/bin/sh", "-c", "/home/vnc/.vnc/xstartup.sh && cat"]
     resources:
       requests:
-        memory: "2662Mi"
+        memory: "10000Mi"
         cpu: "1"
       limits:
-        memory: "2662Mi"
+        memory: "10000Mi"
         cpu: "1"
     volumeMounts:
     - name: settings-xml
@@ -22,6 +22,11 @@ spec:
       mountPath: /home/jenkins/.m2/repository
     - name: volume-known-hosts
       mountPath: /home/jenkins/.ssh
+    - name: "jenkins-home"
+      mountPath: "/home/jenkins"
+      readOnly: false
+    - name: tools
+      mountPath: /jipp/tools
   - name: jnlp
     resources:
       requests:
@@ -45,3 +50,8 @@ spec:
   - name: volume-known-hosts
     configMap:
       name: known-hosts
+  - name: "jenkins-home"
+    emptyDir: {}
+  - name: tools
+    persistentVolumeClaim:
+      claimName: tools-claim-jiro-cdt
