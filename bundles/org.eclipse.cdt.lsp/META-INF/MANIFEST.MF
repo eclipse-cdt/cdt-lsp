@@ -4,7 +4,7 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.cdt.lsp;singleton:=true
 Bundle-Version: 2.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp,
- org.eclipse.cdt.lsp.config;x-friends:="org.eclipse.cdt.lsp.clangd",
+ org.eclipse.cdt.lsp.config,
  org.eclipse.cdt.lsp.editor,
  org.eclipse.cdt.lsp.plugin;x-friends:="org.eclipse.cdt.lsp.clangd",
  org.eclipse.cdt.lsp.server,
