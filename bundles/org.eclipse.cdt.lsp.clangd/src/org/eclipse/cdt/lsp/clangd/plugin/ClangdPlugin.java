@@ -12,10 +12,11 @@
  * Alexander Fedorov (ArSysOp) - use Platform for logging
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd.editor;
+package org.eclipse.cdt.lsp.clangd.plugin;
 
-import org.eclipse.cdt.lsp.internal.clangd.CProjectChangeMonitor;
-import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigFileMonitor;
+import org.eclipse.cdt.lsp.clangd.internal.config.CProjectChangeMonitor;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
+import org.eclipse.cdt.lsp.clangd.internal.config.CompileCommandsMonitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

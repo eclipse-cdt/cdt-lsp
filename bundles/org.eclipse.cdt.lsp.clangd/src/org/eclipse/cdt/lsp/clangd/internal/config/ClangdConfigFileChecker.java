@@ -11,11 +11,11 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.IOException;
 
-import org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin;
+import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;

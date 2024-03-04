@@ -11,7 +11,7 @@
  * Alexander Fedorov (ArSysOp) - rework to OSGi components
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.net.URI;
 import java.util.Optional;

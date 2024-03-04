@@ -11,7 +11,7 @@
  * Contributors:
  *     Alexander Fedorov (ArSysOp) - Initial API and implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.internal.clangd;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.util.ArrayList;
 import java.util.List;

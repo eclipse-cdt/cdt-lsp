@@ -11,7 +11,7 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd.editor;
+package org.eclipse.cdt.lsp.clangd.internal.ui;
 
 import org.eclipse.osgi.util.NLS;
 

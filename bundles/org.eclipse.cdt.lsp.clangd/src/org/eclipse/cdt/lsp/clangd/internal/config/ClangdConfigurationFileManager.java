@@ -11,7 +11,7 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,6 +26,8 @@ import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
+import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
+import org.eclipse.cdt.lsp.clangd.MacroResolver;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
