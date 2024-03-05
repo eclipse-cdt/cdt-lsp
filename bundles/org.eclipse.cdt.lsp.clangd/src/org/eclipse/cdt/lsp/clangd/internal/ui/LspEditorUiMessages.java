@@ -16,7 +16,7 @@ package org.eclipse.cdt.lsp.clangd.internal.ui;
 import org.eclipse.osgi.util.NLS;
 
 public class LspEditorUiMessages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.cdt.lsp.internal.clangd.editor.LspEditorUiMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.cdt.lsp.clangd.internal.ui.LspEditorUiMessages"; //$NON-NLS-1$
 
 	static {
 		// initialize resource bundle
