@@ -116,6 +116,15 @@
                commandId="org.eclipse.ui.genericeditor.findReferences"
                label="%PopupMenu.FindReferences.label"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeEditorId">
+                  <equals
+                        value="org.eclipse.cdt.lsp.CEditor">
+                  </equals>
+               </with>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
