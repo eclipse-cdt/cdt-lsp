@@ -13,7 +13,7 @@
  * Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.net.URI;
 import java.util.ArrayList;

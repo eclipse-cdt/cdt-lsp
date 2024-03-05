@@ -11,7 +11,7 @@
  * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd.editor;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,6 +23,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;

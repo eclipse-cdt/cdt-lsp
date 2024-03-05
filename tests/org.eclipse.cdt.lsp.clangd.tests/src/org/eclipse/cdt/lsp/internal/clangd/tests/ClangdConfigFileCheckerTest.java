@@ -20,10 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.cdt.lsp.clangd.ClangdConfigurationFileManager;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileChecker;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager;
 import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
-import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigFileChecker;
-import org.eclipse.cdt.lsp.internal.clangd.ClangdConfigFileMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;

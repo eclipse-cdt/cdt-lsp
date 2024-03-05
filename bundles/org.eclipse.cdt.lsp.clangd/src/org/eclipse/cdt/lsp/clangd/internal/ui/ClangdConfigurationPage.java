@@ -12,7 +12,7 @@
  *     Alexander Fedorov (ArSysOp) - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd.editor;
+package org.eclipse.cdt.lsp.clangd.internal.ui;
 
 import java.io.IOException;
 

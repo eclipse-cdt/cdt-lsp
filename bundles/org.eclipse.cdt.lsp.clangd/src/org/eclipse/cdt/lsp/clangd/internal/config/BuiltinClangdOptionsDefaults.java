@@ -10,12 +10,13 @@
  * Contributors:
  * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
  *******************************************************************************/
-package org.eclipse.cdt.lsp.clangd;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
 import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.runtime.IPath;
 import org.osgi.service.component.annotations.Component;
@@ -45,7 +46,7 @@ public class BuiltinClangdOptionsDefaults implements ClangdOptionsDefaults {
 
 	@Override
 	public String completionStyle() {
-		return "detailed";
+		return "detailed"; //$NON-NLS-1$
 	}
 
 	@Override
