@@ -28,9 +28,9 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
  org.eclipse.ui.workbench.texteditor;bundle-version="0.0.0",
  org.eclipse.core.variables;bundle-version="0.0.0",
  org.yaml.snakeyaml;bundle-version="0.0.0"
-Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.BuiltinClangdOptionsDefaults.xml,
+Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.ClangdConfigurationFileManager.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.BuiltinClangdOptionsDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdFallbackManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdMetadataDefaults.xml
 Bundle-Activator: org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin
