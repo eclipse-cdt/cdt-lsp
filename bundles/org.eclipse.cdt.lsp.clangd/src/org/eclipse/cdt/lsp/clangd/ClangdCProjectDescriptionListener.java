@@ -25,8 +25,7 @@ public interface ClangdCProjectDescriptionListener {
 	/**
 	 * Called when the configuration of a CDT C/C++ project changes.
 	 * @param event
-	 * @param macroResolver helper class to resolve macros in builder CWD
 	 */
-	void handleEvent(CProjectDescriptionEvent event, MacroResolver macroResolver);
+	void handleEvent(CProjectDescriptionEvent event);
 
 }

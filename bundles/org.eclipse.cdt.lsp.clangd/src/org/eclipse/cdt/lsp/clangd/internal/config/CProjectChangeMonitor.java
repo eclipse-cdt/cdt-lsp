@@ -17,14 +17,12 @@ import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
-import org.eclipse.cdt.lsp.clangd.MacroResolver;
 import org.eclipse.core.runtime.ServiceCaller;
 
 /**
  * This monitor listens to C project description changes.
  */
 public class CProjectChangeMonitor {
-	MacroResolver macroResolver = new MacroResolver();
 
 	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdListener = new ServiceCaller<>(getClass(),
 			ClangdCProjectDescriptionListener.class);
@@ -33,7 +31,7 @@ public class CProjectChangeMonitor {
 
 		@Override
 		public void handleEvent(CProjectDescriptionEvent event) {
-			clangdListener.call(c -> c.handleEvent(event, macroResolver));
+			clangdListener.call(c -> c.handleEvent(event));
 		}
 
 	};
