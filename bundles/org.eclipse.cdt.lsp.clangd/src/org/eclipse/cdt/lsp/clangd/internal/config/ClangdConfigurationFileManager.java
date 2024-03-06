@@ -27,7 +27,6 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
-import org.eclipse.cdt.lsp.clangd.MacroResolver;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -62,8 +61,8 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	private ICBuildConfigurationManager build;
 
 	@Override
-	public void handleEvent(CProjectDescriptionEvent event, MacroResolver macroResolver) {
-		setCompilationDatabasePath(event.getProject(), event.getNewCProjectDescription(), macroResolver);
+	public void handleEvent(CProjectDescriptionEvent event) {
+		setCompilationDatabasePath(event.getProject(), event.getNewCProjectDescription());
 	}
 
 	/**
@@ -78,13 +77,11 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	 *
 	 * @param project C/C++ project
 	 * @param newCProjectDescription new CProject description
-	 * @param macroResolver helper to resolve macros in the CWD path of the builder
 	 */
-	protected void setCompilationDatabasePath(IProject project, ICProjectDescription newCProjectDescription,
-			MacroResolver macroResolver) {
+	protected void setCompilationDatabasePath(IProject project, ICProjectDescription newCProjectDescription) {
 		if (project != null && newCProjectDescription != null) {
 			if (enableSetCompilationDatabasePath(project)) {
-				var relativeDatabasePath = getRelativeDatabasePath(project, newCProjectDescription, macroResolver);
+				var relativeDatabasePath = getRelativeDatabasePath(project, newCProjectDescription);
 				if (!relativeDatabasePath.isEmpty()) {
 					setCompilationDatabase(project, relativeDatabasePath);
 				} else {
@@ -109,18 +106,16 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	 * By de
 	 * @param project
 	 * @param newCProjectDescription
-	 * @param macroResolver
 	 * @return project relative path to active build folder or empty String
 	 */
-	private String getRelativeDatabasePath(IProject project, ICProjectDescription newCProjectDescription,
-			MacroResolver macroResolver) {
+	private String getRelativeDatabasePath(IProject project, ICProjectDescription newCProjectDescription) {
 		if (project != null && newCProjectDescription != null) {
 			ICConfigurationDescription config = newCProjectDescription.getDefaultSettingConfiguration();
 			var cwdBuilder = config.getBuildSetting().getBuilderCWD();
 			var projectLocation = project.getLocation().addTrailingSeparator().toOSString();
 			if (cwdBuilder != null) {
 				try {
-					var cwdString = macroResolver.resolveValue(cwdBuilder.toOSString(), EMPTY, null, config);
+					var cwdString = new MacroResolver().resolveValue(cwdBuilder.toOSString(), EMPTY, null, config);
 					return cwdString.replace(projectLocation, EMPTY);
 				} catch (CdtVariableException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
