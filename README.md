@@ -80,6 +80,10 @@ The clangd path and the arguments can be changed in the workspace preferences as
 
 Newly created C/C++ projects will use the settings from the workspace preferences. This can be changed in the project properties:
 
+> [!IMPORTANT]
+> The project specific clangd settings will be used only when no clangd language server is running and a C/C++ source file from this project was the <ins>first</ins> C/C++ file to be opened in the LSP based C/C++ editor.
+> C/C++ source files from other projects in the workspace will inherit the settings from the initial project. This is because there is a single language server instance used for the whole Eclipse workspace.
+
 ![image](images/properties.png "properties.png")
 
 Different C/C++ projects using the old and new C/C++ editor can be mixed in one workspace. The linked include files will be opened with the same editor.
@@ -150,6 +154,26 @@ The default can be changed per project or per workspace with the *C/C++ General*
 With the *C/C++ Editor (LSP)* open, the presentation of the C++ file will follow the LSP4E conventions augmented by the information returned from clangd.
 
 ![hello-world.png](images/hello-world.png "hello-world.png")
+
+### Save Actions using .clang-format
+
+A C/C++ source file, opened in the LSP based editor, can be formatted on file save using formatting descriptions from a .clang-format file. 
+The clangd language server searches for a .clang-format file in the source folder and its parents. Save actions can be set on project and workspace level.
+
+![image](images/clang-format.png "clang-format.png")
+
+.clang-format example:
+```yaml
+---
+# We'll use defaults from the LLVM style, but with 4 columns indentation.
+BasedOnStyle: LLVM
+IndentWidth: 4
+---
+Language: Cpp
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left
+```
 
 ### Version Support
 
