@@ -139,7 +139,7 @@ public class LspUtils {
 	}
 
 	public static Stream<LanguageServerWrapper> getLanguageServers() {
-		return LanguageServiceAccessor.getStartedWrappers(null, null, true).stream()
+		return LanguageServiceAccessor.getStartedWrappers(null, true).stream()
 				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)); //$NON-NLS-1$
 	}
 
