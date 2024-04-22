@@ -14,41 +14,30 @@
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
 import org.eclipse.cdt.lsp.util.LspUtils;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * Detects changes (add/delete/content) of JSON Compilation Database Format
  * Specification files ({@value #CDBF_SPECIFICATION_JSON_FILE}) in the
  * {@link IWorkspace workspace} and {@link #restartLanguageServers() restarts
- * the language servers} if any cpp file from the affected projects is  open
- * in an editor.
+ * the language servers}.
  */
 public class CompileCommandsMonitor {
 	private static final String CDBF_SPECIFICATION_JSON_FILE = "compile_commands.json"; //$NON-NLS-1$
@@ -95,30 +84,8 @@ public class CompileCommandsMonitor {
 			Set<IProject> affectedProjects = collectAffectedProjects(event);
 
 			if (!affectedProjects.isEmpty()) {
-				if (getEditors().map(editor -> Adapters.adapt(editor.getEditorInput(), IFile.class))
-						.anyMatch(file -> isCppFile(file) && affectedProjects.contains(file.getProject()))) {
-					debouncer.run(() -> restartLanguageServers());
-				}
+				debouncer.run(() -> restartLanguageServers());
 			}
-		}
-
-		/**
-		 * Returns the editors in workbench without restoring them
-		 */
-		private Stream<IEditorPart> getEditors() {
-			return Arrays.stream(PlatformUI.getWorkbench().getWorkbenchWindows()).map(IWorkbenchWindow::getPages)
-					.flatMap(Arrays::stream).map(IWorkbenchPage::getEditorReferences).flatMap(Arrays::stream)
-					.flatMap(ref -> Stream.ofNullable(ref.getEditor(false)));
-		}
-
-		private boolean isCppFile(IResource resource) {
-			if (resource instanceof IFile) {
-				var contentTypes = Platform.getContentTypeManager().findContentTypesFor(((IFile) resource).getName());
-				return Arrays.stream(contentTypes).anyMatch(contentType -> {
-					return LspUtils.isCContentType(contentType.getId());
-				});
-			}
-			return false;
 		}
 
 		/**
