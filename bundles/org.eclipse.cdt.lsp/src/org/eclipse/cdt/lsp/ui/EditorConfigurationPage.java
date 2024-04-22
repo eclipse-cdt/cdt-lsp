@@ -167,7 +167,10 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
 		composite.setFont(parent.getFont());
 		if (!isProjectScope) {
-			createSpellingPreferencesLink(composite);
+			createLink(composite, LspUiMessages.LspEditorConfigurationPage_spelling_link,
+					LspUiMessages.LspEditorConfigurationPage_spelling_link_tooltip);
+			createLink(composite, LspUiMessages.LspEditorConfigurationPage_content_assist_link,
+					LspUiMessages.LspEditorConfigurationPage_content_assist_link_tooltip);
 			Label line = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			line.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
 		}
@@ -175,12 +178,12 @@ public class EditorConfigurationPage extends PropertyPage implements IWorkbenchP
 		return composite;
 	}
 
-	private Control createSpellingPreferencesLink(Composite parent) {
+	private Control createLink(Composite parent, String text, String tooltipText) {
 		Link link = new Link(parent, SWT.NONE);
-		link.setText(LspUiMessages.LspEditorConfigurationPage_spelling_link);
+		link.setText(text);
 		link.addListener(SWT.Selection,
 				event -> PreferencesUtil.createPreferenceDialogOn(getShell(), event.text, null, null));
-		link.setToolTipText(LspUiMessages.LspEditorConfigurationPage_spelling_link_tooltip);
+		link.setToolTipText(tooltipText);
 		link.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		return link;
 	}
