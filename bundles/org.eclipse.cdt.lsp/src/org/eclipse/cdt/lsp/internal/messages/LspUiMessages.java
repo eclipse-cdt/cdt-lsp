@@ -27,6 +27,8 @@ public class LspUiMessages extends NLS {
 
 	public static String LspEditorConfigurationPage_spelling_link;
 	public static String LspEditorConfigurationPage_spelling_link_tooltip;
+	public static String LspEditorConfigurationPage_content_assist_link;
+	public static String LspEditorConfigurationPage_content_assist_link_tooltip;
 
 	public static String LspEditorConfigurationPage_enable_project_specific;
 	public static String LspEditorConfigurationPage_configure_ws_specific;
