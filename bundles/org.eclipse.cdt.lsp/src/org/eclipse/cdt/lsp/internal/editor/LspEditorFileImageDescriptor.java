@@ -28,11 +28,14 @@ public class LspEditorFileImageDescriptor implements ICFileImageDescriptor {
 	private final ICLanguageServerProvider cLanguageServerProvider;
 	private static HashMap<String, ImageDescriptor> imageRegistry = new HashMap<>(2);
 	private static final String ICONS_PATH = "$nl$/icons/"; //$NON-NLS-1$
+
+	public static final String IMG_HFILE = "IMG_HFILE"; //$NON-NLS-1$
 	public static final String IMG_CFILE = "IMG_CFILE"; //$NON-NLS-1$
 	public static final String IMG_CXXFILE = "IMG_CXXFILE"; //$NON-NLS-1$
 
 	public LspEditorFileImageDescriptor() {
 		cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
+		declareRegistryImage(IMG_HFILE, ICONS_PATH + "h.png"); //$NON-NLS-1$
 		declareRegistryImage(IMG_CFILE, ICONS_PATH + "c.png"); //$NON-NLS-1$
 		declareRegistryImage(IMG_CXXFILE, ICONS_PATH + "cpp.png"); //$NON-NLS-1$
 	}
@@ -49,7 +52,7 @@ public class LspEditorFileImageDescriptor implements ICFileImageDescriptor {
 
 	@Override
 	public ImageDescriptor getHeaderImageDescriptor() {
-		return imageRegistry.get(IMG_CFILE);
+		return imageRegistry.get(IMG_HFILE);
 	}
 
 	@Override
