@@ -33,6 +33,12 @@
          <contentTypeBinding
                contentTypeId="org.eclipse.cdt.core.cxxSource">
          </contentTypeBinding>
+         <contentTypeBinding
+               contentTypeId="org.eclipse.cdt.core.cHeader">
+         </contentTypeBinding>
+         <contentTypeBinding
+               contentTypeId="org.eclipse.cdt.core.cxxHeader">
+         </contentTypeBinding>
       </editor>
    </extension>
    <extension
@@ -326,6 +332,25 @@
             </test>
          </enabledWhen>
       </reconciler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.genericeditor.icons">
+      <icon
+            contentType="org.eclipse.cdt.core.cSource"
+            icon="icons/c.png">
+      </icon>
+      <icon
+            contentType="org.eclipse.cdt.core.cxxSource"
+            icon="icons/cpp.png">
+      </icon>
+      <icon
+            contentType="org.eclipse.cdt.core.cHeader"
+            icon="icons/h.png">
+      </icon>
+      <icon
+            contentType="org.eclipse.cdt.core.cxxHeader"
+            icon="icons/h.png">
+      </icon>
    </extension>  
 </plugin>
 
