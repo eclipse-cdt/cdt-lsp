@@ -5,5 +5,6 @@
       <provide interface="org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener"/>
    </service>
    <reference cardinality="1..1" field="build" interface="org.eclipse.cdt.core.build.ICBuildConfigurationManager" name="build"/>
+   <reference cardinality="1..1" field="settings" interface="org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings" name="settings"/>
    <implementation class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager"/>
 </scr:component>
