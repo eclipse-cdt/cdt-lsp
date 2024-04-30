@@ -33,7 +33,7 @@ import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
-import org.eclipse.cdt.lsp.clangd.ClangdConfigurationFileManager;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;

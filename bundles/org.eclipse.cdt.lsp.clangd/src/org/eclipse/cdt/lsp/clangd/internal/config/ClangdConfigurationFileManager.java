@@ -11,7 +11,7 @@
  * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,8 +26,8 @@ import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
-import org.eclipse.cdt.lsp.clangd.internal.config.MacroResolver;
-import org.eclipse.cdt.lsp.plugin.LspPlugin;
+import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
+import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -60,6 +60,9 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	@Reference
 	private ICBuildConfigurationManager build;
 
+	@Reference
+	ClangdCompilationDatabaseSettings settings;
+
 	@Override
 	public void handleEvent(CProjectDescriptionEvent event) {
 		setCompilationDatabasePath(event.getProject(), event.getNewCProjectDescription());
@@ -80,7 +83,7 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	 */
 	protected void setCompilationDatabasePath(IProject project, ICProjectDescription newCProjectDescription) {
 		if (project != null && newCProjectDescription != null) {
-			if (enableSetCompilationDatabasePath(project)) {
+			if (settings.enableSetCompilationDatabasePath(project)) {
 				var relativeDatabasePath = getRelativeDatabasePath(project, newCProjectDescription);
 				if (!relativeDatabasePath.isEmpty()) {
 					setCompilationDatabase(project, relativeDatabasePath);
@@ -89,16 +92,6 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 				}
 			}
 		}
-	}
-
-	/**
-	 * Enabler for {@link setCompilationDatabasePath}. Can be overriden for customization.
-	 * @param project
-	 * @return true if the database path should be written to .clangd file in the project root.
-	 */
-	protected boolean enableSetCompilationDatabasePath(IProject project) {
-		return Optional.ofNullable(LspPlugin.getDefault()).map(LspPlugin::getCLanguageServerProvider)
-				.map(provider -> provider.isEnabledFor(project)).orElse(Boolean.FALSE);
 	}
 
 	/**
