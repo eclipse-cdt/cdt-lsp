@@ -25,8 +25,6 @@ import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -64,9 +62,19 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 		var done = super.performOk();
 		if (done && isLsActive() && (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
 				|| projectOptionsDifferFromWorkspace)) {
-			openRestartDialog();
+			restartClangd();
 		}
 		return done;
+	}
+
+	private void restartClangd() {
+		LspUtils.getLanguageServers().forEach(w -> {
+			try {
+				w.restart();
+			} catch (IOException e) {
+				StatusManager.getManager().handle(Status.error("Could not restart language servers", e)); //$NON-NLS-1$
+			}
+		});
 	}
 
 	/**
@@ -88,23 +96,6 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 
 	private boolean isLsActive() {
 		return LspUtils.getLanguageServers().findAny().isPresent();
-	}
-
-	private void openRestartDialog() {
-		final var dialog = new MessageDialog(getShell(),
-				LspEditorUiMessages.LspEditorPreferencePage_restart_dialog_title, null,
-				LspEditorUiMessages.LspEditorPreferencePage_restart_dialog_message, MessageDialog.INFORMATION,
-				new String[] { IDialogConstants.NO_LABEL, LspEditorUiMessages.LspEditorPreferencePage_restart_button },
-				1);
-		if (dialog.open() == 1) {
-			LspUtils.getLanguageServers().forEach(w -> {
-				try {
-					w.restart();
-				} catch (IOException e) {
-					StatusManager.getManager().handle(Status.error("Could not restart language servers", e)); //$NON-NLS-1$
-				}
-			});
-		}
 	}
 
 	@Override
