@@ -34,10 +34,7 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_drivers_description;
 	public static String LspEditorPreferencePage_additional;
 	public static String LspEditorPreferencePage_additional_description;
-	public static String LspEditorPreferencePage_restart_dialog_title;
-	public static String LspEditorPreferencePage_restart_dialog_message;
 	public static String LspEditorPreferencePage_browse_button;
-	public static String LspEditorPreferencePage_restart_button;
 	public static String LspEditorPreferencePage_clangd_options_label;
 	public static String LspEditorPreferencePage_enable_project_specific;
 	public static String LspEditorPreferencePage_configure_ws_specific;
