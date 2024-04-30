@@ -61,7 +61,7 @@ public class ClangdConfigurationFileManager implements ClangdCProjectDescription
 	private ICBuildConfigurationManager build;
 
 	@Reference
-	ClangdCompilationDatabaseSettings settings;
+	private ClangdCompilationDatabaseSettings settings;
 
 	@Override
 	public void handleEvent(CProjectDescriptionEvent event) {
