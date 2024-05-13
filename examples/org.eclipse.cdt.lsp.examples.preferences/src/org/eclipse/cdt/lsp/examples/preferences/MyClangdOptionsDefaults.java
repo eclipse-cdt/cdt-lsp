@@ -13,8 +13,11 @@
 package org.eclipse.cdt.lsp.examples.preferences;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
+import org.eclipse.cdt.utils.PathUtil;
+import org.eclipse.core.runtime.IPath;
 import org.osgi.service.component.annotations.Component;
 
 @Component(service = ClangdOptionsDefaults.class, property = { "service.ranking:Integer=100" })
@@ -27,38 +30,37 @@ public class MyClangdOptionsDefaults implements ClangdOptionsDefaults {
 
 	@Override
 	public String clangdPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return Optional.ofNullable(PathUtil.findProgramLocation("clangd", null)) //$NON-NLS-1$
+				.map(IPath::toOSString)//
+				.orElse("clangd"); //  //$NON-NLS-1$
 	}
 
 	@Override
 	public boolean useTidy() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean useBackgroundIndex() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public String completionStyle() {
-		// TODO Auto-generated method stub
-		return null;
+		return "detailed"; //$NON-NLS-1$
 	}
 
 	@Override
 	public boolean prettyPrint() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public String queryDriver() {
-		// TODO Auto-generated method stub
-		return null;
+		return Optional.ofNullable(PathUtil.findProgramLocation("gcc", null)) //$NON-NLS-1$
+				.map(p -> p.removeLastSegments(1).append(IPath.SEPARATOR + "*"))// //$NON-NLS-1$
+				.map(IPath::toString)//
+				.orElse(""); //  //$NON-NLS-1$
 	}
 
 }
