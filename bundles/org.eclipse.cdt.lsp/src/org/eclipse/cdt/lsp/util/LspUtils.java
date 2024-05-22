@@ -94,7 +94,7 @@ public class LspUtils {
 					continue;
 				}
 				if (editorInput.equals(editorInputFromEditor)) {
-					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getEditor(true).getEditorSite().getId());
+					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId());
 				}
 			}
 			// the file has not been opened yet:
