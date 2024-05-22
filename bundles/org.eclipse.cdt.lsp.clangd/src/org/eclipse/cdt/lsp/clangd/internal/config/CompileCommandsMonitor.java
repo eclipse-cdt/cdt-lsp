@@ -13,7 +13,6 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -29,8 +28,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
@@ -121,13 +118,7 @@ public class CompileCommandsMonitor {
 
 	protected void restartLanguageServers() {
 		LspUtils.getLanguageServers().forEach(w -> {
-			try {
-				w.restart();
-			} catch (IOException e) {
-				StatusManager.getManager().handle(
-						new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, "Could not restart language servers"),
-						StatusManager.LOG);
-			}
+			w.restart();
 		});
 	}
 
