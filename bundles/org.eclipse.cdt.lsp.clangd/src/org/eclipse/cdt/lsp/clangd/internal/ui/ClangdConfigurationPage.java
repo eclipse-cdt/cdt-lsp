@@ -14,8 +14,6 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
-import java.io.IOException;
-
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
@@ -24,12 +22,9 @@ import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.statushandlers.StatusManager;
 
 public final class ClangdConfigurationPage extends EditorConfigurationPage {
 
@@ -69,15 +64,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	}
 
 	private void restartClangd() {
-		LspUtils.getLanguageServers().forEach(w -> restartServer(w));
-	}
-
-	private void restartServer(LanguageServerWrapper wrapper) {
-		try {
-			wrapper.restart();
-		} catch (IOException e) {
-			StatusManager.getManager().handle(Status.error("Could not restart language servers", e)); //$NON-NLS-1$
-		}
+		LspUtils.getLanguageServers().forEach(w -> w.restart());
 	}
 
 	/**
