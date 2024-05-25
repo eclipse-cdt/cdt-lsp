@@ -13,6 +13,7 @@
 
 package org.eclipse.cdt.lsp.internal.ui.navigator;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import org.eclipse.cdt.core.model.ITranslationUnit;
@@ -23,6 +24,8 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.model.WorkbenchAdapter;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
@@ -154,12 +157,25 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 						if (children.length != 1 || children[0] != ERROR_ELEMENT) {
 							viewer.remove(ERROR_ELEMENT);
 						}
-						viewer.add(parent, children);
+						var limitedChildren = children;
+						var viewLimit = getViewLimit();
+						if (children.length > viewLimit && viewLimit > 0) {
+							// limit children to prevent long UI freezes...
+							// more children can be shown in navigator Treeview via 'Show next x items from remaining y'
+							// at the end of the list
+							limitedChildren = Arrays.copyOfRange(children, 0, viewLimit);
+						}
+						viewer.add(parent, limitedChildren);
 					} finally {
 						control.setRedraw(true);
 					}
 				}
 			});
+		}
+
+		private static int getViewLimit() {
+			return WorkbenchPlugin.getDefault().getPreferenceStore()
+					.getInt(IWorkbenchPreferenceConstants.LARGE_VIEW_LIMIT);
 		}
 	}
 
