@@ -24,8 +24,6 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.lsp4e.outline.SymbolsModel.DocumentSymbolWithURI;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.IWorkbenchPreferenceConstants;
-import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.model.WorkbenchAdapter;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
@@ -119,6 +117,10 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	private static class DeferredCSymbolLoader extends DeferredTreeContentManager {
 		private final IDeferredWorkbenchAdapter adapter;
 		private final AbstractTreeViewer viewer;
+		/**
+		 * maximum children of a translation unit to be shown in Project Explorer when TU gets expanded. Prevents longer UI freezes.
+		 */
+		private static final int MAX_INITIAL_CHILDREN = 100;
 
 		public DeferredCSymbolLoader(AbstractTreeViewer viewer, IDeferredWorkbenchAdapter adapter) {
 			super(viewer);
@@ -158,12 +160,11 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 							viewer.remove(ERROR_ELEMENT);
 						}
 						var limitedChildren = children;
-						var viewLimit = getViewLimit();
-						if (children.length > viewLimit && viewLimit > 0) {
+						if (children.length > MAX_INITIAL_CHILDREN) {
 							// limit children to prevent long UI freezes...
 							// more children can be shown in navigator Treeview via 'Show next x items from remaining y'
 							// at the end of the list
-							limitedChildren = Arrays.copyOfRange(children, 0, viewLimit);
+							limitedChildren = Arrays.copyOfRange(children, 0, MAX_INITIAL_CHILDREN);
 						}
 						viewer.add(parent, limitedChildren);
 					} finally {
@@ -171,11 +172,6 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 					}
 				}
 			});
-		}
-
-		private static int getViewLimit() {
-			return WorkbenchPlugin.getDefault().getPreferenceStore()
-					.getInt(IWorkbenchPreferenceConstants.LARGE_VIEW_LIMIT);
 		}
 	}
 
