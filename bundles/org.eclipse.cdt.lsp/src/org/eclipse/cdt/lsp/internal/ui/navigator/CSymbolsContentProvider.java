@@ -13,6 +13,7 @@
 
 package org.eclipse.cdt.lsp.internal.ui.navigator;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import org.eclipse.cdt.core.model.ITranslationUnit;
@@ -116,6 +117,10 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 	private static class DeferredCSymbolLoader extends DeferredTreeContentManager {
 		private final IDeferredWorkbenchAdapter adapter;
 		private final AbstractTreeViewer viewer;
+		/**
+		 * maximum children of a translation unit to be shown in Project Explorer when TU gets expanded. Prevents longer UI freezes.
+		 */
+		private static final int MAX_INITIAL_CHILDREN = 100;
 
 		public DeferredCSymbolLoader(AbstractTreeViewer viewer, IDeferredWorkbenchAdapter adapter) {
 			super(viewer);
@@ -154,7 +159,14 @@ public class CSymbolsContentProvider extends CNavigatorContentProvider {
 						if (children.length != 1 || children[0] != ERROR_ELEMENT) {
 							viewer.remove(ERROR_ELEMENT);
 						}
-						viewer.add(parent, children);
+						var limitedChildren = children;
+						if (children.length > MAX_INITIAL_CHILDREN) {
+							// limit children to prevent long UI freezes...
+							// more children can be shown in navigator Treeview via 'Show next x items from remaining y'
+							// at the end of the list
+							limitedChildren = Arrays.copyOfRange(children, 0, MAX_INITIAL_CHILDREN);
+						}
+						viewer.add(parent, limitedChildren);
 					} finally {
 						control.setRedraw(true);
 					}
