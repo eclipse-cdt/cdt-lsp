@@ -224,7 +224,7 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 		return EMPTY;
 	}
 
-	private synchronized void refreshTreeContentFromLS(CompileUnit compileUnit) {
+	private void refreshTreeContentFromLS(CompileUnit compileUnit) {
 		if (compileUnit == null || !compileUnit.isDirty) {
 			return;
 		}
