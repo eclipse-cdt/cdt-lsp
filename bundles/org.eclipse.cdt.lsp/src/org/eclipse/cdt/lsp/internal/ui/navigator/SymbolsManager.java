@@ -243,7 +243,7 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 						.forDocument(document).withCapability(ServerCapabilities::getDocumentSymbolProvider)
 						.computeFirst((w, ls) -> CompletableFuture.completedFuture(w));
 				try {
-					symbols = languageServer.get(500, TimeUnit.MILLISECONDS).filter(Objects::nonNull)
+					symbols = languageServer.get(1000, TimeUnit.MILLISECONDS).filter(Objects::nonNull)
 							.filter(LanguageServerWrapper::isActive)
 							.map(s -> s.execute(ls -> ls.getTextDocumentService().documentSymbol(params)))
 							.orElse(CompletableFuture.completedFuture(null));
@@ -256,7 +256,7 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 				}
 				symbols.thenAcceptAsync(response -> {
 					compileUnit.symbolsModel.update(response);
-					compileUnit.isDirty = false;
+					compileUnit.isDirty = response == null; // reset dirty only when fetch was successful
 				}).join();
 			} else {
 				temporaryLoadedDocument = false;
