@@ -9,6 +9,16 @@ pipeline {
     disableConcurrentBuilds()
   }
   stages {
+    stage('initialize PGP') {
+      steps {
+        container('cdt') {
+          withCredentials([file(credentialsId: 'secret-subkeys.asc', variable: 'KEYRING')]) {
+            sh 'gpg --batch --import "${KEYRING}"'
+            sh 'for fpr in $(gpg --list-keys --with-colons  | awk -F: \'/fpr:/ {print $10}\' | sort -u); do echo -e "5\ny\n" |  gpg --batch --command-fd 0 --expert --edit-key ${fpr} trust; done'
+          }
+        }
+      }
+    }
     stage('Install clangd') {
       steps {
         container('cdt') {
@@ -28,7 +38,7 @@ pipeline {
                   export PATH=$PWD/clangd_15.0.6/bin:$PATH
                   which clangd
                   clangd --version
-                  /usr/share/maven/bin/mvn \
+                  /jipp/tools/apache-maven/latest/bin/mvn \
                       clean verify -B -V -X -e \
                       -Dmaven.test.failure.ignore=true \
                       -P baseline-compare-and-replace \

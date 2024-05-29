@@ -15,8 +15,8 @@ package org.eclipse.cdt.lsp.internal.clangd.editor.handlers;
 import java.net.URI;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.LspPlugin;
-import org.eclipse.cdt.lsp.internal.clangd.editor.ClangdPlugin;
+import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
+import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.services.ClangdLanguageServer;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;

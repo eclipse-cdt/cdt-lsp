@@ -17,16 +17,15 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 
 /**
  * Vendors may implement this interface as OSGi service
- * with a service.ranking property > 0 to implement custom behavior
- * and to replace the {@link ClangdConfigurationFileManager}
+ * with a service.ranking property > 0 to replace the default
+ * implementation {@code ClangdConfigurationFileManager}
  */
 public interface ClangdCProjectDescriptionListener {
 
 	/**
 	 * Called when the configuration of a CDT C/C++ project changes.
 	 * @param event
-	 * @param macroResolver helper class to resolve macros in builder CWD
 	 */
-	void handleEvent(CProjectDescriptionEvent event, MacroResolver macroResolver);
+	void handleEvent(CProjectDescriptionEvent event);
 
 }

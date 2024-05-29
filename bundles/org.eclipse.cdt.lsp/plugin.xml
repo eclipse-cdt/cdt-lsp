@@ -14,7 +14,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.eclipse.cdt.lsp.editor.EditorPreferenceInitializer">
+            class="org.eclipse.cdt.lsp.internal.editor.EditorPreferenceInitializer">
       </initializer>
    </extension>
    <extension-point id="serverProvider" name="%Server.name" schema="schema/serverProvider.exsd"/>
@@ -32,6 +32,12 @@
          </contentTypeBinding>
          <contentTypeBinding
                contentTypeId="org.eclipse.cdt.core.cxxSource">
+         </contentTypeBinding>
+         <contentTypeBinding
+               contentTypeId="org.eclipse.cdt.core.cHeader">
+         </contentTypeBinding>
+         <contentTypeBinding
+               contentTypeId="org.eclipse.cdt.core.cxxHeader">
          </contentTypeBinding>
       </editor>
    </extension>
@@ -129,7 +135,7 @@
    <extension
          point="org.eclipse.ui.ide.editorAssociationOverride">
       <editorAssociationOverride
-            class="org.eclipse.cdt.lsp.editor.CEditorAssociationOverride"
+            class="org.eclipse.cdt.lsp.internal.editor.CEditorAssociationOverride"
             id="org.eclipse.cdt.lsp.editorAssociationOverride">
       </editorAssociationOverride>
    </extension>
@@ -137,7 +143,7 @@
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
             activeByDefault="true"
-            contentProvider="org.eclipse.cdt.lsp.ui.navigator.CSymbolsContentProvider"
+            contentProvider="org.eclipse.cdt.lsp.internal.ui.navigator.CSymbolsContentProvider"
             icon="icons/c.png"
             id="org.eclipse.cdt.lsp.navigator.content"
             labelProvider="org.eclipse.lsp4e.outline.SymbolsLabelProvider"
@@ -170,7 +176,7 @@
              policy="InvokeAlwaysRegardlessOfSuppressedExt"
              suppressedExtensionId="org.eclipse.cdt.ui.navigator.content"/>
 	   <actionProvider
-			class="org.eclipse.cdt.lsp.ui.navigator.CSymbolsOpenActionProvider"
+			class="org.eclipse.cdt.lsp.internal.ui.navigator.CSymbolsOpenActionProvider"
 			id="org.eclipse.cdt.lsp.navigator.actions.open"
 			overrides="org.eclipse.ui.navigator.resources.OpenActions"
 			priority="normal">
@@ -209,7 +215,7 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="org.eclipse.cdt.lsp.server.enable.HasLanguageServerPropertyTester"
+            class="org.eclipse.cdt.lsp.internal.server.HasLanguageServerPropertyTester"
             id="org.eclipse.cdt.lsp.server.enable.hasLanguageServerPropertyTester"
             namespace="org.eclipse.cdt.lsp.server.enable"
             properties="hasLanguageServer"
@@ -255,7 +261,7 @@
    <extension
          point="org.eclipse.ui.genericeditor.hoverProviders">
       <hoverProvider
-            class="org.eclipse.cdt.lsp.editor.DebugHoverProvider"
+            class="org.eclipse.cdt.lsp.internal.editor.DebugHoverProvider"
             contentType="org.eclipse.core.runtime.text"
             id="org.eclipse.cdt.lsp.editor.DebugHoverProvider"
             isBefore="org.eclipse.lsp4e.operations.hover.LSPTextHover">
@@ -264,21 +270,21 @@
    <extension
          point="org.eclipse.cdt.ui.CFileImageProvider">
       <imageDescriptor
-            class="org.eclipse.cdt.lsp.editor.LspEditorFileImageDescriptor">
+            class="org.eclipse.cdt.lsp.internal.editor.LspEditorFileImageDescriptor">
       </imageDescriptor>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
-            class="org.eclipse.cdt.lsp.editor.EditorConfigurationPage"
+            class="org.eclipse.cdt.lsp.ui.EditorConfigurationPage"
             id="org.eclipse.cdt.lsp.editor.preferencePage"
             name="%EditorPreferencePage.name">
       </page>
       <page
 	        name="%SaveActionsPreferencePage.name"
 	        category="org.eclipse.cdt.lsp.editor.preferencePage"
-	        class="org.eclipse.cdt.lsp.editor.SaveActionsConfigurationPage"
+	        class="org.eclipse.cdt.lsp.internal.ui.SaveActionsConfigurationPage"
 	        id="org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage">
 	      <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
@@ -288,7 +294,7 @@
          point="org.eclipse.ui.propertyPages">
       <page
             category="org.eclipse.cdt.ui.newui.Page_head_general"
-            class="org.eclipse.cdt.lsp.editor.EditorConfigurationPage"
+            class="org.eclipse.cdt.lsp.ui.EditorConfigurationPage"
             id="org.eclipse.cdt.lsp.editor.propertyPage"
             name="%EditorPreferencePage.name">
          <filter
@@ -303,11 +309,16 @@
       </page>
       <page
             category="org.eclipse.cdt.lsp.editor.propertyPage"
-            class="org.eclipse.cdt.lsp.editor.SaveActionsConfigurationPage"
+            class="org.eclipse.cdt.lsp.internal.ui.SaveActionsConfigurationPage"
             id="org.eclipse.cdt.lsp.editor.SaveActionsPropertyPage"
             name="%SaveActionsPreferencePage.name">
           <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
+       <enabledWhen>
+          <adapt
+                type="org.eclipse.core.resources.IProject">
+          </adapt>
+       </enabledWhen>
       </page>      
    </extension>
    <extension
@@ -321,6 +332,25 @@
             </test>
          </enabledWhen>
       </reconciler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.genericeditor.icons">
+      <icon
+            contentType="org.eclipse.cdt.core.cSource"
+            icon="icons/c.png">
+      </icon>
+      <icon
+            contentType="org.eclipse.cdt.core.cxxSource"
+            icon="icons/cpp.png">
+      </icon>
+      <icon
+            contentType="org.eclipse.cdt.core.cHeader"
+            icon="icons/h.png">
+      </icon>
+      <icon
+            contentType="org.eclipse.cdt.core.cxxHeader"
+            icon="icons/h.png">
+      </icon>
    </extension>  
 </plugin>
 

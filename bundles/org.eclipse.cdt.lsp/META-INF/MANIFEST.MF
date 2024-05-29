@@ -2,19 +2,22 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.cdt.lsp;singleton:=true
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 2.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp,
+ org.eclipse.cdt.lsp.config,
  org.eclipse.cdt.lsp.editor,
+ org.eclipse.cdt.lsp.plugin;x-friends:="org.eclipse.cdt.lsp.clangd",
  org.eclipse.cdt.lsp.server,
- org.eclipse.cdt.lsp.server.enable,
  org.eclipse.cdt.lsp.services,
  org.eclipse.cdt.lsp.services.ast,
- org.eclipse.cdt.lsp.services.symbolinfo
-Bundle-Activator: org.eclipse.cdt.lsp.LspPlugin
+ org.eclipse.cdt.lsp.services.symbolinfo,
+ org.eclipse.cdt.lsp.ui;x-friends:="org.eclipse.cdt.lsp.clangd",
+ org.eclipse.cdt.lsp.util;x-friends:="org.eclipse.cdt.lsp.clangd"
+Bundle-Activator: org.eclipse.cdt.lsp.plugin.LspPlugin
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.lsp4e;bundle-version="0.17.3",
+ org.eclipse.lsp4e;bundle-version="0.18.5",
  org.eclipse.tm4e.ui,
  org.eclipse.tm4e.languageconfiguration,
  org.eclipse.ui.genericeditor,
@@ -28,17 +31,17 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.expressions,
  org.eclipse.jface.text,
  org.eclipse.debug.ui,
- org.eclipse.lsp4j,
- org.eclipse.lsp4j.jsonrpc,
+ org.eclipse.lsp4j;bundle-version="0.22.0",
+ org.eclipse.lsp4j.jsonrpc;bundle-version="0.22.0",
  org.eclipse.cdt.codan.core,
  org.eclipse.cdt.debug.ui,
  org.eclipse.ui.workbench.texteditor
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/org.eclipse.cdt.lsp.editor.BuiltinEditorOptionsDefault.xml,
- OSGI-INF/org.eclipse.cdt.lsp.editor.DefaultConfigurationVisibility.xml,
- OSGI-INF/org.eclipse.cdt.lsp.editor.EditorConfigurationAccess.xml,
- OSGI-INF/org.eclipse.cdt.lsp.editor.EditorMetadataDefaults.xml,
- OSGI-INF/org.eclipse.cdt.lsp.editor.format.FormatOnSave.xml,
- OSGI-INF/org.eclipse.cdt.lsp.internal.InitialFileManager.xml
+Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.editor.EditorMetadataDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.editor.FormatOnSave.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.editor.InitialFileManager.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.ui.BuiltinEditorOptionsDefault.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.ui.DefaultConfigurationVisibility.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.ui.EditorConfigurationAccess.xml

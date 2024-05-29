@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="cdt" sequenceNumber="149">
+<target name="cdt" sequenceNumber="151">
 	<locations>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<repository location="https://download.eclipse.org/cbi/updates/license/" />
 			<unit id="org.eclipse.license.feature.group" version="0.0.0" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<repository location="https://download.eclipse.org/eclipse/updates/4.29/R-4.29-202309031000/" />
+			<repository location="https://download.eclipse.org/eclipse/updates/4.32-I-builds/" />
 			<unit id="org.eclipse.equinox.executable.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.jdt.annotation" version="0.0.0" />
 			<unit id="org.eclipse.sdk.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.test.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.unittest.ui" version="0.0.0" />
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<repository location="https://download.eclipse.org/mylyn/updates/release/latest/" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<repository location="https://download.eclipse.org/egit/updates" />
@@ -23,9 +26,15 @@
 			<unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="0.0.0" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<repository location="https://download.eclipse.org/lsp4e/releases/latest/" />
+			<repository location="https://download.eclipse.org/lsp4e/snapshots/" />
 			<unit id="org.eclipse.lsp4e" version="0.0.0" />
 			<unit id="org.eclipse.lsp4e.debug" version="0.0.0" />
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<unit id="org.eclipse.mylyn.wikitext" version="0.0.0"/>
+			<unit id="org.eclipse.mylyn.wikitext.markdown" version="0.0.0"/>
+			<unit id="org.eclipse.mylyn.wikitext.markdown.ui" version="0.0.0"/>
+			<repository location="https://download.eclipse.org/mylyn/updates/release/latest/"/>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<repository location="https://download.eclipse.org/modeling/emf/emf/builds/release/latest/" />
@@ -37,13 +46,13 @@
 			<unit id="org.eclipse.swtbot.feature.group" version="0.0.0" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<repository location="https://download.eclipse.org/tm4e/releases/latest/" />
+			<repository location="https://download.eclipse.org/tm4e/snapshots/" />
 			<unit id="org.eclipse.tm4e.feature.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.0.0" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<!-- We explicitly have CDT in target platform so that developers can develop org.eclipse.cdt.core/ui without requiring all the projects from CDT in their workspace. -->
-			<repository location="https://download.eclipse.org/tools/cdt/releases/11.3/cdt-11.3.0/" />
+			<repository location="https://download.eclipse.org/tools/cdt/releases/11.4/cdt-11.4.0/" />
 			<unit id="org.eclipse.cdt.feature.group" version="0.0.0" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -54,43 +63,44 @@
 				<dependency>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
-					<version>2.0.7</version>
+					<version>2.0.13</version>
 					<type>jar</type>
 				</dependency>
-				<!-- slf4j-api requires 1 impl, providing a dummy one... -->
+				<!-- slf4j-api requires 1 impl, provide the one that is generally used in the final product, such as standalone debugger -->
 				<dependency>
 					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-nop</artifactId>
-					<version>2.0.7</version>
+					<artifactId>slf4j-simple</artifactId>
+					<version>2.0.13</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.apache.aries.spifly</groupId>
 					<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-					<version>1.3.6</version>
+					<version>1.3.7</version>
+					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>com.google.code.gson</groupId>
 					<artifactId>gson</artifactId>
-					<version>2.10.1</version>
+					<version>2.11.0</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-compress</artifactId>
-					<version>1.23.0</version>
+					<version>1.26.2</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>commons-io</groupId>
 					<artifactId>commons-io</artifactId>
-					<version>2.13.0</version>
+					<version>2.16.1</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.assertj</groupId>
 					<artifactId>assertj-core</artifactId>
-					<version>3.24.2</version>
+					<version>3.26.0</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
@@ -102,43 +112,43 @@
 				<dependency>
 					<groupId>org.junit.jupiter</groupId>
 					<artifactId>junit-jupiter-api</artifactId>
-					<version>5.9.3</version>
+					<version>5.10.2</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.junit.jupiter</groupId>
 					<artifactId>junit-jupiter-engine</artifactId>
-					<version>5.9.3</version>
+					<version>5.10.2</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.mockito</groupId>
 					<artifactId>mockito-core</artifactId>
-					<version>5.4.0</version>
+					<version>5.12.0</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.yaml</groupId>
 					<artifactId>snakeyaml</artifactId>
-					<version>2.0</version>
+					<version>2.2</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>net.java.dev.jna</groupId>
 					<artifactId>jna-platform</artifactId>
-					<version>5.13.0</version>
+					<version>5.14.0</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>net.java.dev.jna</groupId>
 					<artifactId>jna</artifactId>
-					<version>5.13.0</version>
+					<version>5.14.0</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>com.google.guava</groupId>
 					<artifactId>guava</artifactId>
-					<version>32.1.1-jre</version>
+					<version>33.2.0-jre</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
@@ -154,31 +164,31 @@
 				<dependency>
 					<groupId>org.ow2.asm</groupId>
 					<artifactId>asm-commons</artifactId>
-					<version>9.5</version>
+					<version>9.7</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.ow2.asm</groupId>
 					<artifactId>asm-util</artifactId>
-					<version>9.5</version>
+					<version>9.7</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.ow2.asm</groupId>
 					<artifactId>asm</artifactId>
-					<version>9.5</version>
+					<version>9.7</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.ow2.asm</groupId>
 					<artifactId>asm-tree</artifactId>
-					<version>9.5</version>
+					<version>9.7</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
 					<groupId>org.ow2.asm</groupId>
 					<artifactId>asm-analysis</artifactId>
-					<version>9.5</version>
+					<version>9.7</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
@@ -195,17 +205,13 @@
 			</dependencies>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2023-09"/>
-			<!-- failureaccess is needed because the Linuxtools depends on it but doesn't republish it - https://github.com/eclipse-linuxtools/org.eclipse.linuxtools/issues/232
-			This dep can't be added to maven section because of https://github.com/eclipse-pde/eclipse.pde/issues/675 -->
-			<unit id="com.google.guava.failureaccess" version="0.0.0" />
-
+			<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2024-06"/>
 			<unit id="org.hamcrest.core" version="1.3.0.v20230809-1000" />
 			<unit id="org.hamcrest.library" version="1.3.0.v20230809-1000" />
 			<unit id="org.junit" version="4.13.2.v20230809-1000" />
 		</location>
 	</locations>
-	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17" />
+	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21" />
 	<launcherArgs>
 		<vmArgs>-Xms40m&#13;
 		-Xmx512M&#13;

@@ -13,9 +13,9 @@ package org.eclipse.cdt.lsp.services.symbolinfo;
 
 import org.eclipse.cdt.lsp.services.ClangdLanguageServer;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.jsonrpc.util.Preconditions;
+import org.eclipse.lsp4j.jsonrpc.util.ToStringBuilder;
 import org.eclipse.lsp4j.jsonrpc.validation.NonNull;
-import org.eclipse.lsp4j.util.Preconditions;
-import org.eclipse.lsp4j.util.ToStringBuilder;
 
 /**
  * Data type used in {@link SymbolDetails} for the <em>textDocument/symbolInfo</em> request.

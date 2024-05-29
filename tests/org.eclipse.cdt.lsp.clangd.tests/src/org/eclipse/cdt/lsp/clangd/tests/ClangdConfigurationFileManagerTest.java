@@ -33,8 +33,7 @@ import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
-import org.eclipse.cdt.lsp.clangd.ClangdConfigurationFileManager;
-import org.eclipse.cdt.lsp.clangd.MacroResolver;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -60,7 +59,6 @@ final class ClangdConfigurationFileManagerTest {
 	private static final String INVALID_YAML_SYNTAX_MISSING_BRACE = "CompileFlags: {CompilationDatabase: Release\r\n";
 	private final ClangdCProjectDescriptionListener clangdConfigurationManager = PlatformUI.getWorkbench()
 			.getService(ClangdCProjectDescriptionListener.class);
-	private final MacroResolver macroResolver = new MockMacroResolver();
 	private IProject project;
 
 	private static CProjectDescriptionEvent event = mock(CProjectDescriptionEvent.class);
@@ -147,7 +145,7 @@ final class ClangdConfigurationFileManagerTest {
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
 		// WHEN the ClangdConfigurationManager.handleEvent method gets called:
-		clangdConfigurationManager.handleEvent(event, macroResolver);
+		clangdConfigurationManager.handleEvent(event);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
 		// AND the file content is as expected:
@@ -173,7 +171,7 @@ final class ClangdConfigurationFileManagerTest {
 		// GIVEN an existing but empty .clangd configuration file in the project:
 		var emptyConfigFile = createConfigFile("%s", "  ");
 		// WHEN the ClangdConfigurationManager.handleEvent method gets called with a new cdb path "build/debug":
-		clangdConfigurationManager.handleEvent(event, macroResolver);
+		clangdConfigurationManager.handleEvent(event);
 		// THEN the updated file matches the expected content with the given CompilationDatabase directory "build/debug":
 		assertTrue(Arrays.equals(Files.readAllBytes(emptyConfigFile.getLocation().toFile().toPath()),
 				Files.readAllBytes(refFile.toPath())));
@@ -204,7 +202,7 @@ final class ClangdConfigurationFileManagerTest {
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
 		// AND the ClangdConfigurationManager.handleEvent method gets called:
-		clangdConfigurationManager.handleEvent(event, macroResolver);
+		clangdConfigurationManager.handleEvent(event);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
 		// THEN the created file matches the expected content:
@@ -214,7 +212,7 @@ final class ClangdConfigurationFileManagerTest {
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 		// AND the handleEvent gets called again:
-		clangdConfigurationManager.handleEvent(event, macroResolver);
+		clangdConfigurationManager.handleEvent(event);
 		// THEN the updated file matches the expected content:
 		assertTrue(Arrays.equals(Files.readAllBytes(configFile.toPath()), Files.readAllBytes(refFileDebug.toPath())));
 
@@ -238,7 +236,7 @@ final class ClangdConfigurationFileManagerTest {
 		// WHEN the ClangdConfigurationManager.handleEvent method gets called and the builder CWD points to "build/debug":
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
-		clangdConfigurationManager.handleEvent(event, macroResolver);
+		clangdConfigurationManager.handleEvent(event);
 		// THEN the updated file matches the expected content:
 		assertTrue(Arrays.equals(Files.readAllBytes(configFile.getLocation().toFile().toPath()),
 				Files.readAllBytes(refFile.toPath())));

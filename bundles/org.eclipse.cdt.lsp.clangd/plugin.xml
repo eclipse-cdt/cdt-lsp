@@ -14,7 +14,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.eclipse.cdt.lsp.internal.clangd.ClangdPreferenceInitializer">
+            class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdPreferenceInitializer">
       </initializer>
    </extension>
    <extension
@@ -23,7 +23,7 @@
       <!-- FIXME: AF: Move commmon part to "org.eclipse.cdt.lsp[.editor]" -->
       <page
             category="org.eclipse.cdt.lsp.editor.preferencePage"
-            class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
+            class="org.eclipse.cdt.lsp.clangd.internal.ui.ClangdConfigurationPage"
             id="org.eclipse.cdt.lsp.clangd.editor.preferencePage"
             name="%ClangdConfigurationPage.name">
       </page>
@@ -32,7 +32,7 @@
          point="org.eclipse.ui.propertyPages">
       <page
             category="org.eclipse.cdt.lsp.editor.propertyPage"
-            class="org.eclipse.cdt.lsp.internal.clangd.editor.ClangdConfigurationPage"
+            class="org.eclipse.cdt.lsp.clangd.internal.ui.ClangdConfigurationPage"
             id="org.eclipse.cdt.lsp.clangd.editor.propertyPage"
             name="%ClangdConfigurationPage.name">
          <filter
@@ -59,7 +59,7 @@
    <extension
          point="org.eclipse.cdt.lsp.serverProvider">
       <server
-            class="org.eclipse.cdt.lsp.internal.clangd.ClangdLanguageServerProvider"
+            class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdLanguageServerProvider"
             priority="low">
       </server>
    </extension>
@@ -106,6 +106,24 @@
                style="push">
             <visibleWhen
                   checkEnabled="true">
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any?after=org.eclipse.lsp4e.openCallHierarchy">
+         <command
+               commandId="org.eclipse.ui.genericeditor.findReferences"
+               label="%PopupMenu.FindReferences.label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeEditorId">
+                  <equals
+                        value="org.eclipse.cdt.lsp.CEditor">
+                  </equals>
+               </with>
             </visibleWhen>
          </command>
       </menuContribution>

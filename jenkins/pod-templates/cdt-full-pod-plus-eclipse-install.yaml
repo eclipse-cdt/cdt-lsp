@@ -3,15 +3,15 @@ kind: Pod
 spec:
   containers:
   - name: cdt
-    image: quay.io/eclipse-cdt/cdt-infra-plus-eclipse-install@sha256:efa01be7dc63af2f239fff3ea929d2d79b07084983e9ab859eb480fcc17b5ba2
+    image: quay.io/eclipse-cdt/cdt-infra-plus-eclipse-install@sha256:7146f40a39f75e364c473aa26044803582428f41f1f911e4b44a8ee8e72f89d1
     tty: true
     args: ["/bin/sh", "-c", "/home/vnc/.vnc/xstartup.sh && cat"]
     resources:
       requests:
-        memory: "2662Mi"
+        memory: "10000Mi"
         cpu: "1"
       limits:
-        memory: "2662Mi"
+        memory: "10000Mi"
         cpu: "1"
     volumeMounts:
     - name: settings-xml
@@ -22,6 +22,11 @@ spec:
       mountPath: /home/jenkins/.m2/repository
     - name: volume-known-hosts
       mountPath: /home/jenkins/.ssh
+    - name: "jenkins-home"
+      mountPath: "/home/jenkins"
+      readOnly: false
+    - name: tools
+      mountPath: /jipp/tools
   - name: jnlp
     resources:
       requests:
@@ -45,3 +50,8 @@ spec:
   - name: volume-known-hosts
     configMap:
       name: known-hosts
+  - name: "jenkins-home"
+    emptyDir: {}
+  - name: tools
+    persistentVolumeClaim:
+      claimName: tools-claim-jiro-cdt
