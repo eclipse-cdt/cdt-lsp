@@ -54,6 +54,23 @@
        </plugin>
        <plugin>
           <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-gpg-plugin</artifactId>
+          <version>${tycho.version}</version>
+          <executions>
+            <execution>
+              <id>pgpsigner</id>
+              <goals>
+              <goal>sign-p2-artifacts</goal>
+              </goals>
+              <configuration>
+                <keyname>4F23165B6AC51B15</keyname>
+                <skipIfJarsigned>false</skipIfJarsigned>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
