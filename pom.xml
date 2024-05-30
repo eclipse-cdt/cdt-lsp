@@ -1,5 +1,5 @@
 <!--
-   Copyright (c) 2023 Contributors to the Eclipse Foundation.
+   Copyright (c) 2023, 2024 Contributors to the Eclipse Foundation.
 
    This program and the accompanying materials
    are made available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,9 @@
 
    SPDX-License-Identifier: EPL-2.0
 -->
-<project>
+<project
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+ xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
  <modelVersion>4.0.0</modelVersion>
  <groupId>org.eclipse.cdt.lsp</groupId>
  <artifactId>org.eclipse.cdt.lsp.root</artifactId>
@@ -20,14 +22,27 @@
   <cbi-plugins.version>1.4.3</cbi-plugins.version>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <tycho.scmUrl>scm:git:https://github.com/eclipse-cdt/cdt-lsp</tycho.scmUrl>
+  <comparator.repo>https://download.eclipse.org/tools/cdt/releases/cdt-lsp-latest/</comparator.repo>
+  <api-baseline.repo>https://download.eclipse.org/tools/cdt/releases/cdt-lsp-latest/</api-baseline.repo>
+  <api-baseline.repo.simrel>https://download.eclipse.org/releases/2024-03/</api-baseline.repo.simrel>
+    <!-- these parameters are to control baseline replace and compare. On a local build you want
+       to avoid baseline replace and compare, especially if you have different versions of Java than
+    the baseline was built with. This is the default.
+
+    If you have the same version of Java as the build machine you can run baseline comparison and
+    replace. To do that run with the baseline-compare-and-replace profile.
+     -->
+  <compare-version-with-baselines.skip>true</compare-version-with-baselines.skip>
+  <replace-version-with-baselines.mode>disable</replace-version-with-baselines.mode>
+  <replace-version-with-baselines.replace>none</replace-version-with-baselines.replace>
  </properties>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>cbi</id>
+ <pluginRepositories>
+   <pluginRepository>
+     <id>cbi</id>
       <url>https://repo.eclipse.org/content/repositories/cbi-releases/</url>
-    </pluginRepository>
-  </pluginRepositories>
+   </pluginRepository>
+ </pluginRepositories>
 
  <build>
   <pluginManagement>
@@ -37,7 +52,7 @@
          <artifactId>tycho-p2-director-plugin</artifactId>
          <version>${tycho.version}</version>
        </plugin>
-        <plugin>
+       <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-gpg-plugin</artifactId>
           <version>${tycho.version}</version>
@@ -113,7 +128,7 @@
           </executions>
         </plugin>
      </plugins>
-   </pluginManagement>
+  </pluginManagement>
   <plugins>
    <plugin>
     <groupId>org.eclipse.tycho</groupId>
@@ -121,7 +136,7 @@
     <version>${tycho.version}</version>
     <extensions>true</extensions>
    </plugin>
-  <plugin>
+   <plugin>
     <groupId>org.eclipse.tycho</groupId>
     <artifactId>target-platform-configuration</artifactId>
     <version>${tycho.version}</version>
@@ -188,9 +203,29 @@
      </execution>
     </executions>
    </plugin>
+   <plugin>
+    <groupId>org.eclipse.tycho.extras</groupId>
+    <artifactId>tycho-p2-extras-plugin</artifactId>
+    <version>${tycho.version}</version>
+    <executions>
+     <execution> <!-- Checks versions are properly bumped from one stream to the other -->
+      <id>compare-attached-artifacts-with-release</id>
+      <goals>
+       <goal>compare-version-with-baselines</goal>
+      </goals>
+      <configuration>
+       <skip>${compare-version-with-baselines.skip}</skip>
+       <baselines>
+        <baseline>${comparator.repo}</baseline> <!-- Previous release) -->
+       </baselines>
+       <comparator>zip</comparator>
+      </configuration>
+     </execution>
+    </executions>
+   </plugin>
   </plugins>
  </build>
-  <profiles>
+ <profiles>
     <profile>
       <id>production</id>
       <build>
@@ -237,7 +272,52 @@
         </plugins>
       </build>
     </profile>
-  </profiles>
+    <profile>
+      <id>baseline-compare-and-replace</id>
+      <properties>
+        <compare-version-with-baselines.skip>false</compare-version-with-baselines.skip>
+        <replace-version-with-baselines.mode>fail</replace-version-with-baselines.mode>
+        <replace-version-with-baselines.replace>all</replace-version-with-baselines.replace>
+      </properties>
+    </profile>
+    <profile>
+      <id>api-baseline-check</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-apitools-plugin</artifactId>
+            <version>${tycho.version}</version>
+            <configuration>
+              <skipIfReplaced>false</skipIfReplaced>
+              <baselines>
+                <repository>
+                  <url>${api-baseline.repo}</url>
+                </repository>
+                <repository>
+                  <url>${api-baseline.repo.simrel}</url>
+                </repository>
+              </baselines>
+            </configuration>
+            <executions>
+              <execution>
+                <id>generate</id>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>verify</id>
+                <goals>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+ </profiles>
 
  <modules>
     <module>bundles</module>

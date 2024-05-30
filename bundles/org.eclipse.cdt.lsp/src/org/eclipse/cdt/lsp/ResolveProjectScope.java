@@ -19,6 +19,9 @@ import java.util.function.Function;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
 
+/**
+ * @since 2.0
+ */
 public final class ResolveProjectScope implements Function<Object, Optional<ProjectScope>> {
 
 	private final ResolveProject project;

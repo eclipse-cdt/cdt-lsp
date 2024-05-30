@@ -15,6 +15,9 @@ package org.eclipse.cdt.lsp.clangd;
 
 import org.eclipse.core.resources.IProject;
 
+/**
+ * @since 2.0
+ */
 public interface ClangdCompilationDatabaseSettings {
 
 	/**

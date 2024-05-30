@@ -21,6 +21,9 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * @since 2.0
+ */
 public abstract class ConfigurationAccess {
 	protected final String qualifier;
 

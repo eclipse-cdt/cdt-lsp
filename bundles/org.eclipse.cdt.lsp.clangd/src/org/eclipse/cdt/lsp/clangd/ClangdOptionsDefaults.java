@@ -14,6 +14,8 @@ package org.eclipse.cdt.lsp.clangd;
 
 /**
  * Interface for providing default options for clangd.
+ *
+ * @since 2.0
  */
 public interface ClangdOptionsDefaults extends ClangdOptions {
 

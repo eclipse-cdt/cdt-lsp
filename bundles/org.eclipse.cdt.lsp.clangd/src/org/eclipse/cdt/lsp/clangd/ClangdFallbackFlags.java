@@ -17,6 +17,7 @@ import java.net.URI;
  *
  * Retrieves data for https://clangd.llvm.org/extensions#compilation-commands
  *
+ * @since 2.0
  */
 public interface ClangdFallbackFlags {
 

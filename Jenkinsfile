@@ -43,6 +43,8 @@ pipeline {
                       clean verify -B -V -e \
                       -Dmaven.test.failure.ignore=true \
                       -Dgpg.passphrase="${KEYRING_PASSPHRASE}"  \
+                      -P baseline-compare-and-replace \
+                      -P api-baseline-check \
                       -P production \
                       -Dmaven.repo.local=/home/jenkins/.m2/repository \
                       --settings /home/jenkins/.m2/settings.xml \
