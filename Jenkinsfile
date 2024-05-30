@@ -34,6 +34,7 @@ pipeline {
         container('cdt') {
           timeout(activity: true, time: 20) {
             withEnv(['MAVEN_OPTS=-XX:MaxRAMPercentage=60.0']) {
+              withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
                 sh '''
                   export PATH=$PWD/clangd_15.0.6/bin:$PATH
                   which clangd
@@ -41,10 +42,12 @@ pipeline {
                   /jipp/tools/apache-maven/latest/bin/mvn \
                       clean verify -B -V -X -e \
                       -Dmaven.test.failure.ignore=true \
+                      -Dgpg.passphrase="${KEYRING_PASSPHRASE}"  \
                       -P production \
                       -Dmaven.repo.local=/home/jenkins/.m2/repository \
                       --settings /home/jenkins/.m2/settings.xml \
                 '''
+              }
             }
           }
         }
