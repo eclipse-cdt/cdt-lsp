@@ -15,6 +15,9 @@ package org.eclipse.cdt.lsp.clangd;
 
 import java.util.function.Supplier;
 
+/**
+ * @since 2.0
+ */
 public final class ClangdQualifier implements Supplier<String> {
 
 	@Override

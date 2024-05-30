@@ -27,6 +27,7 @@ import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
  * @see ClangdOptions
  * @see IScopeContext
  *
+ * @since 2.0
  */
 public interface ClangdConfiguration extends Configuration {
 

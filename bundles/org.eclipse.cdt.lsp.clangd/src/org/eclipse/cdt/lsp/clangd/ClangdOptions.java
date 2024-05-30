@@ -18,6 +18,7 @@ import java.util.List;
 /**
  * Options to configure clangd
  *
+ * @since 2.0
  */
 public interface ClangdOptions {
 

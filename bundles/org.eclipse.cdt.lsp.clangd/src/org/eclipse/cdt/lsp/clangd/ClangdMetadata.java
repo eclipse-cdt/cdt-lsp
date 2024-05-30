@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.preferences.PreferenceMetadata;
  * The metadata for options to configure clangd
  *
  * @see ClangdOptions
- *
+ * @since 2.0
  */
 public interface ClangdMetadata {
 
