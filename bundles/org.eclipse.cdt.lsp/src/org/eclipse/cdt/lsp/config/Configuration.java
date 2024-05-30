@@ -5,6 +5,9 @@ import java.net.URI;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.preferences.IPreferenceMetadataStore;
 
+/**
+ * @since 2.0
+ */
 public interface Configuration {
 
 	/**

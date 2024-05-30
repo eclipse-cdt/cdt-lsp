@@ -18,6 +18,7 @@ import java.util.Optional;
  * Access to initial URI used determine the compiler flags
  * for the clangd fallback settings on Windows machines
  *
+ * @since 2.0
  */
 public interface InitialUri {
 
