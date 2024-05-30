@@ -40,7 +40,7 @@ pipeline {
                   which clangd
                   clangd --version
                   /jipp/tools/apache-maven/latest/bin/mvn \
-                      clean verify -B -V -X -e \
+                      clean verify -B -V -e \
                       -Dmaven.test.failure.ignore=true \
                       -Dgpg.passphrase="${KEYRING_PASSPHRASE}"  \
                       -P production \
