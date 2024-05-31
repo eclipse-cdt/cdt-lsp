@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.lsp4e.LanguageServiceAccessor;
 import org.eclipse.ui.IEditorInput;
@@ -79,7 +80,7 @@ public class LspUtils {
 		return false;
 	}
 
-	public static boolean isFileOpenedInLspEditor(IEditorInput editorInput) {
+	public static boolean isFileOpenedInLspEditor(IEditorInput editorInput, IContentType contentType) {
 		if (editorInput == null) {
 			return false;
 		}
@@ -100,7 +101,9 @@ public class LspUtils {
 			// the file has not been opened yet:
 			return isLspEditorActive();
 		}
-		return false;
+		// check defaults:
+		var desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(editorInput.getName(), contentType);
+		return desc != null ? LspPlugin.LSP_C_EDITOR_ID.equals(desc.getId()) : false;
 	}
 
 	public static List<IEditorReference> getEditors() {
