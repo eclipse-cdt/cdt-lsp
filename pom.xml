@@ -14,17 +14,17 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>org.eclipse.cdt.lsp</groupId>
  <artifactId>org.eclipse.cdt.lsp.root</artifactId>
- <version>2.0.0-SNAPSHOT</version>
+ <version>2.1.0-SNAPSHOT</version>
  <packaging>pom</packaging>
 
  <properties>
-  <tycho.version>4.0.6</tycho.version>
+  <tycho.version>4.0.8</tycho.version>
   <cbi-plugins.version>1.4.3</cbi-plugins.version>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <tycho.scmUrl>scm:git:https://github.com/eclipse-cdt/cdt-lsp</tycho.scmUrl>
-  <comparator.repo>https://download.eclipse.org/tools/cdt/releases/cdt-lsp-1.1/</comparator.repo>
-  <api-baseline.repo>https://download.eclipse.org/tools/cdt/releases/cdt-lsp-1.1/</api-baseline.repo>
-  <api-baseline.repo.simrel>https://download.eclipse.org/releases/2024-03/</api-baseline.repo.simrel>
+  <comparator.repo>https://download.eclipse.org/tools/cdt/builds/cdt-lsp-2.0/cdt-lsp-2.0.0-rc2/</comparator.repo>
+  <api-baseline.repo>https://download.eclipse.org/tools/cdt/builds/cdt-lsp-2.0/cdt-lsp-2.0.0-rc2/</api-baseline.repo>
+  <api-baseline.repo.simrel>https://download.eclipse.org/releases/2024-06/</api-baseline.repo.simrel>
     <!-- these parameters are to control baseline replace and compare. On a local build you want
        to avoid baseline replace and compare, especially if you have different versions of Java than
     the baseline was built with. This is the default.
