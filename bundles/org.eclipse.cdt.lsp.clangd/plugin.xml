@@ -26,6 +26,18 @@
             class="org.eclipse.cdt.lsp.clangd.internal.ui.ClangdConfigurationPage"
             id="org.eclipse.cdt.lsp.clangd.editor.preferencePage"
             name="%ClangdConfigurationPage.name">
+         <keywordReference
+               id="org.eclipse.cdt.ui.ceditor">
+         </keywordReference>
+      </page>
+      <page
+            category="org.eclipse.cdt.lsp.editor.preferencePage"
+            class="org.eclipse.cdt.lsp.clangd.internal.ui.ClangFormatConfigurationPage"
+            id="org.eclipse.cdt.lsp.clangd.format.preferencePage"
+            name="%ClangFormatConfigurationPage.name">
+         <keywordReference
+               id="org.eclipse.cdt.ui.ceditor">
+         </keywordReference>
       </page>
    </extension>
    <extension
@@ -44,6 +56,27 @@
                   type="org.eclipse.core.resources.IProject">
             </adapt>
          </enabledWhen>
+         <keywordReference
+               id="org.eclipse.cdt.ui.ceditor">
+         </keywordReference>
+      </page>
+      <page
+            category="org.eclipse.cdt.lsp.editor.propertyPage"
+            class="org.eclipse.cdt.lsp.clangd.internal.ui.ClangFormatConfigurationPage"
+            id="org.eclipse.cdt.lsp.clangd.format.propertyPage"
+            name="%ClangFormatConfigurationPage.name">
+         <filter
+               name="projectNature"
+               value="org.eclipse.cdt.core.cnature">
+         </filter>
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+            </adapt>
+         </enabledWhen>
+         <keywordReference
+               id="org.eclipse.cdt.ui.ceditor">
+         </keywordReference>
       </page>
    </extension>
    <extension
