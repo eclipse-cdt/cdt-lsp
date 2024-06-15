@@ -138,6 +138,13 @@
       <persistent
             value="true">
       </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <file-association
+            content-type="org.eclipse.tm4e.language_pack.yaml"
+            file-names=".clangd,.clang-format">
+      </file-association>
    </extension>   
 
 </plugin>
