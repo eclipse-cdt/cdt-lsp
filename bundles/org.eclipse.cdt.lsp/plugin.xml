@@ -288,6 +288,7 @@
 	        id="org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage">
 	      <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
+	      <keywordReference id="org.eclipse.cdt.ui.ceditor"/>
       </page>      
    </extension>
    <extension
@@ -314,6 +315,11 @@
             name="%SaveActionsPreferencePage.name">
           <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
+	      <keywordReference id="org.eclipse.cdt.ui.ceditor"/>
+       <filter
+             name="projectNature"
+             value="org.eclipse.cdt.core.cnature">
+       </filter>
        <enabledWhen>
           <adapt
                 type="org.eclipse.core.resources.IProject">
