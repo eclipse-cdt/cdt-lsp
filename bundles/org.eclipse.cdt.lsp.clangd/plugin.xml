@@ -30,15 +30,6 @@
                id="org.eclipse.cdt.ui.ceditor">
          </keywordReference>
       </page>
-      <page
-            category="org.eclipse.cdt.lsp.editor.preferencePage"
-            class="org.eclipse.cdt.lsp.clangd.internal.ui.ClangFormatConfigurationPage"
-            id="org.eclipse.cdt.lsp.clangd.format.preferencePage"
-            name="%ClangFormatConfigurationPage.name">
-         <keywordReference
-               id="org.eclipse.cdt.ui.ceditor">
-         </keywordReference>
-      </page>
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">

@@ -26,15 +26,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 public class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
-	private final String id = "org.eclipse.cdt.lsp.clangd.format.preferencePage"; //$NON-NLS-1$
 	private IProject project;
 	private IWorkspace workspace;
 	private ClangFormatUtils utils = new ClangFormatUtils();
@@ -67,20 +64,13 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(1).create());
-		if (project != null) {
-			createLink(composite, LspEditorUiMessages.ClangFormatConfigurationPage_configure_ws_specific);
-		}
 		createButton(composite);
 	}
 
 	private Button createButton(Composite composite) {
 		Button button = new Button(composite, SWT.PUSH);
 		button.setLayoutData(GridDataFactory.fillDefaults().span(1, 1).indent(0, 0).create());
-		var txt = LspEditorUiMessages.ClangFormatConfigurationPage_openProjectFormatFile;
-		if (project == null) {
-			txt = LspEditorUiMessages.ClangFormatConfigurationPage_openWorkspaceFormatFile;
-		}
-		button.setText(txt);
+		button.setText(LspEditorUiMessages.ClangFormatConfigurationPage_openProjectFormatFile);
 		button.setToolTipText(LspEditorUiMessages.ClangFormatConfigurationPage_openFormatFileTooltip);
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -89,10 +79,6 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 					var formatFile = project.getFile(ClangFormatUtils.format_file);
 					utils.checkProjectClangFormatFile(formatFile);
 					openFile(formatFile.getLocationURI().toString());
-				} else {
-					utils.checkWorkspaceClangFormatFile(workspace);
-					openFile(workspace.getRoot().getLocation().append(ClangFormatUtils.format_file).toPath().toUri()
-							.toString());
 				}
 			}
 		});
@@ -103,20 +89,5 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 		LSPEclipseUtils.open(path, null);
 		// close preference page:
 		getShell().close();
-	}
-
-	private Link createLink(Composite composite, String text) {
-		Link link = new Link(composite, SWT.NONE);
-		link.setFont(composite.getFont());
-		link.setText("<A>" + text + "</A>"); //$NON-NLS-1$ //$NON-NLS-2$
-		link.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
-				//close this shell as well to not hide the (possibly) opened workspace .clang-format file:
-				getShell().close();
-			}
-		});
-		return link;
 	}
 }

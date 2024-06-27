@@ -1,3 +1,9 @@
-# We'll inherit the style from the parent .clang-format file in the workspace root directory. 
-# If there is no parent file found it falls back to the fallback style (LLVM), and applies the changes made in this file to that.
-BasedOnStyle: InheritParentConfig
+# We'll use defaults from the LLVM style, but with some modifications so that it's close to the CDT K&R style.
+BasedOnStyle: LLVM
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+PackConstructorInitializers: NextLineOnly
+BreakConstructorInitializers: AfterColon
+IndentAccessModifiers: false
+AccessModifierOffset: -4
