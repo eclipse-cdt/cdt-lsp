@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.cdt.lsp.clangd
 Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.cdt.lsp.clangd;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 3.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp.clangd
 Import-Package: org.yaml.snakeyaml;version="1.27.0",
  org.yaml.snakeyaml.error;version="1.27.0",

@@ -15,10 +15,14 @@ package org.eclipse.cdt.lsp.server;
 import org.eclipse.core.resources.IProject;
 
 /**
- * @since 2.1.0
+ * @since 3.0.0
  */
 public interface ICLanguageServerProvider2 extends ICLanguageServerProvider {
 
-	public void init(IProject project);
+	/**
+	 * The init function gets called always prior a file from the given project gets opened.
+	 * @param project
+	 */
+	public void preFileOpening(IProject project);
 
 }

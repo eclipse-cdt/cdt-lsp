@@ -59,6 +59,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				var isEnabled = enabledFor(uri);
 				if (isEnabled) {
 					initial.call(iu -> iu.register(uri));
+					init();
 				}
 				return isEnabled;
 			} else if (receiver instanceof ITranslationUnit) {
@@ -82,25 +83,20 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 		return false;
 	}
 
-	private boolean enabledFor(URI uri) {
-		fetchProject(uri);
-		//FIXME: AF: consider changing signature here from IProject to Object
-		var enabled = project.map(cLanguageServerProvider::isEnabledFor) //
-				.orElseGet(() -> LspUtils.isFileOpenedInLspEditor(uri));
-		// call initialization function:
-		if (enabled) {
-			init();
-		}
-		return enabled;
-	}
-
 	private void fetchProject(URI uri) {
 		workspace.call(w -> project = new ExistingResource(w).apply(uri).map(IResource::getProject));
 	}
 
+	private boolean enabledFor(URI uri) {
+		fetchProject(uri);
+		//FIXME: AF: consider changing signature here from IProject to Object
+		return project.map(cLanguageServerProvider::isEnabledFor) //
+				.orElseGet(() -> LspUtils.isFileOpenedInLspEditor(uri));
+	}
+
 	private void init() {
 		if (project.isPresent() && cLanguageServerProvider instanceof ICLanguageServerProvider2 provider) {
-			provider.init(project.get());
+			provider.preFileOpening(project.get());
 		}
 	}
 

@@ -74,7 +74,7 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 	}
 
 	@Override
-	public void init(IProject project) {
+	public void preFileOpening(IProject project) {
 		utils.createClangFormatFile(project);
 	}
 
