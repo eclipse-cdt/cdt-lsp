@@ -12,7 +12,7 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
-import org.eclipse.cdt.lsp.clangd.utils.ClangdUtils;
+import org.eclipse.cdt.lsp.clangd.utils.ClangFormatUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -26,19 +26,22 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 public class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
+	private final String id = "org.eclipse.cdt.lsp.clangd.format.preferencePage"; //$NON-NLS-1$
 	private IProject project;
 	private IWorkspace workspace;
-	private ClangdUtils utils = new ClangdUtils();
+	private ClangFormatUtils utils = new ClangFormatUtils();
 
 	@Override
 	public void init(IWorkbench workbench) {
-		this.workspace = workbench.getService(IWorkspace.class);
+		workspace = workbench.getService(IWorkspace.class);
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 		if (workspace == null) {
 			workspace = PlatformUI.getWorkbench().getService(IWorkspace.class);
 		}
-		this.project = (IProject) getElement();
+		project = (IProject) getElement();
 	}
 
 	@Override
@@ -64,7 +67,9 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(1).create());
-
+		if (project != null) {
+			createLink(composite, LspEditorUiMessages.ClangFormatConfigurationPage_configure_ws_specific);
+		}
 		createButton(composite);
 	}
 
@@ -81,12 +86,12 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				if (project != null) {
-					var formatFile = project.getFile(ClangdUtils.format_file);
+					var formatFile = project.getFile(ClangFormatUtils.format_file);
 					utils.checkProjectClangFormatFile(formatFile);
 					openFile(formatFile.getLocationURI().toString());
 				} else {
 					utils.checkWorkspaceClangFormatFile(workspace);
-					openFile(workspace.getRoot().getLocation().append(ClangdUtils.format_file).toPath().toUri()
+					openFile(workspace.getRoot().getLocation().append(ClangFormatUtils.format_file).toPath().toUri()
 							.toString());
 				}
 			}
@@ -98,5 +103,20 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 		LSPEclipseUtils.open(path, null);
 		// close preference page:
 		getShell().close();
+	}
+
+	private Link createLink(Composite composite, String text) {
+		Link link = new Link(composite, SWT.NONE);
+		link.setFont(composite.getFont());
+		link.setText("<A>" + text + "</A>"); //$NON-NLS-1$ //$NON-NLS-2$
+		link.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
+				//close this shell as well to not hide the (possibly) opened workspace .clang-format file:
+				getShell().close();
+			}
+		});
+		return link;
 	}
 }

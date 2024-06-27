@@ -23,12 +23,18 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
-public class ClangdUtils {
+public final class ClangFormatUtils {
 	public static final String format_file = ".clang-format"; //$NON-NLS-1$
 
 	/**
 	 * Checks if a .clang-format file exists in the workspace root directory. Creates it if not.
 	 * This ensures that the user has a default formatting similar to the CDT default K&R formatter
+	 *
+	 * The reason why we store the .clang-format file in the workspace root is:
+	 * clangd searches parent directories for .clang-format files.
+	 * Putting a .clang-format file in the root directory ensures that workspace wide preferences
+	 * will be used for formatting via clangd. It's a smart way (according to the convention over configuration paradigm)
+	 * to tell clangd which .clang-format file should be used.
 	 *
 	 */
 	public void checkWorkspaceClangFormatFile(IWorkspace workspace) {
@@ -44,18 +50,20 @@ public class ClangdUtils {
 	}
 
 	/**
-	 * Checks if the configFile exists. Creates it if not.
-	 * @param configFile
+	 * Checks if the formatFile exists. Creates it if not.
+	 * @param formatFile
 	 */
-	public void checkProjectClangFormatFile(IFile configFile) {
-		if (!configFile.exists()) {
-			try (final var source = getClass().getResourceAsStream(".clang-format-project");) { //$NON-NLS-1$
-				configFile.create(source, true, new NullProgressMonitor());
-			} catch (CoreException e) {
-				Platform.getLog(getClass()).log(e.getStatus());
-			} catch (IOException e) {
-				Platform.getLog(getClass()).error(e.getMessage(), e);
-			}
+	public void checkProjectClangFormatFile(IFile formatFile) {
+		if (!formatFile.exists()) {
+			createFileFromResource(formatFile, ".clang-format-project"); //$NON-NLS-1$
+		}
+	}
+
+	private void createFileFromResource(IFile formatFile, String sourceFileName) {
+		try (final var source = getClass().getResourceAsStream(sourceFileName);) {
+			formatFile.create(source, true, new NullProgressMonitor());
+		} catch (CoreException | IOException e) {
+			Platform.getLog(getClass()).error(e.getMessage(), e);
 		}
 	}
 

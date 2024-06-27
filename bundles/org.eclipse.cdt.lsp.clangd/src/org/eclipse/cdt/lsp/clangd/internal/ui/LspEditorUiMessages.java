@@ -46,5 +46,6 @@ public class LspEditorUiMessages extends NLS {
 	public static String ClangFormatConfigurationPage_openProjectFormatFile;
 	public static String ClangFormatConfigurationPage_openWorkspaceFormatFile;
 	public static String ClangFormatConfigurationPage_openFormatFileTooltip;
+	public static String ClangFormatConfigurationPage_configure_ws_specific;
 
 }
