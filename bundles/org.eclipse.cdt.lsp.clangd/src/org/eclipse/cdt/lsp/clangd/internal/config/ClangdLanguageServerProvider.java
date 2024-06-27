@@ -23,21 +23,24 @@ import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
+import org.eclipse.cdt.lsp.clangd.utils.ClangFormatUtils;
 import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
-import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
+import org.eclipse.cdt.lsp.server.ICLanguageServerProvider2;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.variables.VariablesPlugin;
 
-public final class ClangdLanguageServerProvider implements ICLanguageServerProvider {
+public final class ClangdLanguageServerProvider implements ICLanguageServerProvider2 {
 
 	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
 			ClangdConfiguration.class);
 
 	private final ServiceCaller<Configuration> editorConfiguration = new ServiceCaller<>(getClass(),
 			Configuration.class);
+
+	private final ClangFormatUtils utils = new ClangFormatUtils();
 
 	@Override
 	public Object getInitializationOptions(URI rootUri) {
@@ -68,6 +71,11 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 		boolean[] enabled = new boolean[1];
 		editorConfiguration.call(c -> enabled[0] = ((LanguageServerEnable) c.options(project)).isEnabledFor(project));
 		return enabled[0];
+	}
+
+	@Override
+	public void init(IProject project) {
+		utils.createClangFormatFile(project);
 	}
 
 }

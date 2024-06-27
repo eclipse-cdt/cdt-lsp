@@ -76,9 +76,10 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				if (project != null) {
-					var formatFile = project.getFile(ClangFormatUtils.format_file);
-					utils.checkProjectClangFormatFile(formatFile);
-					openFile(formatFile.getLocationURI().toString());
+					var formatFile = utils.getClangFormatFile(project);
+					if (formatFile.isPresent()) {
+						openFile(formatFile.get().getLocationURI().toString());
+					}
 				}
 			}
 		});

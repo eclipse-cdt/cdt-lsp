@@ -24,8 +24,10 @@ import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.cdt.lsp.editor.InitialUri;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
+import org.eclipse.cdt.lsp.server.ICLanguageServerProvider2;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.expressions.PropertyTester;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Platform;
@@ -36,11 +38,13 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
 	private final ServiceCaller<InitialUri> initial;
 	private final ServiceCaller<IWorkspace> workspace;
+	private Optional<IProject> project;
 
 	public HasLanguageServerPropertyTester() {
 		this.cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
 		this.initial = new ServiceCaller<>(getClass(), InitialUri.class);
 		this.workspace = new ServiceCaller<>(getClass(), IWorkspace.class);
+		this.project = Optional.empty();
 	}
 
 	@Override
@@ -79,13 +83,25 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	}
 
 	private boolean enabledFor(URI uri) {
-		boolean[] provider = new boolean[1];
-		workspace.call(w -> provider[0] = new ExistingResource(w).apply(uri)//
-				.map(IResource::getProject)//
-				//FIXME: AF: consider changing signature here from IProject to Object
-				.map(cLanguageServerProvider::isEnabledFor)//
-				.orElseGet(() -> LspUtils.isFileOpenedInLspEditor(uri)));
-		return provider[0];
+		fetchProject(uri);
+		//FIXME: AF: consider changing signature here from IProject to Object
+		var enabled = project.map(cLanguageServerProvider::isEnabledFor) //
+				.orElseGet(() -> LspUtils.isFileOpenedInLspEditor(uri));
+		// call initialization function:
+		if (enabled) {
+			init();
+		}
+		return enabled;
+	}
+
+	private void fetchProject(URI uri) {
+		workspace.call(w -> project = new ExistingResource(w).apply(uri).map(IResource::getProject));
+	}
+
+	private void init() {
+		if (project.isPresent() && cLanguageServerProvider instanceof ICLanguageServerProvider2 provider) {
+			provider.init(project.get());
+		}
 	}
 
 }
