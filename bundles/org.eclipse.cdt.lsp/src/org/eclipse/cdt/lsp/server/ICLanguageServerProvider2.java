@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IProject;
 public interface ICLanguageServerProvider2 extends ICLanguageServerProvider {
 
 	/**
-	 * The init function gets called always prior a file from the given project gets opened.
+	 * This function gets always called prior a C/C++ source file from the given project gets opened by LSP4E.
 	 * @param project
 	 */
 	public void preFileOpening(IProject project);

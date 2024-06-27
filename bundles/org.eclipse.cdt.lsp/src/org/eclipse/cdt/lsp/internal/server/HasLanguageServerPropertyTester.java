@@ -59,7 +59,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				var isEnabled = enabledFor(uri);
 				if (isEnabled) {
 					initial.call(iu -> iu.register(uri));
-					init();
+					preFileOpening();
 				}
 				return isEnabled;
 			} else if (receiver instanceof ITranslationUnit) {
@@ -94,7 +94,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				.orElseGet(() -> LspUtils.isFileOpenedInLspEditor(uri));
 	}
 
-	private void init() {
+	private void preFileOpening() {
 		if (project.isPresent() && cLanguageServerProvider instanceof ICLanguageServerProvider2 provider) {
 			provider.preFileOpening(project.get());
 		}
