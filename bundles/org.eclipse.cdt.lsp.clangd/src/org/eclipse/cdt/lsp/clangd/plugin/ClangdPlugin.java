@@ -17,6 +17,7 @@ package org.eclipse.cdt.lsp.clangd.plugin;
 import org.eclipse.cdt.lsp.clangd.internal.config.CProjectChangeMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.CompileCommandsMonitor;
+import org.eclipse.cdt.lsp.clangd.utils.ClangdUtils;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -53,6 +54,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
 		cProjectChangeMonitor = new CProjectChangeMonitor().start();
 		configFileMonitor = new ClangdConfigFileMonitor(workspace).start();
+		new ClangdUtils().checkWorkspaceClangFormatFile(workspace);
 	}
 
 	@Override

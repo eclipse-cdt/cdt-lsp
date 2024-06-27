@@ -1,3 +1,0 @@
-# We'll use style from the workspace .clang-format file (or its parent if there is none). 
-# If there is no parent file found it falls back to the fallback style (LLVM), and applies the changes to that.
-BasedOnStyle: InheritParentConfig

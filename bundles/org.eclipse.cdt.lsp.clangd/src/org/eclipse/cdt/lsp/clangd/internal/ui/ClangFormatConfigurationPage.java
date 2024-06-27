@@ -12,17 +12,9 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-
-import org.eclipse.core.resources.IFile;
+import org.eclipse.cdt.lsp.clangd.utils.ClangdUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
@@ -40,9 +32,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 public class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
-	private static final String format_file = ".clang-format"; //$NON-NLS-1$
 	private IProject project;
-	protected IWorkspace workspace;
+	private IWorkspace workspace;
+	private ClangdUtils utils = new ClangdUtils();
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -89,12 +81,13 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				if (project != null) {
-					var formatFile = project.getFile(format_file);
-					createProjectClangFormatFile(formatFile, ".clang-format-project"); //$NON-NLS-1$
+					var formatFile = project.getFile(ClangdUtils.format_file);
+					utils.checkProjectClangFormatFile(formatFile);
 					openFile(formatFile.getLocationURI().toString());
 				} else {
-					createWorkspaceClangFormatFile();
-					openFile(workspace.getRoot().getLocation().append(format_file).toPath().toUri().toString());
+					utils.checkWorkspaceClangFormatFile(workspace);
+					openFile(workspace.getRoot().getLocation().append(ClangdUtils.format_file).toPath().toUri()
+							.toString());
 				}
 			}
 		});
@@ -106,29 +99,4 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 		// close preference page:
 		getShell().close();
 	}
-
-	private void createWorkspaceClangFormatFile() {
-		var path = workspace.getRoot().getLocation().append(format_file).toOSString();
-		var formatFile = new File(path);
-		if (!formatFile.exists()) {
-			try (final var source = getClass().getResourceAsStream(".clang-format-ws");) { //$NON-NLS-1$
-				Files.copy(source, formatFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				Platform.getLog(getClass()).error(e.getMessage(), e);
-			}
-		}
-	}
-
-	private void createProjectClangFormatFile(IFile configFile, String templateFileName) {
-		if (!configFile.exists()) {
-			try (final var source = getClass().getResourceAsStream(templateFileName);) {
-				configFile.create(source, true, new NullProgressMonitor());
-			} catch (CoreException e) {
-				Platform.getLog(getClass()).log(e.getStatus());
-			} catch (IOException e) {
-				Platform.getLog(getClass()).error(e.getMessage(), e);
-			}
-		}
-	}
-
 }
