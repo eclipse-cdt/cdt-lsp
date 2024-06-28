@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.server;
 import org.eclipse.core.resources.IProject;
 
 /**
- * @since 3.0.0
+ * @since 2.1
  */
 public interface ICLanguageServerProvider2 extends ICLanguageServerProvider {
 
