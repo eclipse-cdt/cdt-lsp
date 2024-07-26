@@ -15,15 +15,23 @@ package org.eclipse.cdt.lsp.internal.editor;
 import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.lsp4e.LSPEclipseUtils;
+import org.eclipse.lsp4e.LanguageServerPlugin;
 import org.eclipse.lsp4e.format.IFormatRegionsProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component(property = { "serverDefinitionId:String=org.eclipse.cdt.lsp.server" })
 public class FormatOnSave implements IFormatRegionsProvider {
+
+	public FormatOnSave() {
+		IPreferenceStore store = LanguageServerPlugin.getDefault().getPreferenceStore();
+		// increase timeout from 5 to 30 seconds. Fetching formatting regions from the language server for large files (>20k lines of code) can take more than 5 sec.:
+		store.setValue("org.eclipse.cdt.lsp.server.timeout.willSaveWaitUntil", 30); //$NON-NLS-1$
+	}
 
 	@Reference
 	private Configuration configuration;
