@@ -239,6 +239,7 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 				temporaryLoadedDocument = true;
 			}
 			if (document != null) {
+				var isTimeoutException = new boolean[1];
 				CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> symbols;
 				final var params = new DocumentSymbolParams(LSPEclipseUtils.toTextDocumentIdentifier(document));
 				CompletableFuture<Optional<LanguageServerWrapper>> languageServer = LanguageServers
@@ -254,11 +255,13 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 					symbols = CompletableFuture.completedFuture(null);
 					if (e instanceof InterruptedException) {
 						Thread.currentThread().interrupt();
+					} else if (e instanceof TimeoutException) {
+						isTimeoutException[0] = true;
 					}
 				}
 				symbols.thenAcceptAsync(response -> {
 					compileUnit.symbolsModel.update(response);
-					compileUnit.isDirty = response == null; // reset dirty only when fetch was successful
+					compileUnit.isDirty = isTimeoutException[0]; // reset dirty only when no TimeoutException occurred
 				}).join();
 			} else {
 				temporaryLoadedDocument = false;
