@@ -18,12 +18,18 @@ import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.lsp4e.LanguageServerPlugin;
 
 public final class EditorPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	@Override
 	public void initializeDefaultPreferences() {
 		ServiceCaller.callOnce(getClass(), Configuration.class, this::initializeDefaults);
+
+		IPreferenceStore store = LanguageServerPlugin.getDefault().getPreferenceStore();
+		// increase timeout from 5 to 30 seconds. Fetching formatting regions from the language server for large files (>20k lines of code) can take more than 5 sec.:
+		store.setValue("org.eclipse.cdt.lsp.server.timeout.willSaveWaitUntil", 30); //$NON-NLS-1$
 	}
 
 	private void initializeDefaults(Configuration configuration) {
