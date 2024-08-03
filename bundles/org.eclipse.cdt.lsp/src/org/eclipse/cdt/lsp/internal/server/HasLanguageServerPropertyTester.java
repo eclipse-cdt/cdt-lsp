@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2024 Bachmann electronic GmbH and others.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -24,7 +24,6 @@ import org.eclipse.cdt.lsp.ExistingResource;
 import org.eclipse.cdt.lsp.editor.InitialUri;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
-import org.eclipse.cdt.lsp.server.ICLanguageServerProvider2;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
@@ -59,7 +58,6 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				var isEnabled = enabledFor(uri);
 				if (isEnabled) {
 					initial.call(iu -> iu.register(uri));
-					preFileOpening();
 				}
 				return isEnabled;
 			} else if (receiver instanceof ITranslationUnit) {
@@ -93,11 +91,4 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 		return project.map(cLanguageServerProvider::isEnabledFor) //
 				.orElseGet(() -> LspUtils.isFileOpenedInLspEditor(uri));
 	}
-
-	private void preFileOpening() {
-		if (project.isPresent() && cLanguageServerProvider instanceof ICLanguageServerProvider2 provider) {
-			provider.preFileOpening(project.get());
-		}
-	}
-
 }

@@ -18,7 +18,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
-import org.eclipse.lsp4e.LSPEclipseUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -76,19 +75,11 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				if (project != null) {
-					var formatFile = utils.getClangFormatFile(project);
-					if (formatFile.isPresent()) {
-						openFile(formatFile.get().getLocationURI().toString());
-					}
+					utils.openClangFormatFile(project);
+					getShell().close();
 				}
 			}
 		});
 		return button;
-	}
-
-	private void openFile(String path) {
-		LSPEclipseUtils.open(path, null);
-		// close preference page:
-		getShell().close();
 	}
 }

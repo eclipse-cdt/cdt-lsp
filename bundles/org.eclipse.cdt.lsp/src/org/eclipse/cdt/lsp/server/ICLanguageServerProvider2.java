@@ -16,7 +16,10 @@ import org.eclipse.core.resources.IProject;
 
 /**
  * @since 2.1
+ *
+ * This interface is deprecated and will be removed in the next release.
  */
+@Deprecated
 public interface ICLanguageServerProvider2 extends ICLanguageServerProvider {
 
 	/**
