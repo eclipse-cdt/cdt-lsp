@@ -10,10 +10,11 @@
  *   See git history
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd.utils;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.IOException;
 
+import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -28,8 +29,10 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.lsp4e.LSPEclipseUtils;
 import org.eclipse.swt.widgets.Display;
+import org.osgi.service.component.annotations.Component;
 
-public final class ClangFormatUtils {
+@Component(property = { "service.ranking:Integer=0" })
+public final class ClangFormatFileHandler implements ClangFormatFile {
 	public static final String format_file = ".clang-format"; //$NON-NLS-1$
 
 	private class OpenFileExecuter extends JobChangeAdapter {
@@ -57,10 +60,10 @@ public final class ClangFormatUtils {
 	 * Opens the .clang-format file in the given project. Creates a file with default values, if not yet existing prior to the opening.
 	 * @param formatFile
 	 */
+	@Override
 	public void openClangFormatFile(IProject project) {
-		var formatFile = project.getFile(format_file);
 		var job = getClangFormatFileCreatorJob(project);
-		job.addJobChangeListener(new OpenFileExecuter(formatFile));
+		job.addJobChangeListener(new OpenFileExecuter(project.getFile(format_file)));
 		job.schedule();
 	}
 
@@ -68,6 +71,7 @@ public final class ClangFormatUtils {
 	 * Creates a new .clang-format file with default settings in the project root directory if not yet existing.
 	 * @param project
 	 */
+	@Override
 	public void createClangFormatFile(IProject project) {
 		getClangFormatFileCreatorJob(project).schedule();
 	}

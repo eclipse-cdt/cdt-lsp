@@ -12,7 +12,7 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
-import org.eclipse.cdt.lsp.clangd.utils.ClangFormatUtils;
+import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.IPartListener2;
@@ -22,10 +22,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 public class ClangFormatMonitor implements IPartListener2, IWindowListener {
-	private final ClangFormatUtils formatUtils;
+	private final ClangFormatFile formatFile;
 
-	public ClangFormatMonitor(ClangFormatUtils formatUtils) {
-		this.formatUtils = formatUtils;
+	public ClangFormatMonitor(ClangFormatFile formatFile) {
+		this.formatFile = formatFile;
 	}
 
 	public ClangFormatMonitor start() {
@@ -77,7 +77,7 @@ public class ClangFormatMonitor implements IPartListener2, IWindowListener {
 			if (file == null) {
 				return;
 			}
-			formatUtils.createClangFormatFile(file.getProject());
+			formatFile.createClangFormatFile(file.getProject());
 		}
 	}
 
