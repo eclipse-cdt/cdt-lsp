@@ -14,7 +14,6 @@ package org.eclipse.cdt.lsp.clangd.internal.ui;
 
 import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
@@ -32,24 +31,20 @@ import org.eclipse.ui.dialogs.PropertyPage;
 
 public class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
 	private IProject project;
-	private IWorkspace workspace;
 	private ClangFormatFile formatFile;
+
+	public ClangFormatConfigurationPage() {
+		formatFile = PlatformUI.getWorkbench().getService(ClangFormatFile.class);
+	}
 
 	@Override
 	public void init(IWorkbench workbench) {
-		workspace = workbench.getService(IWorkspace.class);
-		formatFile = workbench.getService(ClangFormatFile.class);
+		// do nothing
 	}
 
 	@Override
 	public void setContainer(IPreferencePageContainer container) {
 		super.setContainer(container);
-		if (workspace == null) {
-			workspace = PlatformUI.getWorkbench().getService(IWorkspace.class);
-		}
-		if (formatFile == null) {
-			formatFile = PlatformUI.getWorkbench().getService(ClangFormatFile.class);
-		}
 		project = (IProject) getElement();
 	}
 

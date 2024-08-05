@@ -14,7 +14,6 @@
 
 package org.eclipse.cdt.lsp.clangd.plugin;
 
-import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.cdt.lsp.clangd.internal.config.CProjectChangeMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
@@ -28,6 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * The activator class controls the plug-in life cycle
  */
 public class ClangdPlugin extends AbstractUIPlugin {
+	private ServiceTracker<IWorkspace, IWorkspace> workspaceTracker;
 	private IWorkspace workspace;
 	private CompileCommandsMonitor compileCommandsMonitor;
 	private CProjectChangeMonitor cProjectChangeMonitor;
@@ -50,17 +50,13 @@ public class ClangdPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		ServiceTracker<IWorkspace, IWorkspace> workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
+		workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
 		workspaceTracker.open();
 		workspace = workspaceTracker.getService();
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
 		cProjectChangeMonitor = new CProjectChangeMonitor().start();
 		configFileMonitor = new ClangdConfigFileMonitor(workspace).start();
-
-		ServiceTracker<ClangFormatFile, ClangFormatFile> clangFormatTracker = new ServiceTracker<>(context,
-				ClangFormatFile.class, null);
-		clangFormatTracker.open();
-		formatMonitor = new ClangFormatMonitor(clangFormatTracker.getService()).start();
+		formatMonitor = new ClangFormatMonitor().start();
 	}
 
 	@Override
@@ -70,6 +66,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		cProjectChangeMonitor.stop();
 		configFileMonitor.stop();
 		formatMonitor.stop();
+		workspaceTracker.close();
 		super.stop(context);
 	}
 

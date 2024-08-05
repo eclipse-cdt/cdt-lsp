@@ -15,6 +15,7 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
 import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -22,15 +23,17 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 public class ClangFormatMonitor implements IPartListener2, IWindowListener {
-	private final ClangFormatFile formatFile;
-
-	public ClangFormatMonitor(ClangFormatFile formatFile) {
-		this.formatFile = formatFile;
-	}
+	private ClangFormatFile clangFormat;
 
 	public ClangFormatMonitor start() {
 		if (PlatformUI.isWorkbenchRunning()) {
-			PlatformUI.getWorkbench().addWindowListener(this);
+			var workbench = PlatformUI.getWorkbench();
+			clangFormat = workbench.getService(ClangFormatFile.class);
+			if (clangFormat == null) {
+				Platform.getLog(getClass()).error("Cannot get ClangFormatFile service."); //$NON-NLS-1$
+				return this;
+			}
+			workbench.addWindowListener(this);
 
 			// Ensure existing windows get connected
 			IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
@@ -77,7 +80,7 @@ public class ClangFormatMonitor implements IPartListener2, IWindowListener {
 			if (file == null) {
 				return;
 			}
-			formatFile.createClangFormatFile(file.getProject());
+			clangFormat.createClangFormatFile(file.getProject());
 		}
 	}
 
