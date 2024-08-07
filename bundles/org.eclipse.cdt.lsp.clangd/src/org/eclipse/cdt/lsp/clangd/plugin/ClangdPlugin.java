@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2024 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@
 package org.eclipse.cdt.lsp.clangd.plugin;
 
 import org.eclipse.cdt.lsp.clangd.internal.config.CProjectChangeMonitor;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.CompileCommandsMonitor;
 import org.eclipse.core.resources.IWorkspace;
@@ -26,10 +27,12 @@ import org.osgi.util.tracker.ServiceTracker;
  * The activator class controls the plug-in life cycle
  */
 public class ClangdPlugin extends AbstractUIPlugin {
+	private ServiceTracker<IWorkspace, IWorkspace> workspaceTracker;
 	private IWorkspace workspace;
 	private CompileCommandsMonitor compileCommandsMonitor;
 	private CProjectChangeMonitor cProjectChangeMonitor;
 	private ClangdConfigFileMonitor configFileMonitor;
+	private ClangFormatMonitor formatMonitor;
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp.clangd"; //$NON-NLS-1$
@@ -47,12 +50,13 @@ public class ClangdPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		ServiceTracker<IWorkspace, IWorkspace> workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
+		workspaceTracker = new ServiceTracker<>(context, IWorkspace.class, null);
 		workspaceTracker.open();
 		workspace = workspaceTracker.getService();
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
 		cProjectChangeMonitor = new CProjectChangeMonitor().start();
 		configFileMonitor = new ClangdConfigFileMonitor(workspace).start();
+		formatMonitor = new ClangFormatMonitor().start();
 	}
 
 	@Override
@@ -61,6 +65,8 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		compileCommandsMonitor.stop();
 		cProjectChangeMonitor.stop();
 		configFileMonitor.stop();
+		formatMonitor.stop();
+		workspaceTracker.close();
 		super.stop(context);
 	}
 

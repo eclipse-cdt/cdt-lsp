@@ -10,41 +10,60 @@
  *   See git history
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd.utils;
+package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.IOException;
-import java.util.Optional;
 
+import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.lsp4e.LSPEclipseUtils;
+import org.eclipse.ui.progress.WorkbenchJob;
+import org.osgi.service.component.annotations.Component;
 
-public final class ClangFormatUtils {
+@Component(property = { "service.ranking:Integer=0" })
+public final class ClangFormatFileHandler implements ClangFormatFile {
 	public static final String format_file = ".clang-format"; //$NON-NLS-1$
 
 	/**
-	 * Checks if the formatFile exists. Creates it if not.
+	 * Opens the .clang-format file in the given project. Creates a file with default values, if not yet existing prior to the opening.
 	 * @param formatFile
 	 */
-	public Optional<IFile> getClangFormatFile(IProject project) {
-		var formatFile = project.getFile(format_file);
-		var status = createFileFromResource(formatFile);
-		return status.isOK() ? Optional.of(formatFile) : Optional.empty();
+	@Override
+	public void openClangFormatFile(IProject project) {
+		runClangFormatFileCreatorJob(project, true);
 	}
 
+	/**
+	 * Creates a new .clang-format file with default settings in the project root directory if not yet existing.
+	 * @param project
+	 */
+	@Override
 	public void createClangFormatFile(IProject project) {
+		runClangFormatFileCreatorJob(project, false);
+	}
+
+	private void runClangFormatFileCreatorJob(IProject project, boolean openFile) {
 		var formatFile = project.getFile(format_file);
-		WorkspaceJob job = new WorkspaceJob("Create " + format_file + " file") { //$NON-NLS-1$ //$NON-NLS-2$
+		WorkbenchJob job = new WorkbenchJob("Create " + format_file + " file") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+			public IStatus runInUIThread(IProgressMonitor monitor) {
 				return createFileFromResource(formatFile);
+			}
+
+			@Override
+			public void performDone(IJobChangeEvent event) {
+				if (openFile) {
+					LSPEclipseUtils.open(formatFile.getLocationURI().toString(), null);
+				}
 			}
 		};
 		job.setSystem(true);
@@ -58,7 +77,7 @@ public final class ClangFormatUtils {
 				formatFile.create(source, true, new NullProgressMonitor());
 			} catch (IOException | CoreException e) {
 				Platform.getLog(getClass()).error(e.getMessage(), e);
-				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, "Cannot create " + format_file, e); //$NON-NLS-1$
+				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, "Cannot create " + format_file + " file", e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return Status.OK_STATUS;

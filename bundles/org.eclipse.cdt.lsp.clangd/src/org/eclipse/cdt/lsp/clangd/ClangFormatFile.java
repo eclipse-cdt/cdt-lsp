@@ -10,22 +10,25 @@
  *   See git history
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.server;
+package org.eclipse.cdt.lsp.clangd;
 
 import org.eclipse.core.resources.IProject;
 
 /**
  * @since 2.1
- *
- * This interface is deprecated and will be removed in the next release.
  */
-@Deprecated
-public interface ICLanguageServerProvider2 extends ICLanguageServerProvider {
+public interface ClangFormatFile {
 
 	/**
-	 * This function gets always called prior a C/C++ source file from the given project gets opened by LSP4E.
+	 * Opens the .clang-format file in the given project. Creates a file with default values, if not yet existing prior to the opening.
+	 * @param formatFile
+	 */
+	void openClangFormatFile(IProject project);
+
+	/**
+	 * Creates a new .clang-format file with default settings in the project root directory if not yet existing.
 	 * @param project
 	 */
-	public void preFileOpening(IProject project);
+	void createClangFormatFile(IProject project);
 
 }

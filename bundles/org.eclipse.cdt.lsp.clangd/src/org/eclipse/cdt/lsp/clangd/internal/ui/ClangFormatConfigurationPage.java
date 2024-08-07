@@ -12,13 +12,11 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
-import org.eclipse.cdt.lsp.clangd.utils.ClangFormatUtils;
+import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
-import org.eclipse.lsp4e.LSPEclipseUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,22 +29,22 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
-public class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
+public final class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
 	private IProject project;
-	private IWorkspace workspace;
-	private ClangFormatUtils utils = new ClangFormatUtils();
+	private final ClangFormatFile formatFile;
+
+	public ClangFormatConfigurationPage() {
+		formatFile = PlatformUI.getWorkbench().getService(ClangFormatFile.class);
+	}
 
 	@Override
 	public void init(IWorkbench workbench) {
-		workspace = workbench.getService(IWorkspace.class);
+		// do nothing
 	}
 
 	@Override
 	public void setContainer(IPreferencePageContainer container) {
 		super.setContainer(container);
-		if (workspace == null) {
-			workspace = PlatformUI.getWorkbench().getService(IWorkspace.class);
-		}
 		project = (IProject) getElement();
 	}
 
@@ -76,19 +74,11 @@ public class ClangFormatConfigurationPage extends PropertyPage implements IWorkb
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				if (project != null) {
-					var formatFile = utils.getClangFormatFile(project);
-					if (formatFile.isPresent()) {
-						openFile(formatFile.get().getLocationURI().toString());
-					}
+					formatFile.openClangFormatFile(project);
+					getShell().close();
 				}
 			}
 		});
 		return button;
-	}
-
-	private void openFile(String path) {
-		LSPEclipseUtils.open(path, null);
-		// close preference page:
-		getShell().close();
 	}
 }
