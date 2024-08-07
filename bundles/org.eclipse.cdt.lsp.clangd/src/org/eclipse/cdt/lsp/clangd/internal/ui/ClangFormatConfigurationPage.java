@@ -29,9 +29,9 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
-public class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
+public final class ClangFormatConfigurationPage extends PropertyPage implements IWorkbenchPreferencePage {
 	private IProject project;
-	private ClangFormatFile formatFile;
+	private final ClangFormatFile formatFile;
 
 	public ClangFormatConfigurationPage() {
 		formatFile = PlatformUI.getWorkbench().getService(ClangFormatFile.class);

@@ -22,7 +22,7 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-public class ClangFormatMonitor implements IPartListener2, IWindowListener {
+public final class ClangFormatMonitor implements IPartListener2, IWindowListener {
 	private ClangFormatFile clangFormat;
 
 	public ClangFormatMonitor start() {

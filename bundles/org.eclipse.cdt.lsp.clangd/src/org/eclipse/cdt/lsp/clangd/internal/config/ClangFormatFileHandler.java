@@ -18,7 +18,6 @@ import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -26,35 +25,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.lsp4e.LSPEclipseUtils;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.progress.WorkbenchJob;
 import org.osgi.service.component.annotations.Component;
 
 @Component(property = { "service.ranking:Integer=0" })
 public final class ClangFormatFileHandler implements ClangFormatFile {
 	public static final String format_file = ".clang-format"; //$NON-NLS-1$
-
-	private class OpenFileExecuter extends JobChangeAdapter {
-		private final IFile file;
-
-		public OpenFileExecuter(IFile file) {
-			this.file = file;
-		}
-
-		@Override
-		public void done(IJobChangeEvent event) {
-			if (Status.OK_STATUS.equals(event.getResult())) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						LSPEclipseUtils.open(file.getLocationURI().toString(), null);
-					}
-				});
-			}
-		}
-
-	}
 
 	/**
 	 * Opens the .clang-format file in the given project. Creates a file with default values, if not yet existing prior to the opening.
@@ -62,9 +39,7 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	 */
 	@Override
 	public void openClangFormatFile(IProject project) {
-		var job = getClangFormatFileCreatorJob(project);
-		job.addJobChangeListener(new OpenFileExecuter(project.getFile(format_file)));
-		job.schedule();
+		runClangFormatFileCreatorJob(project, true);
 	}
 
 	/**
@@ -73,20 +48,27 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	 */
 	@Override
 	public void createClangFormatFile(IProject project) {
-		getClangFormatFileCreatorJob(project).schedule();
+		runClangFormatFileCreatorJob(project, false);
 	}
 
-	private WorkspaceJob getClangFormatFileCreatorJob(IProject project) {
+	private void runClangFormatFileCreatorJob(IProject project, boolean openFile) {
 		var formatFile = project.getFile(format_file);
-		WorkspaceJob job = new WorkspaceJob("Create " + format_file + " file") { //$NON-NLS-1$ //$NON-NLS-2$
+		WorkbenchJob job = new WorkbenchJob("Create " + format_file + " file") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+			public IStatus runInUIThread(IProgressMonitor monitor) {
 				return createFileFromResource(formatFile);
+			}
+
+			@Override
+			public void performDone(IJobChangeEvent event) {
+				if (openFile) {
+					LSPEclipseUtils.open(formatFile.getLocationURI().toString(), null);
+				}
 			}
 		};
 		job.setSystem(true);
 		job.setRule(formatFile.getWorkspace().getRuleFactory().createRule(formatFile));
-		return job;
+		job.schedule();
 	}
 
 	private IStatus createFileFromResource(IFile formatFile) {
