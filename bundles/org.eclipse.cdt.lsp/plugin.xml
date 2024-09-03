@@ -257,6 +257,27 @@
          </action>
       </editorContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="org.eclipse.cdt.lsp.CEditor.EditorRulerActions"
+            targetID="org.eclipse.cdt.lsp.CEditor.RulerContext">
+         <action
+               class="org.eclipse.debug.ui.actions.RulerEnableDisableBreakpointActionDelegate"
+               id="org.eclipse.cdt.lsp.CEditor.RulerEnableDisableBreakpointAction"
+               label="%EnableBreakpoint.label"
+               menubarPath="debug">
+         </action>
+         <action
+               class="org.eclipse.debug.ui.actions.RulerToggleBreakpointActionDelegate"
+               definitionId="org.eclipse.debug.ui.commands.ToggleBreakpoint"
+               icon="icons/elcl16/line_brkpt_co.gif"
+               id="org.eclipse.cdt.lsp.CEditor.RulerToggleBreakpointAction"
+               label="%AddBreakpoint.label"
+               menubarPath="debug">
+         </action>
+      </viewerContribution>
+   </extension>
    
    <extension
          point="org.eclipse.ui.genericeditor.hoverProviders">
