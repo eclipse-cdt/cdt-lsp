@@ -141,8 +141,21 @@ public class LspUtils {
 		return found.stream().findFirst();
 	}
 
+	/**
+	 * Get active language servers
+	 * @return Stream of LanguageServerWrapper
+	 */
 	public static Stream<LanguageServerWrapper> getLanguageServers() {
-		return LanguageServiceAccessor.getStartedWrappers(null, true).stream()
+		return getLanguageServers(true);
+	}
+
+	/**
+	 * Get language servers
+	 * @param onlyActiveLS
+	 * @return Stream of LanguageServerWrapper
+	 */
+	public static Stream<LanguageServerWrapper> getLanguageServers(boolean onlyActiveLS) {
+		return LanguageServiceAccessor.getStartedWrappers(null, onlyActiveLS).stream()
 				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)); //$NON-NLS-1$
 	}
 
