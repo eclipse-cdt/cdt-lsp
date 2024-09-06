@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.core.resources.IFile;
@@ -141,9 +140,22 @@ public class LspUtils {
 		return found.stream().findFirst();
 	}
 
-	public static Stream<LanguageServerWrapper> getLanguageServers() {
-		return LanguageServiceAccessor.getStartedWrappers(null, true).stream()
-				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)); //$NON-NLS-1$
+	/**
+	 * Get active language servers
+	 * @return List of LanguageServerWrapper
+	 */
+	public static List<LanguageServerWrapper> getLanguageServers() {
+		return getLanguageServers(true);
+	}
+
+	/**
+	 * Get language servers
+	 * @param onlyActiveLS
+	 * @return List of LanguageServerWrapper
+	 */
+	public static List<LanguageServerWrapper> getLanguageServers(boolean onlyActiveLS) {
+		return LanguageServiceAccessor.getStartedWrappers(null, onlyActiveLS).stream()
+				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)).toList(); //$NON-NLS-1$
 	}
 
 }

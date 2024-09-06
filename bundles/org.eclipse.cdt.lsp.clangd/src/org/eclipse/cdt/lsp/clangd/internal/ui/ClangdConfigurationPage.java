@@ -64,7 +64,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	}
 
 	private void restartClangd() {
-		LspUtils.getLanguageServers().forEach(w -> w.restart());
+		LspUtils.getLanguageServers(false).forEach(w -> w.restart());
 	}
 
 	/**
@@ -85,7 +85,8 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	}
 
 	private boolean isLsActive() {
-		return LspUtils.getLanguageServers().findAny().isPresent();
+		return LspUtils.getLanguageServers(false).stream().findFirst().filter(w -> w.startupFailed() || w.isActive())
+				.isPresent();
 	}
 
 	@Override
