@@ -85,7 +85,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	}
 
 	private boolean isLsActive() {
-		return LspUtils.getLanguageServers(false).findFirst().filter(w -> w.startupFailed() || w.isActive())
+		return LspUtils.getLanguageServers(false).stream().findFirst().filter(w -> w.startupFailed() || w.isActive())
 				.isPresent();
 	}
 
