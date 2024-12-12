@@ -10,6 +10,7 @@ CONTRIBUTING text
 LICENSE text
 *.txt text
 *.md text
+*.adoc text
 *.zip binary
 
 # C-like Sources

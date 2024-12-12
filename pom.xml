@@ -223,6 +223,32 @@
      </execution>
     </executions>
    </plugin>
+   <plugin>
+    <groupId>org.asciidoctor</groupId>
+    <artifactId>asciidoctor-maven-plugin</artifactId>
+    <version>3.0.0</version>
+    <executions>
+     <execution>
+      <id>adoc-to-html</id>
+      <phase>generate-resources</phase>
+      <goals>
+       <goal>process-asciidoc</goal>
+      </goals>
+      <configuration>
+       <outputDirectory>${project.basedir}/html</outputDirectory>
+       <attributes>
+        <icons>font</icons>
+        <imagesdir>../images</imagesdir>
+        <linkcss />
+        <reproducible />
+        <source-highlighter>coderay</source-highlighter>
+        <stylesheet>../help.css</stylesheet>
+        <toc>macro</toc>
+       </attributes>
+      </configuration>
+     </execution>
+    </executions>
+   </plugin>
   </plugins>
  </build>
  <profiles>
