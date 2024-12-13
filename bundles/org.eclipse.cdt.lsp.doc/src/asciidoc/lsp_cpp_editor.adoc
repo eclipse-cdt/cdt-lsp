@@ -18,4 +18,25 @@ ifdef::env-github[]
 :toc-placement!:
 endif::[]
 
-= LSP C/C++ editor
+// enable support for button, menu and keyboard macros
+:experimental:
+
+= C/{cpp} editor (LSP)
+
+The CDT provides a Language Server based editor that gives you specific support for editing C/{cpp} code.
+This editor uses _Language Server Protocol_ (LSP) to provide better support for modern C/{cpp} language features than the legacy C/{cpp} editor.
+The Language Server based editor is invoked automatically when you open a C/{cpp} source file within new projects.
+Projects created using an older version of CDT may be configured to use this editor from the menu:Project[Preferences > C/{cpp} General > Editor (LSP)] properties page:
+
+image:lsp_editor_properties.png[width=526]
+
+The C/{cpp} editor (LSP) includes the following features:
+
+- Syntax highlighting
+- Content/code assist
+- Code folding
+- Integrated debugging features
+
+You can customize formatting behaviour of the editor by modifying style options in the _link:https://clang.llvm.org/docs/ClangFormatStyleOptions.html[ClangFormat]_ configuration file from the menu:Project[Preferences > C/{cpp} General > Editor (LSP) > Formatter] properties page.
+
+IMPORTANT: The C/{cpp} editor (LSP) requires an installation of the `link:https://clangd.llvm.org[clangd]` command-line tool. Refer to link:lsp_clangd_prefs.html[clangd preferences] for setup details.

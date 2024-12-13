@@ -1,0 +1,38 @@
+////
+Copyright (c) 2024 John Dallaway and others
+This program and the accompanying materials
+are made available under the terms of the Eclipse Public License 2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+
+Contributors:
+    John Dallaway - initial content (#963)
+////
+
+// support image rendering and table of contents within GitHub
+ifdef::env-github[]
+:imagesdir: ../../images
+:toc:
+:toc-placement!:
+endif::[]
+
+= Save actions
+
+Use the image:command_link.png[] link:javascript:executeCommand('org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage)')[Save Actions] preference page to configure actions performed by the C/{cpp} editor (LSP) while saving a file:
+
+image:lsp_save_prefs.png[width=550]
+
+.Save Actions Preference Options
+:!table-caption:
+[%autowidth]
+[options="header"]
+|===
+|Option              |Description
+|Format source code  |While saving a file, the editor will format all lines or edited lines only.
+|===
+
+Related concepts:
+
+* link:lsp_cpp_editor.html[C/C++ editor (LSP)]
