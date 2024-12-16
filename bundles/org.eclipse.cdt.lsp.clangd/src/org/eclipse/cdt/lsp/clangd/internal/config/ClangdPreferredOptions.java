@@ -72,7 +72,7 @@ final class ClangdPreferredOptions implements ClangdOptions {
 		if (options.isBlank()) {
 			return new ArrayList<>();
 		}
-		return Arrays.asList(options.split(System.lineSeparator()));
+		return Arrays.asList(options.split("\\R")); //$NON-NLS-1$
 	}
 
 	private String stringValue(PreferenceMetadata<?> meta) {
