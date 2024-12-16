@@ -20,7 +20,7 @@ To try out and develop the plug-ins in you can edit and run them from source.
 All PRs are built using GitHub Actions using the workflows in the [.github/workflows](.github/workflows) directory.
 
 All branches are built using the [Jenkinsfile](Jenkinsfile) on the [Eclipse Foundations Jenkins infrastructure](https://wiki.eclipse.org/Jenkins) in the [cdt-lsp](https://ci.eclipse.org/cdt/job/cdt-lsp) multi-branch pipeline.
-The pipeline publishes continuously to download.eclipse.org, for example the `master` branch publishes to https://download.eclipse.org/tools/cdt/builds/cdt-lsp/master/
+The pipeline publishes continuously to download.eclipse.org, for example the `main` branch publishes to https://download.eclipse.org/tools/cdt/builds/cdt-lsp/main/
 
 ## CI Milestone and Release Builds
 
