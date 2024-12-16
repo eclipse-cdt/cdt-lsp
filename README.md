@@ -4,7 +4,7 @@
 
 This plugin is based on the [LSP4E](https://github.com/eclipse/lsp4e) and [TM4E](https://github.com/eclipse/tm4e) Eclipse projects. The editor is based on the [`ExtensionBasedTextEditor`](https://github.com/eclipse-platform/eclipse.platform.ui/blob/master/bundles/org.eclipse.ui.genericeditor/src/org/eclipse/ui/internal/genericeditor/ExtensionBasedTextEditor.java#L55-L56) in Eclipse.
 
-The [`org.eclipse.cdt.lsp`](https://github.com/eclipse-cdt/cdt-lsp/tree/master/bundles/org.eclipse.cdt.lsp) is the core plugin. C/C++ IDE Developers can use the [`serverProvider`](https://github.com/eclipse-cdt/cdt-lsp/blob/master/bundles/org.eclipse.cdt.lsp/schema/serverProvider.exsd) extension point to define a C/C++ language server. If there is no extension defined, the LLVM [clangd](https://clangd.llvm.org/) language server will be used and searched on the PATH environment variable. Clangd searches for a `compile_commands.json` file in the source file folder and its parents. It's needed to determine the compile informations. In the default clangd configuration, the PATH will be searched for a `gcc` compiler to determine the default compiler include paths.
+The [`org.eclipse.cdt.lsp`](https://github.com/eclipse-cdt/cdt-lsp/tree/main/bundles/org.eclipse.cdt.lsp) is the core plugin. C/C++ IDE Developers can use the [`serverProvider`](https://github.com/eclipse-cdt/cdt-lsp/blob/main/bundles/org.eclipse.cdt.lsp/schema/serverProvider.exsd) extension point to define a C/C++ language server. If there is no extension defined, the LLVM [clangd](https://clangd.llvm.org/) language server will be used and searched on the PATH environment variable. Clangd searches for a `compile_commands.json` file in the source file folder and its parents. It's needed to determine the compile informations. In the default clangd configuration, the PATH will be searched for a `gcc` compiler to determine the default compiler include paths.
 
 The editor is basically the `ExtensionBasedTextEditor`. The language grammar comes from [TM4E](https://github.com/eclipse/tm4e). 
 
@@ -98,7 +98,7 @@ see [issues](https://github.com/eclipse-cdt/cdt-lsp/issues)
 1. Download the latest Developer Build of Eclipse for C/C++ Developers or Eclipse for Embedded C/C++ Developers using the [Eclipse installer](https://www.eclipse.org/downloads/packages/installer) or downloading and extracting the latest release available on [eclipse.org](https://www.eclipse.org/downloads/packages/release/).
 2. Add to your Available Software Sites and install *C/C++ LSP Support* in the *Eclipse CDT LSP* Category and restart Eclipse from one of these p2 sites:
     - For latest release: `https://download.eclipse.org/tools/cdt/releases/cdt-lsp-latest`
-    - For current master branch continuous build: `https://download.eclipse.org/tools/cdt/builds/cdt-lsp/master/`
+    - For current main branch continuous build: `https://download.eclipse.org/tools/cdt/builds/cdt-lsp/main/`
 3. [Install Pre-requisites](#install-pre-requisites) listed below
 4. [Create a CMake project](#create-an-example-cmake-project) or [import an existing](#import-an-existing-project) project following guidelines below
 5. [Enable the LSP based C/C++ Editor](#activating-lsp-based-cc-editor) following instructions above.
