@@ -1,0 +1,44 @@
+////
+Copyright (c) 2024 John Dallaway and others
+This program and the accompanying materials
+are made available under the terms of the Eclipse Public License 2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+
+Contributors:
+    John Dallaway - initial content (#963)
+////
+
+// support image rendering and table of contents within GitHub
+ifdef::env-github[]
+:imagesdir: ../../images
+:toc:
+:toc-placement!:
+endif::[]
+
+= clangd
+
+Use the image:command_link.png[] link:javascript:executeCommand('org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.cdt.lsp.clangd.editor.preferencePage)')[clangd] preference page to configure the behaviour of the `clangd` language server:
+
+image:lsp_clangd_prefs.png[width=550]
+
+.clangd Preference Options
+:!table-caption:
+[%autowidth]
+[options="header"]
+|===
+|Option                        |Description
+|Path                          |The absolute path of the `clangd` command-line tool.
+|Enable clang-tidy diagnostics |Enables the link:https://clang.llvm.org/extra/clang-tidy[_ClangTidy_] {cpp} linter tool.
+|Index project code in the background and persist index on disk |Enables building of files in the background to generate a project index.
+|Completion                    |The granularity of code completion suggestions.
+|Pretty-print JSON output      |Enables the pretty-printing of JSON output.
+|Drivers                       |A comma-separated list of globs for the extraction of system includes.
+|Additional                    |Miscellaneous `clangd` command-line arguments.
+|===
+
+Related concepts:
+
+* link:lsp_cpp_editor.html[C/C++ editor (LSP)]

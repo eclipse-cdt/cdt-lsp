@@ -12,6 +12,9 @@ SPDX-License-Identifier: EPL-2.0
 Contributors:
   John Dallaway - initial implementation (#963)
 -->
-<toc link_to="../org.eclipse.cdt.doc.user/topics_Concepts.xml#cdt_EditingCpp_Anchor" label="C/C++ editor (LSP)">
-	<topic label="C/C++ editor (LSP)" href="html/lsp_cpp_editor.html" />
+<toc link_to="../org.eclipse.cdt.doc.user/topics_Reference.xml#cdt_Preferences_Anchor" label="Editor (LSP) preferences">
+	<topic label="Editor (LSP) preferences" href="html/lsp_cpp_editor_prefs.html">
+		<topic label="clangd" href="html/lsp_clangd_prefs.html" />
+		<topic label="Save Actions" href="html/lsp_save_prefs.html" />
+	</topic>
 </toc>

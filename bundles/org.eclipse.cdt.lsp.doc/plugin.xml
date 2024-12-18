@@ -15,5 +15,6 @@ Contributors:
 <plugin>
 	<extension point="org.eclipse.help.toc">
 		<toc file="toc_editor.xml" />
+		<toc file="toc_prefs.xml" />
 	</extension>
 </plugin>

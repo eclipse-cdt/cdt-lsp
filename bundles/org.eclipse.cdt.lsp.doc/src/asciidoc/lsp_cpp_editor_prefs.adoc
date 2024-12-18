@@ -1,0 +1,38 @@
+////
+Copyright (c) 2024 John Dallaway and others
+This program and the accompanying materials
+are made available under the terms of the Eclipse Public License 2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+
+Contributors:
+    John Dallaway - initial content (#963)
+////
+
+// support image rendering and table of contents within GitHub
+ifdef::env-github[]
+:imagesdir: ../../images
+:toc:
+:toc-placement!:
+endif::[]
+
+= C/{cpp} editor (LSP) preferences
+
+Use the image:command_link.png[] link:javascript:executeCommand('org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.cdt.lsp.editor.preferencePage)')[Editor (LSP)] preference page to configure general behaviour of the C/{cpp} editor (LSP):
+
+image:lsp_editor_prefs.png[width=550]
+
+.C/{cpp} Editor (LSP) Preference Options
+:!table-caption:
+[%autowidth]
+[options="header"]
+|===
+|Option              |Description
+|Set C/{cpp} Editor (LSP) as default |When opening a C/{cpp} source file, the C/C++ editor (LSP) will be used by default.
+|===
+
+Related concepts:
+
+* link:lsp_cpp_editor.html[C/C++ editor (LSP)]
