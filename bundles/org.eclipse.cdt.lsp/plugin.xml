@@ -18,6 +18,7 @@
       </initializer>
    </extension>
    <extension-point id="serverProvider" name="%Server.name" schema="schema/serverProvider.exsd"/>
+   <extension-point id="logProvider" name="%Logger.name" schema="schema/logProvider.exsd"/>
    <extension
          point="org.eclipse.ui.editors">
       <editor

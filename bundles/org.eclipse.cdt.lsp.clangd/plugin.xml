@@ -169,6 +169,12 @@
             content-type="org.eclipse.tm4e.language_pack.yaml"
             file-names=".clangd,.clang-format">
       </file-association>
+   </extension>
+   <extension
+         point="org.eclipse.cdt.lsp.logProvider">
+      <logger
+            class="org.eclipse.cdt.lsp.clangd.console.ClangdConsole">
+      </logger>
    </extension>   
 
 </plugin>

@@ -3,7 +3,7 @@
    <service>
       <provide interface="org.eclipse.cdt.lsp.clangd.ClangdConfiguration"/>
    </service>
-   <reference cardinality="1..1" field="metadata" interface="org.eclipse.cdt.lsp.clangd.ClangdMetadata" name="metadata"/>
+   <reference cardinality="1..1" field="metadata" interface="org.eclipse.cdt.lsp.clangd.ClangdMetadata2" name="metadata"/>
    <reference cardinality="1..1" field="workspace" interface="org.eclipse.core.resources.IWorkspace" name="workspace"/>
    <implementation class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess"/>
 </scr:component>

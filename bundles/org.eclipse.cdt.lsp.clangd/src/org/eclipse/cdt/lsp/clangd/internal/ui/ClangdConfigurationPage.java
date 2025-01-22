@@ -15,8 +15,8 @@
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
-import org.eclipse.cdt.lsp.clangd.ClangdOptions;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions2;
 import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
@@ -43,7 +43,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 
 	@Override
 	protected ConfigurationArea getConfigurationArea(Composite composite, boolean isProjectScope) {
-		return new ClangdConfigurationArea(composite, (ClangdMetadata) configuration.metadata(), isProjectScope);
+		return new ClangdConfigurationArea(composite, (ClangdMetadata2) configuration.metadata(), isProjectScope);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	 * @return
 	 */
 	private boolean configurationSettingsChanged() {
-		return ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions) configuration.options(getElement()));
+		return ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions2) configuration.options(getElement()));
 	}
 
 	/**
@@ -81,7 +81,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	 */
 	private boolean projectOptionsDifferFromWorkspace() {
 		return hasProjectSpecificOptions() != useProjectSettings()
-				&& ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions) configuration.options(null));
+				&& ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions2) configuration.options(null));
 	}
 
 	private boolean isLsActive() {
@@ -93,7 +93,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(((ClangdMetadata) configuration.metadata()).clangdPath().identifer(), null))//
+				.map(n -> n.get(((ClangdMetadata2) configuration.metadata()).clangdPath().identifer(), null))//
 				.isPresent();
 	}
 

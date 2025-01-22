@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions2Defaults;
 import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.runtime.IPath;
 import org.osgi.service.component.annotations.Component;
@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Component;
  * Provides the default clangd options for cdt-lsp.
  */
 @Component(property = { "service.ranking:Integer=0" })
-public class BuiltinClangdOptionsDefaults implements ClangdOptionsDefaults {
+public class BuiltinClangdOptionsDefaults implements ClangdOptions2Defaults {
 
 	@Override
 	public String clangdPath() {
@@ -65,5 +65,10 @@ public class BuiltinClangdOptionsDefaults implements ClangdOptionsDefaults {
 	@Override
 	public List<String> additionalOptions() {
 		return Collections.emptyList();
+	}
+
+	@Override
+	public boolean logToConsole() {
+		return false;
 	}
 }

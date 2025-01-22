@@ -19,8 +19,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions2;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
@@ -51,6 +52,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 	private final Button pretty;
 	private final Text driver;
 	private final Text additional;
+	private final Button logToConsole;
 	private final Group group;
 	private ControlEnableState enableState;
 
@@ -63,7 +65,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 			LspEditorUiMessages.LspEditorPreferencePage_completion_default };
 	private final Map<String, String> completions;
 
-	public ClangdConfigurationArea(Composite parent, ClangdMetadata metadata, boolean isProjectScope) {
+	public ClangdConfigurationArea(Composite parent, ClangdMetadata2 metadata, boolean isProjectScope) {
 		super(3);
 		this.texts = new HashMap<>();
 		this.combos = new HashMap<>();
@@ -82,6 +84,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 		this.pretty = createButton(metadata.prettyPrint(), group, SWT.CHECK, 0);
 		this.driver = createText(metadata.queryDriver(), group, false);
 		this.additional = createText(metadata.additionalOptions(), group, true);
+		this.logToConsole = createButton(metadata.logToConsole(), group, SWT.CHECK, 0);
 	}
 
 	void enablePreferenceContent(boolean enable) {
@@ -182,6 +185,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 					clangdOptions.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
 			enablePreferenceContent(enable);
 		}
+		if (options instanceof ClangdOptions2 clangdOptions2) {
+			logToConsole.setSelection(clangdOptions2.logToConsole());
+		}
 	}
 
 	@Override
@@ -199,13 +205,14 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 		combos.clear();
 	}
 
-	public boolean optionsChanged(ClangdOptions options) {
+	public boolean optionsChanged(ClangdOptions2 options) {
 		return !options.clangdPath().equals(path.getText()) || options.useTidy() != tidy.getSelection()
 				|| options.useBackgroundIndex() != index.getSelection()
 				|| !options.completionStyle().equals(completions.get(completion.getText()))
 				|| options.prettyPrint() != pretty.getSelection() || !options.queryDriver().equals(driver.getText())
 				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
-						.equals(additional.getText());
+						.equals(additional.getText())
+				|| options.logToConsole() != logToConsole.getSelection();
 	}
 
 }
