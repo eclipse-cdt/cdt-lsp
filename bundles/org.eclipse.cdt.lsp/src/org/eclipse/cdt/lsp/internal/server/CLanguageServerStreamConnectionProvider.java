@@ -50,7 +50,7 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 	 */
 	@Override
 	protected ProcessBuilder createProcessBuilder() {
-		if (logEnabled()) {
+		if (logEnabled() && getLogProvider().isPresent()) {
 			final var builder = new ProcessBuilder(castNonNull(getCommands()));
 			final var workDir = getWorkingDirectory();
 			if (workDir != null) {
@@ -78,9 +78,8 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 		// destroy LS process first, to prevent a write operation on a already closed output stream:
 		super.stop();
 		// then close output stream.
-		if (getLogProvider().isPresent()) {
-			getLogProvider().get().close();
-		}
+		// TODO: we need to wait here until the process has been terminated:
+		getLogProvider().ifPresent(lp -> lp.close());
 	}
 
 	private boolean logEnabled() {
