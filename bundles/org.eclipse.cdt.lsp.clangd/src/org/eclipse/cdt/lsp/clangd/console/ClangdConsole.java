@@ -12,9 +12,11 @@
 
 package org.eclipse.cdt.lsp.clangd.console;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 import org.eclipse.cdt.lsp.server.ILogProvider;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -22,10 +24,27 @@ import org.eclipse.ui.console.MessageConsole;
 
 public final class ClangdConsole implements ILogProvider {
 	private static final String CLANGD_CONSOLE = "Clangd"; //$NON-NLS-1$
+	private OutputStream outputStream;
 
 	@Override
 	public OutputStream getOutputStream() {
-		return findConsole().newOutputStream();
+		if (outputStream == null) {
+			outputStream = findConsole().newOutputStream();
+		}
+		return outputStream;
+	}
+
+	@Override
+	public void close() {
+		if (outputStream != null) {
+			try {
+				outputStream.close();
+				outputStream = null;
+			} catch (IOException e) {
+				Platform.getLog(ClangdConsole.class).error(e.getMessage(), e);
+			}
+		}
+
 	}
 
 	private MessageConsole findConsole() {
@@ -40,5 +59,4 @@ public final class ClangdConsole implements ILogProvider {
 		conMan.addConsoles(new IConsole[] { myConsole });
 		return myConsole;
 	}
-
 }

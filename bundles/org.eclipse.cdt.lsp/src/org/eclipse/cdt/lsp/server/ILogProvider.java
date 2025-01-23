@@ -26,4 +26,9 @@ public interface ILogProvider {
 	 * @return OutputStream for language server log messages
 	 */
 	OutputStream getOutputStream();
+
+	/**
+	 * Close all open streams. Will  be called when the language server process has been terminated.
+	 */
+	void close();
 }

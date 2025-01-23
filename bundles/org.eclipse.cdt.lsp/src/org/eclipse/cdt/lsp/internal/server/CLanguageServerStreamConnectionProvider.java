@@ -19,15 +19,18 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider3;
+import org.eclipse.cdt.lsp.server.ILogProvider;
 import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
 
 public final class CLanguageServerStreamConnectionProvider extends ProcessStreamConnectionProvider {
 	private final ICLanguageServerProvider provider;
 	private Runnable errorStreamPipeStopper;
+	private Optional<ILogProvider> logProvider = Optional.empty();
 
 	public CLanguageServerStreamConnectionProvider() {
 		this.provider = LspPlugin.getDefault().getCLanguageServerProvider();
@@ -61,24 +64,34 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 	@Override
 	public void start() throws IOException {
 		super.start();
-		if (logEnabled()) {
-			var logProvider = LogProviderRegistry.createLogProvider();
-			if (logProvider.isPresent()) {
-				errorStreamPipeStopper = new AsyncStreamPipe().pipeTo(new BufferedInputStream(getErrorStream()),
-						logProvider.get().getOutputStream());
-			}
+		if (logEnabled() && getLogProvider().isPresent()) {
+			errorStreamPipeStopper = new AsyncStreamPipe().pipeTo(new BufferedInputStream(getErrorStream()),
+					getLogProvider().get().getOutputStream());
 		}
 	}
 
 	@Override
 	public void stop() {
-		if (errorStreamPipeStopper != null)
+		if (errorStreamPipeStopper != null) {
 			errorStreamPipeStopper.run();
+		}
+		// destroy LS process first, to prevent a write operation on a already closed output stream:
 		super.stop();
+		// then close output stream.
+		if (getLogProvider().isPresent()) {
+			getLogProvider().get().close();
+		}
 	}
 
 	private boolean logEnabled() {
 		return provider instanceof ICLanguageServerProvider3 provider3 && provider3.logToConsole();
+	}
+
+	private Optional<ILogProvider> getLogProvider() {
+		if (logProvider.isEmpty()) {
+			logProvider = LogProviderRegistry.createLogProvider();
+		}
+		return logProvider;
 	}
 
 }
