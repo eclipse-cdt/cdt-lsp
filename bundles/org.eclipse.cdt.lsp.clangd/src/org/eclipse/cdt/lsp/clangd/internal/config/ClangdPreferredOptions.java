@@ -19,18 +19,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
-import org.eclipse.cdt.lsp.clangd.ClangdOptions;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions2;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
-final class ClangdPreferredOptions implements ClangdOptions {
+final class ClangdPreferredOptions implements ClangdOptions2 {
 
 	private final String qualifier;
 	private final IScopeContext[] scopes;
-	private final ClangdMetadata metadata;
+	private final ClangdMetadata2 metadata;
 
-	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata metadata) {
+	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata2 metadata) {
 		this.qualifier = Objects.requireNonNull(qualifier);
 		this.scopes = Objects.requireNonNull(scopes);
 		this.metadata = Objects.requireNonNull(metadata);
@@ -73,6 +73,11 @@ final class ClangdPreferredOptions implements ClangdOptions {
 			return new ArrayList<>();
 		}
 		return Arrays.asList(options.split("\\R")); //$NON-NLS-1$
+	}
+
+	@Override
+	public boolean logToConsole() {
+		return booleanValue(metadata.logToConsole());
 	}
 
 	private String stringValue(PreferenceMetadata<?> meta) {
