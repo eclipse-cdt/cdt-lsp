@@ -95,7 +95,7 @@ public class ClangdMetadataDefaults implements ClangdMetadata2 {
 				"log_to_console", //$NON-NLS-1$
 				defaults.logToConsole(), //
 				LspEditorUiMessages.LspEditorPreferencePage_Log_to_Console, //
-				LspEditorUiMessages.LspEditorPreferencePage_Log_to_Console);
+				LspEditorUiMessages.LspEditorPreferencePage_Log_to_Console_description);
 	}
 
 }
