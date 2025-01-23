@@ -84,7 +84,11 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 		this.pretty = createButton(metadata.prettyPrint(), group, SWT.CHECK, 0);
 		this.driver = createText(metadata.queryDriver(), group, false);
 		this.additional = createText(metadata.additionalOptions(), group, true);
-		this.logToConsole = createButton(metadata.logToConsole(), group, SWT.CHECK, 0);
+		if (!isProjectScope) {
+			this.logToConsole = createButton(metadata.logToConsole(), group, SWT.CHECK, 0);
+		} else {
+			this.logToConsole = null;
+		}
 	}
 
 	void enablePreferenceContent(boolean enable) {
@@ -185,7 +189,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 					clangdOptions.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
 			enablePreferenceContent(enable);
 		}
-		if (options instanceof ClangdOptions2 clangdOptions2) {
+		if (logToConsole != null && options instanceof ClangdOptions2 clangdOptions2) {
 			logToConsole.setSelection(clangdOptions2.logToConsole());
 		}
 	}
@@ -212,7 +216,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 				|| options.prettyPrint() != pretty.getSelection() || !options.queryDriver().equals(driver.getText())
 				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
 						.equals(additional.getText())
-				|| options.logToConsole() != logToConsole.getSelection();
+				|| (logToConsole != null && options.logToConsole() != logToConsole.getSelection());
 	}
 
 }
