@@ -82,8 +82,9 @@ public final class RegexMarkerPattern {
 			}
 			var fileURI = matcher.replaceAll(fileExpression);
 			if (!file.getLocation().toOSString().equals(fileURI)) {
-				Platform.getLog(getClass()).error("Parsed .clang-format path does not match with IFile location: " //$NON-NLS-1$
-						+ fileURI + " != " + file.getLocation().toOSString()); //$NON-NLS-1$
+				Platform.getLog(getClass())
+						.error("Parsed .clang-format path does not match with modified .clang-format location: " //$NON-NLS-1$
+								+ fileURI + " != " + file.getLocation().toOSString()); //$NON-NLS-1$
 				return;
 			}
 			var lineNumber = 0;

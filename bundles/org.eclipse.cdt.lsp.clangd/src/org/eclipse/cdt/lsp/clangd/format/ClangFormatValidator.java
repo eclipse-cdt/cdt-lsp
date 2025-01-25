@@ -40,7 +40,6 @@ public class ClangFormatValidator {
 		var fileDocument = LSPEclipseUtils.getDocument(clangFormatFile);
 		if (fileDocument == null) {
 			return;
-
 		}
 		File directory = null;
 		if (clangFormatFile.getParent() != null && clangFormatFile.getParent().getLocation() != null) {
