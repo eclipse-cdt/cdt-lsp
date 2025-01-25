@@ -41,7 +41,7 @@ import org.eclipse.core.variables.VariablesPlugin;
  */
 public class ClangFormatFileMonitor {
 	private static final String CLANG_FORMAT_FILE = ".clang-format"; //$NON-NLS-1$
-	public static final String CLANG_FORMAT_CHECK_FILE = ".clang-format-check"; //$NON-NLS-1$
+	public static final String CLANG_FORMAT_CHECK_FILE = "clang-format-check"; //$NON-NLS-1$
 	private final ConcurrentLinkedQueue<IFile> pendingFiles = new ConcurrentLinkedQueue<>();
 	private final IWorkspace workspace;
 	private final ClangFormatValidator validator = new ClangFormatValidator();

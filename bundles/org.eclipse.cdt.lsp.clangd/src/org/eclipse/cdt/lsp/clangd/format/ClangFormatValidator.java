@@ -28,13 +28,13 @@ import org.eclipse.lsp4e.LSPEclipseUtils;
 
 public class ClangFormatValidator {
 	public static final String CLANG_FORMAT_MARKER = ClangdPlugin.PLUGIN_ID + ".format.marker"; //$NON-NLS-1$
-	private static final String ClangFormatError = "(?<file>.*?\\.clang-format):(?<line>\\d+):(?<columnstart>\\d+:)?\\s*(([Ee]rror)|(ERROR)): (.*)"; //$NON-NLS-1$
+	private static final String ClangFormatError = "(?<file>.*?\\.clang-format):(?<line>\\d+):(?<column>\\d+:)?\\s*(([Ee]rror)|(ERROR)): (.*)"; //$NON-NLS-1$
 	private static final String group1 = "$1"; //$NON-NLS-1$
 	private static final String group2 = "$2"; //$NON-NLS-1$
 	private static final String group3 = "$3"; //$NON-NLS-1$
 	private static final String group7 = "$7"; //$NON-NLS-1$
-	private final RegexMarkerPattern pattern = new RegexMarkerPattern(ClangFormatError, group1, group2, group3, null,
-			group7, IMarker.SEVERITY_ERROR, CLANG_FORMAT_MARKER);
+	private final RegexMarkerPattern pattern = new RegexMarkerPattern(ClangFormatError, group1, group2, group3, group7,
+			IMarker.SEVERITY_ERROR, CLANG_FORMAT_MARKER);
 
 	public void validateFile(List<String> commandLine, IFile clangFormatFile) throws IOException {
 		var fileDocument = LSPEclipseUtils.getDocument(clangFormatFile);

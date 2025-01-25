@@ -30,8 +30,7 @@ public final class RegexMarkerPattern {
 	private final Pattern pattern;
 	private final String fileExpression;
 	private final String lineExpression;
-	private final String columnStartExpression;
-	private final String columnEndExpression;
+	private final String columnExpression;
 	private final String descriptionExpression;
 	private final int severity;
 
@@ -56,9 +55,7 @@ public final class RegexMarkerPattern {
 	 *                                  unused for
 	 *                                  this pattern.
 	 * @param lineExpression        "Replacement" expression composed from capturing groups defined in regex to define the line in file.
-	 * @param columnStartExpression "Replacement" expression composed from capturing groups defined in regex to define the column start in file.
-	 * @param columnEndExpression   "Replacement" expression composed from capturing groups defined in regex to define the column end in file.
-	 *                                  If <code>null</code> the whole line will be marked.
+	 * @param columnExpression 		"Replacement" expression composed from capturing groups defined in regex to define the column in file.
 	 * @param descriptionExpression "Replacement" expression composed from capturing groups defined in regex to define the description (i.e. "$1: $2"). It is
 	 *                                  possible to specify more than one capturing group in such expression.
 	 * @param severity              This attribute specifies which severity should be used to display the {@link IMarker} in Problems View. There are 3 levels
@@ -66,14 +63,12 @@ public final class RegexMarkerPattern {
 	 *                                  {@link IMarker#SEVERITY_ERROR}, {@link IMarker#SEVERITY_WARNING} and {@link IMarker#SEVERITY_INFO}.
 	 * @param markerID				IMarker ID as defined in the <code>org.eclipse.core.resources.markers</code> extension point
 	 */
-	public RegexMarkerPattern(String pattern, String fileExpression, String lineExpression,
-			String columnStartExpression, String columnEndExpression, String descriptionExpression, int severity,
-			String markerID) {
+	public RegexMarkerPattern(String pattern, String fileExpression, String lineExpression, String columnExpression,
+			String descriptionExpression, int severity, String markerID) {
 		this.pattern = Pattern.compile(pattern != null ? pattern : EMPTY_STR);
 		this.fileExpression = fileExpression != null ? fileExpression : EMPTY_STR;
 		this.lineExpression = lineExpression != null ? lineExpression : EMPTY_STR;
-		this.columnStartExpression = columnStartExpression != null ? columnStartExpression : EMPTY_STR;
-		this.columnEndExpression = columnEndExpression != null ? columnEndExpression : EMPTY_STR;
+		this.columnExpression = columnExpression != null ? columnExpression : EMPTY_STR;
 		this.descriptionExpression = descriptionExpression != null ? descriptionExpression : EMPTY_STR;
 		this.severity = severity;
 		this.markerID = markerID;
@@ -99,11 +94,10 @@ public final class RegexMarkerPattern {
 				Platform.getLog(getClass()).error("Cannot parse line number from pattern: " + pattern.pattern() //$NON-NLS-1$
 						+ " within group: " + lineExpression); //$NON-NLS-1$
 			}
-			int columnStart = parseColumn(matcher, columnStartExpression);
-			int columnEnd = parseColumn(matcher, columnEndExpression);
+			int column = parseColumn(matcher, columnExpression);
 			var message = matcher.replaceAll(descriptionExpression);
 
-			var resourceInfo = getCharStartCharEnd(fileDocument, lineNumber, columnStart, columnEnd);
+			var resourceInfo = getCharStartCharEnd(fileDocument, lineNumber, column);
 			addMarker(file, message, severity, lineNumber, resourceInfo.charStart, resourceInfo.charEnd);
 		}
 	}
@@ -168,18 +162,14 @@ public final class RegexMarkerPattern {
 		return column;
 	}
 
-	ResourceInfo getCharStartCharEnd(IDocument document, int lineNumber, int columnStart, int columnEnd) {
+	ResourceInfo getCharStartCharEnd(IDocument document, int lineNumber, int column) {
 		var resourceInfo = new ResourceInfo();
 		try {
 			// NOTE: get getLineOffset is 0-based:
 			var zeroBasedLine = lineNumber > 0 ? lineNumber - 1 : lineNumber;
 			var offset = document.getLineOffset(zeroBasedLine);
-			resourceInfo.charStart = offset + columnStart - 1;
-			if (columnEnd > -1) {
-				resourceInfo.charEnd = resourceInfo.charStart + (columnEnd - columnStart);
-			} else {
-				resourceInfo.charEnd = getLineEnd(document, zeroBasedLine);
-			}
+			resourceInfo.charStart = offset + column - 1;
+			resourceInfo.charEnd = getLineEnd(document, zeroBasedLine);
 		} catch (BadLocationException e) {
 			Platform.getLog(getClass()).error(e.getMessage(), e);
 			resourceInfo.charStart = -1;
