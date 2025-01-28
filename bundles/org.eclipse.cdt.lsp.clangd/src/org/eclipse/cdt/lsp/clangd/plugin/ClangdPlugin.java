@@ -14,6 +14,7 @@
 
 package org.eclipse.cdt.lsp.clangd.plugin;
 
+import org.eclipse.cdt.lsp.clangd.format.ClangFormatFileMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.CProjectChangeMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
@@ -32,6 +33,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 	private CompileCommandsMonitor compileCommandsMonitor;
 	private CProjectChangeMonitor cProjectChangeMonitor;
 	private ClangdConfigFileMonitor configFileMonitor;
+	private ClangFormatFileMonitor clangFormatMonitor;
 	private ClangFormatMonitor formatMonitor;
 
 	// The plug-in ID
@@ -56,6 +58,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
 		cProjectChangeMonitor = new CProjectChangeMonitor().start();
 		configFileMonitor = new ClangdConfigFileMonitor(workspace).start();
+		clangFormatMonitor = new ClangFormatFileMonitor(workspace).start();
 		formatMonitor = new ClangFormatMonitor().start();
 	}
 
@@ -65,6 +68,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		compileCommandsMonitor.stop();
 		cProjectChangeMonitor.stop();
 		configFileMonitor.stop();
+		clangFormatMonitor.stop();
 		formatMonitor.stop();
 		workspaceTracker.close();
 		super.stop(context);

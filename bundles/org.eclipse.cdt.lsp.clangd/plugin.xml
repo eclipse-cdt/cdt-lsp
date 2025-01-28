@@ -175,6 +175,17 @@
       <logger
             class="org.eclipse.cdt.lsp.clangd.console.ClangdConsole">
       </logger>
+   </extension>
+   <extension
+         id="org.eclipse.cdt.lsp.clangd.format.marker"
+         name="ClangFormat"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
    </extension>   
 
 </plugin>
