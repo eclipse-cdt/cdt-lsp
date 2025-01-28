@@ -65,8 +65,8 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 	public void start() throws IOException {
 		super.start();
 		if (logEnabled() && getLogProvider().isPresent()) {
-			errorStreamPipeStopper = new AsyncStreamPipe().pipeTo(new BufferedInputStream(getErrorStream()),
-					getLogProvider().get().getOutputStream());
+			errorStreamPipeStopper = new AsyncStreamPipe().pipeTo("LS stderr pipe", //$NON-NLS-1$
+					new BufferedInputStream(getErrorStream()), getLogProvider().get().getOutputStream());
 		}
 	}
 
@@ -78,7 +78,6 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 		// destroy LS process first, to prevent a write operation on a already closed output stream:
 		super.stop();
 		// then close output stream.
-		// TODO: we need to wait here until the process has been terminated:
 		getLogProvider().ifPresent(lp -> lp.close());
 	}
 

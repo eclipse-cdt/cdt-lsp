@@ -14,21 +14,27 @@ package org.eclipse.cdt.lsp.internal.server;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("all")
 public final class AsyncStreamPipe {
+
 	/**
 	 * Starts a pipe from @input to @output
 	 * Returns a runnable that can stop the pipe
 	 */
-	public Runnable pipeTo(final InputStream input, final OutputStream output) {
+	public Runnable pipeTo(final String threadName, final InputStream input, final OutputStream output) {
 		if (output != null) {
 			final Runnable[] cancelation = new Runnable[1];
+			final AtomicBoolean stop = new AtomicBoolean(false);
 			final Runnable writer = () -> {
 				try {
 					final byte[] buffer = new byte[1024];
 					int size = 0;
 					do {
+						if (stop.get()) {
+							break;
+						}
 						size = input.read(buffer);
 						if (size > -1) {
 							output.write(buffer, 0, size);
@@ -44,11 +50,12 @@ public final class AsyncStreamPipe {
 					throw sneakyThrow(t);
 				}
 			};
-			final Thread writerThread = new Thread(writer);
+			final Thread writerThread = new Thread(writer, threadName);
 			final Runnable stopper = () -> {
-				writerThread.interrupt();
+				stop.set(true);
 			};
 			cancelation[0] = stopper;
+			writerThread.setDaemon(true);
 			writerThread.start();
 			return cancelation[0];
 		}
