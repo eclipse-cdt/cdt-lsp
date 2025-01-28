@@ -12,11 +12,14 @@
 
 package org.eclipse.cdt.lsp.internal.server;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@SuppressWarnings("all")
+import org.eclipse.core.runtime.Platform;
+
 public final class AsyncStreamPipe {
 
 	/**
@@ -25,7 +28,7 @@ public final class AsyncStreamPipe {
 	 */
 	public Runnable pipeTo(final String threadName, final InputStream input, final OutputStream output) {
 		if (output != null) {
-			final Runnable[] cancelation = new Runnable[1];
+			final InputStream bufferedInput = new BufferedInputStream(input);
 			final AtomicBoolean stop = new AtomicBoolean(false);
 			final Runnable writer = () -> {
 				try {
@@ -35,44 +38,27 @@ public final class AsyncStreamPipe {
 						if (stop.get()) {
 							break;
 						}
-						size = input.read(buffer);
+						size = bufferedInput.read(buffer);
 						if (size > -1) {
 							output.write(buffer, 0, size);
 						}
 					} while (size > -1 && !Thread.interrupted());
-					final Runnable c = cancelation[0];
-					if ((c != null)) {
-						synchronized (c) {
-							c.notify();
-						}
+				} catch (IOException ioe) {
+					if (!stop.get()) {
+						Platform.getLog(getClass()).error(ioe.getMessage(), ioe);
 					}
-				} catch (Throwable t) {
-					throw sneakyThrow(t);
 				}
 			};
 			final Thread writerThread = new Thread(writer, threadName);
 			final Runnable stopper = () -> {
 				stop.set(true);
 			};
-			cancelation[0] = stopper;
 			writerThread.setDaemon(true);
 			writerThread.start();
-			return cancelation[0];
+			return stopper;
 		}
 		final Runnable emptyRunner = () -> {
 		};
 		return emptyRunner;
-	}
-
-	private static RuntimeException sneakyThrow(Throwable t) {
-		if (t == null)
-			throw new NullPointerException("t");
-		sneakyThrowT(t);
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Throwable> void sneakyThrowT(Throwable t) throws T {
-		throw (T) t;
 	}
 }
