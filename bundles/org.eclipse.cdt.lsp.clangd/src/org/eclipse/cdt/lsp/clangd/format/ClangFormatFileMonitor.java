@@ -138,6 +138,7 @@ public class ClangFormatFileMonitor {
 		var list = new ArrayList<String>(2);
 		list.add(clangdPath);
 		list.add("--check=" + emptyFile.getLocation().toOSString()); //$NON-NLS-1$
+		list.add("--log=error"); //$NON-NLS-1$
 		return list;
 	}
 
