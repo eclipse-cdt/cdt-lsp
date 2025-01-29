@@ -12,18 +12,18 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
-import org.eclipse.cdt.lsp.clangd.ClangdOptions2Defaults;
+import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults2;
 import org.osgi.service.component.annotations.Component;
 
 /**
  * Provides the default clangd extended options for cdt-lsp.
  */
 @Component(property = { "service.ranking:Integer=0" })
-public class BuiltinClangdOptions2Defaults extends BuiltinClangdOptionsDefaults implements ClangdOptions2Defaults {
+public class BuiltinClangdOptionsDefaults2 extends BuiltinClangdOptionsDefaults implements ClangdOptionsDefaults2 {
 
 	@Override
 	public boolean logToConsole() {
-		return false;
+		return true;
 	}
 
 }

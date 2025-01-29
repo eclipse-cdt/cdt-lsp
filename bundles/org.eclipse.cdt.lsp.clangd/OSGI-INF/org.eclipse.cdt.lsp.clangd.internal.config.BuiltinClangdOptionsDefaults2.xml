@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.cdt.lsp.clangd.internal.config.BuiltinClangdOptionsDefaults2">
+   <property name="service.ranking" type="Integer" value="0"/>
+   <service>
+      <provide interface="org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults2"/>
+   </service>
+   <implementation class="org.eclipse.cdt.lsp.clangd.internal.config.BuiltinClangdOptionsDefaults2"/>
+</scr:component>
