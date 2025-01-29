@@ -15,8 +15,7 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.util.stream.Collectors;
 
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
-import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults2;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
 import org.eclipse.cdt.lsp.clangd.internal.ui.LspEditorUiMessages;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
@@ -24,13 +23,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component
-public class ClangdMetadataDefaults implements ClangdMetadata2 {
+public final class ClangdMetadataDefaults implements ClangdMetadata {
 
 	@Reference
 	private ClangdOptionsDefaults defaults;
-
-	@Reference
-	private ClangdOptionsDefaults2 defaults2;
 
 	@Override
 	public PreferenceMetadata<String> clangdPath() {
@@ -97,7 +93,7 @@ public class ClangdMetadataDefaults implements ClangdMetadata2 {
 	public PreferenceMetadata<Boolean> logToConsole() {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"log_to_console", //$NON-NLS-1$
-				defaults2.logToConsole(), //
+				defaults.logToConsole(), //
 				LspEditorUiMessages.LspEditorPreferencePage_Log_to_Console, //
 				LspEditorUiMessages.LspEditorPreferencePage_Log_to_Console_description);
 	}

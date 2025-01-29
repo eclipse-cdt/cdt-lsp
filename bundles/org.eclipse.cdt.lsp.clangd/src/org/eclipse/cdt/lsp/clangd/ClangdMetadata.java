@@ -86,4 +86,13 @@ public interface ClangdMetadata {
 	 */
 	PreferenceMetadata<String> additionalOptions();
 
+	/**
+	 * Returns the metadata for the "Log to Console" option, must not return <code>null</code>.
+	 *
+	 * @return the metadata for the "Log to Console" option
+	 *
+	 * @see ClangdOptions#logToConsole()
+	 */
+	PreferenceMetadata<Boolean> logToConsole();
+
 }

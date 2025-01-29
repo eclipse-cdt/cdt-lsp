@@ -14,7 +14,7 @@
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -28,7 +28,7 @@ public final class ClangdPreferenceInitializer extends AbstractPreferenceInitial
 	}
 
 	private void initializeDefaults(ClangdConfiguration configuration) {
-		ClangdMetadata2 metadata = (ClangdMetadata2) configuration.metadata();
+		ClangdMetadata metadata = (ClangdMetadata) configuration.metadata();
 		String qualifier = configuration.qualifier();
 		initializeString(metadata.clangdPath(), qualifier);
 		initializeBoolean(metadata.useTidy(), qualifier);

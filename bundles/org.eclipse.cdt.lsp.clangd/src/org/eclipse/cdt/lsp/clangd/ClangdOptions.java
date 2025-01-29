@@ -71,4 +71,12 @@ public interface ClangdOptions {
 	 */
 	List<String> additionalOptions();
 
+	/**
+	 * Enable logging to Clangd console
+	 *
+	 * @return true if clangd logging is enabled
+	 */
+	default boolean logToConsole() {
+		return false;
+	}
 }

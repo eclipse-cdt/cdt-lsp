@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
-import org.eclipse.cdt.lsp.clangd.ClangdOptions2;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdQualifier;
 import org.eclipse.cdt.lsp.config.ConfigurationAccess;
 import org.eclipse.core.resources.IWorkspace;
@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.Reference;
 public final class ClangdConfigurationAccess extends ConfigurationAccess implements ClangdConfiguration {
 
 	@Reference
-	private ClangdMetadata2 metadata;
+	private ClangdMetadata metadata;
 
 	@Reference
 	private IWorkspace workspace;
@@ -47,17 +47,17 @@ public final class ClangdConfigurationAccess extends ConfigurationAccess impleme
 	}
 
 	@Override
-	public ClangdMetadata2 metadata() {
+	public ClangdMetadata metadata() {
 		return metadata;
 	}
 
 	@Override
-	public ClangdOptions2 defaults() {
+	public ClangdOptions defaults() {
 		return new ClangdPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata);
 	}
 
 	@Override
-	public ClangdOptions2 options(Object context) {
+	public ClangdOptions options(Object context) {
 		Optional<ProjectScope> project = projectScope(workspace, context);
 		IScopeContext[] scopes;
 		if (project.isPresent()) {
@@ -84,7 +84,7 @@ public final class ClangdConfigurationAccess extends ConfigurationAccess impleme
 
 	@Override
 	public List<String> commands(Object context) {
-		ClangdOptions2 options = options(context);
+		ClangdOptions options = options(context);
 		List<String> list = new ArrayList<>();
 		list.add(options.clangdPath());
 		if (options.useTidy()) {
