@@ -93,7 +93,7 @@ public interface ClangdMetadata {
 	 *
 	 * @see ClangdOptions#logToConsole()
 	 *
-	 * @since 3.0
+	 * @since 2.2
 	 */
 	PreferenceMetadata<Boolean> logToConsole();
 

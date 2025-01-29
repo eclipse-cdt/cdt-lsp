@@ -76,7 +76,7 @@ public interface ClangdOptions {
 	 *
 	 * @return true if clangd logging is enabled
 	 *
-	 * @since 3.0
+	 * @since 2.2
 	 */
 	default boolean logToConsole() {
 		return false;
