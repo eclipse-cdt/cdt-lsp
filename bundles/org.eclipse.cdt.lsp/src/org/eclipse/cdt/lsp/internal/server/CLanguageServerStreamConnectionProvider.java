@@ -15,7 +15,6 @@ package org.eclipse.cdt.lsp.internal.server;
 
 import static org.eclipse.lsp4e.internal.NullSafetyHelper.castNonNull;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -65,7 +64,7 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 	public void start() throws IOException {
 		super.start();
 		if (logEnabled() && getLogProvider().isPresent()) {
-			errorStreamPipeStopper = new AsyncStreamPipe().pipeTo(new BufferedInputStream(getErrorStream()),
+			errorStreamPipeStopper = new AsyncStreamPipe().pipeTo("CDT LS stderr pipe", getErrorStream(), //$NON-NLS-1$
 					getLogProvider().get().getOutputStream());
 		}
 	}
@@ -78,7 +77,6 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 		// destroy LS process first, to prevent a write operation on a already closed output stream:
 		super.stop();
 		// then close output stream.
-		// TODO: we need to wait here until the process has been terminated:
 		getLogProvider().ifPresent(lp -> lp.close());
 	}
 
