@@ -95,6 +95,12 @@ public interface ClangdMetadata {
 	 *
 	 * @since 2.2
 	 */
-	PreferenceMetadata<Boolean> logToConsole();
+	default PreferenceMetadata<Boolean> logToConsole() {
+		return new PreferenceMetadata<>(Boolean.class, //
+				"log_to_console", //$NON-NLS-1$
+				false, //
+				"Log to Console", // //$NON-NLS-1$
+				"Log to Console"); //$NON-NLS-1$
+	}
 
 }
