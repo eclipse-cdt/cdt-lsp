@@ -23,7 +23,7 @@ public class BuiltinClangdOptionsDefaults2 extends BuiltinClangdOptionsDefaults 
 
 	@Override
 	public boolean logToConsole() {
-		return true;
+		return false;
 	}
 
 }
