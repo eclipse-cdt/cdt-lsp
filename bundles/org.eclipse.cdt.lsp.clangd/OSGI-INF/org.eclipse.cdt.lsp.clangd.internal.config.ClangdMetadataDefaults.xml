@@ -3,6 +3,7 @@
    <service>
       <provide interface="org.eclipse.cdt.lsp.clangd.ClangdMetadata2"/>
    </service>
-   <reference cardinality="1..1" field="defaults" interface="org.eclipse.cdt.lsp.clangd.ClangdOptions2Defaults" name="defaults"/>
+   <reference cardinality="1..1" field="defaults" interface="org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults" name="defaults"/>
+   <reference cardinality="1..1" field="defaults2" interface="org.eclipse.cdt.lsp.clangd.ClangdOptions2Defaults" name="defaults2"/>
    <implementation class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdMetadataDefaults"/>
 </scr:component>
