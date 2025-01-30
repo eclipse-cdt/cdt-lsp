@@ -19,18 +19,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
-import org.eclipse.cdt.lsp.clangd.ClangdOptions2;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
-final class ClangdPreferredOptions implements ClangdOptions2 {
+final class ClangdPreferredOptions implements ClangdOptions {
 
 	private final String qualifier;
 	private final IScopeContext[] scopes;
-	private final ClangdMetadata2 metadata;
+	private final ClangdMetadata metadata;
 
-	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata2 metadata) {
+	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata metadata) {
 		this.qualifier = Objects.requireNonNull(qualifier);
 		this.scopes = Objects.requireNonNull(scopes);
 		this.metadata = Objects.requireNonNull(metadata);

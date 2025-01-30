@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
-import org.eclipse.cdt.lsp.clangd.ClangdOptions2;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider3;
@@ -74,7 +74,8 @@ public final class ClangdLanguageServerProvider implements ICLanguageServerProvi
 	@Override
 	public boolean logToConsole() {
 		boolean[] enabled = new boolean[1];
-		configuration.call(c -> enabled[0] = ((ClangdOptions2) c.options(null)).logToConsole());
+		configuration
+				.call(c -> enabled[0] = c.options(null) instanceof ClangdOptions copt ? copt.logToConsole() : false);
 		return enabled[0];
 	}
 

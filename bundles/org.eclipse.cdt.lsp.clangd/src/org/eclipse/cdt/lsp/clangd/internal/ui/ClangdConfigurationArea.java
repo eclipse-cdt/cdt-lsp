@@ -19,9 +19,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata2;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.clangd.ClangdOptions2;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
@@ -65,7 +64,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 			LspEditorUiMessages.LspEditorPreferencePage_completion_default };
 	private final Map<String, String> completions;
 
-	public ClangdConfigurationArea(Composite parent, ClangdMetadata2 metadata, boolean isProjectScope) {
+	public ClangdConfigurationArea(Composite parent, ClangdMetadata metadata, boolean isProjectScope) {
 		super(3);
 		this.texts = new HashMap<>();
 		this.combos = new HashMap<>();
@@ -188,9 +187,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 			additional.setText(
 					clangdOptions.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
 			enablePreferenceContent(enable);
-		}
-		if (logToConsole != null && options instanceof ClangdOptions2 clangdOptions2) {
-			logToConsole.setSelection(clangdOptions2.logToConsole());
+			if (logToConsole != null) {
+				logToConsole.setSelection(clangdOptions.logToConsole());
+			}
 		}
 	}
 
@@ -209,7 +208,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 		combos.clear();
 	}
 
-	public boolean optionsChanged(ClangdOptions2 options) {
+	public boolean optionsChanged(ClangdOptions options) {
 		return !options.clangdPath().equals(path.getText()) || options.useTidy() != tidy.getSelection()
 				|| options.useBackgroundIndex() != index.getSelection()
 				|| !options.completionStyle().equals(completions.get(completion.getText()))
