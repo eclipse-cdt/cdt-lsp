@@ -56,6 +56,7 @@ public final class ClangdConsole implements ILogProvider {
 		}
 		// no console found, so create a new one
 		final var myConsole = new MessageConsole(CLANGD_CONSOLE, null);
+		myConsole.setWaterMarks(80000, 800000); // limit text buffer size to prevent OOM
 		conMan.addConsoles(new IConsole[] { myConsole });
 		return myConsole;
 	}
