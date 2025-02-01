@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(property = { "service.ranking:Integer=0" })
 public final class ClangdCommandLineValidator implements IClangdCommandLineValidator {
-	private static final String CLANGD_VERSION_PATTERN = "clangd\\s+version\\s+(\\d+\\.)?(\\d+\\.)?(\\*|\\d+).*"; //$NON-NLS-1$
+	private static final String CLANGD_VERSION_PATTERN = ".*clangd\\s+version\\s+(\\d+\\.)?(\\d+\\.)?(\\*|\\d+).*"; //$NON-NLS-1$
 	private final Pattern pattern = Pattern.compile(CLANGD_VERSION_PATTERN);
 	private static final String major = "$1"; //$NON-NLS-1$
 
