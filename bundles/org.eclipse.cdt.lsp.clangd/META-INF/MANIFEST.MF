@@ -32,6 +32,7 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
  org.eclipse.ui.console;bundle-version="0.0.0"
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.BuiltinClangdOptionsDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatFileHandler.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdCommandLineValidator.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdFallbackManager.xml,
