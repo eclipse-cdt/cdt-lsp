@@ -28,7 +28,7 @@ public interface IClangdCommandLineValidator {
 	 * @param clangdBinaryPath absolute path to clangd binary
 	 * @return IStatus.OK if validation is supported for the given clangd binary, otherwise IStatus.CANCEL
 	 */
-	public IStatus supportsValidation(String clangdBinaryPath);
+	public IStatus supportsValidation(final String clangdBinaryPath);
 
 	/**
 	 * Validates the clangd command line options prior to a LS start. Prevents LS from being started if returned IStatus is not OK.
