@@ -115,7 +115,7 @@ public interface ClangdMetadata {
 	default PreferenceMetadata<Boolean> validateClangdOptions() {
 		return new PreferenceMetadata<>(Boolean.class, //
 				"validate_clangd_options", //$NON-NLS-1$
-				false, //
+				true, //
 				"Validate clangd options", // //$NON-NLS-1$
 				"Validate clangd options"); //$NON-NLS-1$
 	}
