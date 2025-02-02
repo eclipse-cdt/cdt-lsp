@@ -32,7 +32,6 @@ import org.eclipse.cdt.lsp.server.ICLanguageServerProvider3;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.variables.VariablesPlugin;
@@ -92,14 +91,7 @@ public final class ClangdLanguageServerProvider
 	public IStatus validateCommandLineOptions() {
 		final var cmd = getCommands(null); // null, because we have no initial URI here => workspace context => use commands from workspace preferences
 		IStatus[] status = { Status.OK_STATUS };
-		validator.call(v -> {
-			var result = v.supportsValidation(cmd.getFirst());
-			if (result.isOK()) {
-				status[0] = v.validateCommandLineOptions(cmd);
-			} else if (result.getSeverity() != Status.CANCEL) {
-				Platform.getLog(getClass()).log(result);
-			}
-		});
+		validator.call(v -> status[0] = v.validateCommandLineOptions(cmd));
 		return status[0];
 	}
 

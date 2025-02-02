@@ -24,16 +24,9 @@ import org.eclipse.core.runtime.IStatus;
 public interface IClangdCommandLineValidator {
 
 	/**
-	 * Checks if the command line validation is supported.
-	 * @param clangdBinaryPath absolute path to clangd binary
-	 * @return IStatus.OK if validation is supported for the given clangd binary, otherwise IStatus.CANCEL
-	 */
-	public IStatus supportsValidation(final String clangdBinaryPath);
-
-	/**
 	 * Validates the clangd command line options prior to a LS start. Prevents LS from being started if returned IStatus is not OK.
 	 * @param commands the language servers command line options to be validated
-	 * @return validation status.
+	 * @return validation status or IStatus.CANCEL if validation is not supported for the clangd binary
 	 */
 	public IStatus validateCommandLineOptions(final List<String> commands);
 

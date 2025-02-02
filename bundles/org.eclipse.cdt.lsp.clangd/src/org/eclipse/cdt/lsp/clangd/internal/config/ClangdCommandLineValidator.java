@@ -48,29 +48,12 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 		IStatus getResult();
 	}
 
-	/**
-	 * Checks if given clangd binary supports the <code>--check</code> option.
-	 * This is fulfilled when the clangd major version is >= 12
-	 */
-	@Override
-	public IStatus supportsValidation(String clangdBinaryPath) {
-		var commands = new ArrayList<String>(2);
-		commands.add(clangdBinaryPath);
-		commands.add("--version"); //$NON-NLS-1$
-		return Optional.ofNullable(getProcessBuilder(commands)).map(pb -> {
-			try {
-				var process = pb.start();
-				return getProcessResult(process, process.getInputStream(), new VersionChecker(),
-						new StringBuilder("Check clangd version")); //$NON-NLS-1$
-			} catch (IOException e) {
-				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, e.getMessage(), e);
-			}
-		}).orElse(new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID,
-				"Cannot determine if clangd command line validation is supported")); //$NON-NLS-1$
-	}
-
 	@Override
 	public IStatus validateCommandLineOptions(final List<String> commands) {
+		var result = supportsValidation(commands.getFirst());
+		if (!result.isOK()) {
+			return result;
+		}
 		Path tempFile = null;
 		try {
 			return createTempCFile() //
@@ -88,6 +71,26 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 		} finally {
 			deleteTempCFile(tempFile);
 		}
+	}
+
+	/**
+	 * Checks if given clangd binary supports the <code>--check</code> option.
+	 * This is fulfilled when the clangd major version is >= 12
+	 */
+	private IStatus supportsValidation(String clangdBinaryPath) {
+		var commands = new ArrayList<String>(2);
+		commands.add(clangdBinaryPath);
+		commands.add("--version"); //$NON-NLS-1$
+		return Optional.ofNullable(getProcessBuilder(commands)).map(pb -> {
+			try {
+				var process = pb.start();
+				return getProcessResult(process, process.getInputStream(), new VersionChecker(),
+						new StringBuilder("Check clangd version")); //$NON-NLS-1$
+			} catch (IOException e) {
+				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, e.getMessage(), e);
+			}
+		}).orElse(new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID,
+				"Cannot determine if clangd command line validation is supported")); //$NON-NLS-1$
 	}
 
 	private Optional<Path> createTempCFile() {
@@ -124,10 +127,6 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 
 	private IStatus getProcessResult(final Process process, final InputStream inputStream,
 			final Consumer<String> consumer, final StringBuilder description) {
-		if (!process.isAlive()) {
-			description.append(": process has been terminated!"); //$NON-NLS-1$
-			return new Status(IStatus.WARNING, ClangdPlugin.PLUGIN_ID, description.toString());
-		}
 		var readerThread = getReaderThread("CDT clangd version check", inputStream, consumer); //$NON-NLS-1$
 		readerThread.start();
 		try {
@@ -135,6 +134,9 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 			if (exited && consumer instanceof IClangdChecker validator) {
 				return validator.getResult();
 			} else {
+				if (!exited) {
+					process.destroyForcibly();
+				}
 				//handle timeout:
 				description.append(": process timeout or consumer is not a instance of IClangdValidator!"); //$NON-NLS-1$
 				return new Status(IStatus.WARNING, ClangdPlugin.PLUGIN_ID, description.toString());
