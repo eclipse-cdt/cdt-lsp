@@ -26,6 +26,7 @@ import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider3;
 import org.eclipse.cdt.lsp.server.ILogProvider;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
 
 public final class CLanguageServerStreamConnectionProvider extends ProcessStreamConnectionProvider {
@@ -66,8 +67,10 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 	public void start() throws IOException {
 		if (provider instanceof ICLanguageServerCommandLineValidator validator) {
 			IStatus status = validator.validateCommandLineOptions();
-			if (!status.isOK()) {
+			if (status.getSeverity() == IStatus.ERROR) {
 				throw new IOException(status.getMessage());
+			} else if (!status.isOK()) {
+				Platform.getLog(getClass()).log(status);
 			}
 		}
 		super.start();

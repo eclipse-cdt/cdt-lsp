@@ -44,7 +44,7 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 	private final Pattern pattern = Pattern.compile(CLANGD_VERSION_PATTERN);
 	private static final String major = "$1"; //$NON-NLS-1$
 
-	interface IClangdChecker {
+	private interface IClangdChecker {
 		IStatus getResult();
 	}
 
@@ -80,7 +80,7 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 						try {
 							var process = pb.start();
 							return getProcessResult(process, process.getErrorStream(), new OptionsChecker(),
-									new StringBuilder("Validate command line options")); //$NON-NLS-1$
+									new StringBuilder("Validate clangd command line options")); //$NON-NLS-1$
 						} catch (IOException e) {
 							return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, e.getMessage(), e);
 						}
@@ -131,8 +131,7 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 		var readerThread = getReaderThread("CDT clangd version check", inputStream, consumer); //$NON-NLS-1$
 		readerThread.start();
 		try {
-			readerThread.join(3000);
-			var exited = process.waitFor(4000, TimeUnit.MILLISECONDS);
+			var exited = process.waitFor(5000, TimeUnit.MILLISECONDS);
 			if (exited && consumer instanceof IClangdChecker validator) {
 				return validator.getResult();
 			} else {
@@ -151,6 +150,10 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 		return new Thread(threadName) {
 			@Override
 			public void run() {
+				if (stderr == null) {
+					Platform.getLog(getClass()).error("input stream is null!"); //$NON-NLS-1$
+					return;
+				}
 				try (BufferedReader reader = new BufferedReader(new InputStreamReader(stderr))) {
 					for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 						validator.accept(line);
@@ -162,17 +165,20 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 		};
 	}
 
-	class OptionsChecker implements Consumer<String>, IClangdChecker {
+	private class OptionsChecker implements Consumer<String>, IClangdChecker {
+		private static final String CLANGD_ERROR_PATTERN = ".*(?<!\\.)clangd(.exe)?\s*:.+"; //$NON-NLS-1$
 		private final String ls = System.lineSeparator();
 		private StringBuilder builder = new StringBuilder();
 
 		@Override
 		public void accept(String line) {
-			if (builder.isEmpty()) {
+			if (line.matches(CLANGD_ERROR_PATTERN)) {
+				if (builder.isEmpty()) {
+					builder.append(ls);
+				}
 				builder.append(ls);
+				builder.append(line);
 			}
-			builder.append(ls);
-			builder.append(line);
 		}
 
 		@Override
@@ -184,7 +190,7 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 		}
 	}
 
-	class VersionChecker implements Consumer<String>, IClangdChecker {
+	private class VersionChecker implements Consumer<String>, IClangdChecker {
 		private IStatus result = new Status(IStatus.WARNING, ClangdPlugin.PLUGIN_ID,
 				"The clangd version does not support command line option check!"); //$NON-NLS-1$
 
