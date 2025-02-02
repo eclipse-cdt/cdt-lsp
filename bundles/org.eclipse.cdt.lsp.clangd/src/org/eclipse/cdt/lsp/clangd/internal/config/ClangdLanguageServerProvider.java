@@ -89,10 +89,19 @@ public final class ClangdLanguageServerProvider
 
 	@Override
 	public IStatus validateCommandLineOptions() {
-		final var cmd = getCommands(null); // null, because we have no initial URI here => workspace context => use commands from workspace preferences
 		IStatus[] status = { Status.OK_STATUS };
-		validator.call(v -> status[0] = v.validateCommandLineOptions(cmd));
+		if (isCommandLineValidationEnabled()) {
+			final var cmd = getCommands(null); // null, because we have no initial URI here => workspace context => use commands from workspace preferences
+			validator.call(v -> status[0] = v.validateCommandLineOptions(cmd));
+		}
 		return status[0];
+	}
+
+	private boolean isCommandLineValidationEnabled() {
+		boolean[] enabled = new boolean[1];
+		configuration.call(
+				c -> enabled[0] = c.options(null) instanceof ClangdOptions copt ? copt.validateClangdOptions() : false);
+		return enabled[0];
 	}
 
 }

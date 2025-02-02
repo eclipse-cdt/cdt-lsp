@@ -103,4 +103,21 @@ public interface ClangdMetadata {
 				"Log to Console"); //$NON-NLS-1$
 	}
 
+	/**
+	 * Returns the metadata for the "Validate clangd options" option, must not return <code>null</code>.
+	 *
+	 * @return the metadata for the "Validate clangd options" option
+	 *
+	 * @see ClangdOptions#validateClangdOptions()
+	 *
+	 * @since 2.2
+	 */
+	default PreferenceMetadata<Boolean> validateClangdOptions() {
+		return new PreferenceMetadata<>(Boolean.class, //
+				"validate_clangd_options", //$NON-NLS-1$
+				false, //
+				"Validate clangd options", // //$NON-NLS-1$
+				"Validate clangd options"); //$NON-NLS-1$
+	}
+
 }

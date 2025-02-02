@@ -44,6 +44,8 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_select_clangd_executable;
 	public static String LspEditorPreferencePage_Log_to_Console;
 	public static String LspEditorPreferencePage_Log_to_Console_description;
+	public static String LspEditorPreferencePage_Validate_clangd_options;
+	public static String LspEditorPreferencePage_Validate_clangd_options_description;
 
 	public static String ClangFormatConfigurationPage_openProjectFormatFile;
 	public static String ClangFormatConfigurationPage_openFormatFileTooltip;

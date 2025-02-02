@@ -7,12 +7,24 @@
                 <message_argument value="logToConsole()"/>
             </message_arguments>
         </filter>
+        <filter id="404000815">
+            <message_arguments>
+                <message_argument value="org.eclipse.cdt.lsp.clangd.ClangdMetadata"/>
+                <message_argument value="validateClangdOptions()"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="src/org/eclipse/cdt/lsp/clangd/ClangdOptions.java" type="org.eclipse.cdt.lsp.clangd.ClangdOptions">
         <filter id="404000815">
             <message_arguments>
                 <message_argument value="org.eclipse.cdt.lsp.clangd.ClangdOptions"/>
                 <message_argument value="logToConsole()"/>
+            </message_arguments>
+        </filter>
+        <filter id="404000815">
+            <message_arguments>
+                <message_argument value="org.eclipse.cdt.lsp.clangd.ClangdOptions"/>
+                <message_argument value="validateClangdOptions()"/>
             </message_arguments>
         </filter>
     </resource>
