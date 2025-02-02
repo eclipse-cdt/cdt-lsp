@@ -43,6 +43,7 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 	private static final String CLANGD_VERSION_PATTERN = ".*clangd\\s+version\\s+(\\d+\\.)?(\\d+\\.)?(\\*|\\d+).*"; //$NON-NLS-1$
 	private final Pattern pattern = Pattern.compile(CLANGD_VERSION_PATTERN);
 	private static final String major = "$1"; //$NON-NLS-1$
+	Path tempFile = null;
 
 	private interface IClangdChecker {
 		IStatus getResult();
@@ -54,7 +55,6 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 		if (!result.isOK()) {
 			return result;
 		}
-		Path tempFile = null;
 		try {
 			return createTempCFile() //
 					.map(temp -> this.getValidationCommands(temp, commands)) //
@@ -69,7 +69,7 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 						}
 					}).orElse(Status.OK_STATUS);
 		} finally {
-			deleteTempCFile(tempFile);
+			deleteTempCFile();
 		}
 	}
 
@@ -95,14 +95,15 @@ public final class ClangdCommandLineValidator implements IClangdCommandLineValid
 
 	private Optional<Path> createTempCFile() {
 		try {
-			return Optional.of(Files.createTempFile("dummy", ".c")); //$NON-NLS-1$ //$NON-NLS-2$
+			tempFile = Files.createTempFile("dummy", ".c"); //$NON-NLS-1$ //$NON-NLS-2$
+			return Optional.of(tempFile);
 		} catch (IOException e) {
 			Platform.getLog(getClass()).error(e.getMessage(), e);
 		}
 		return Optional.empty();
 	}
 
-	private void deleteTempCFile(Path tempFile) {
+	private void deleteTempCFile() {
 		try {
 			if (tempFile != null) {
 				Files.deleteIfExists(tempFile);
