@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.cdt.lsp.clangd.internal.config.ClangdCommandLineValidator">
+   <property name="service.ranking" type="Integer" value="0"/>
+   <service>
+      <provide interface="org.eclipse.cdt.lsp.clangd.IClangdCommandLineValidator"/>
+   </service>
+   <implementation class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdCommandLineValidator"/>
+</scr:component>

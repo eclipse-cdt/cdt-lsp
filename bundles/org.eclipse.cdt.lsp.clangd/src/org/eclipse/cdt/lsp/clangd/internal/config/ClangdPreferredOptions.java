@@ -80,6 +80,11 @@ final class ClangdPreferredOptions implements ClangdOptions {
 		return booleanValue(metadata.logToConsole());
 	}
 
+	@Override
+	public boolean validateClangdOptions() {
+		return booleanValue(metadata.validateClangdOptions());
+	}
+
 	private String stringValue(PreferenceMetadata<?> meta) {
 		String actual = String.valueOf(meta.defaultValue());
 		for (int i = scopes.length - 1; i >= 0; i--) {

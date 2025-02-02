@@ -81,4 +81,15 @@ public interface ClangdOptions {
 	default boolean logToConsole() {
 		return false;
 	}
+
+	/**
+	 * Enable validation of clangd command line options
+	 *
+	 * @return true if clangd command line options should be validated prior clangd launch.
+	 *
+	 * @since 2.2
+	 */
+	default boolean validateClangdOptions() {
+		return true;
+	}
 }

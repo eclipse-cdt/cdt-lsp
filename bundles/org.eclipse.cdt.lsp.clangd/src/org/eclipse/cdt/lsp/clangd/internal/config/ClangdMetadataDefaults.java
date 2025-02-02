@@ -98,4 +98,13 @@ public final class ClangdMetadataDefaults implements ClangdMetadata {
 				LspEditorUiMessages.LspEditorPreferencePage_Log_to_Console_description);
 	}
 
+	@Override
+	public PreferenceMetadata<Boolean> validateClangdOptions() {
+		return new PreferenceMetadata<>(Boolean.class, //
+				"validate_clangd_options", //$NON-NLS-1$
+				defaults.validateClangdOptions(), //
+				LspEditorUiMessages.LspEditorPreferencePage_Validate_clangd_options, //
+				LspEditorUiMessages.LspEditorPreferencePage_Validate_clangd_options_description);
+	}
+
 }

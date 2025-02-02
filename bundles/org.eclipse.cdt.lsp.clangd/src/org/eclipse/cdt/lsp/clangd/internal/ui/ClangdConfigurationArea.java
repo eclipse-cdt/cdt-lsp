@@ -52,6 +52,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 	private final Text driver;
 	private final Text additional;
 	private final Button logToConsole;
+	private final Button validateOptions;
 	private final Group group;
 	private ControlEnableState enableState;
 
@@ -85,8 +86,10 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 		this.additional = createText(metadata.additionalOptions(), group, true);
 		if (!isProjectScope) {
 			this.logToConsole = createButton(metadata.logToConsole(), group, SWT.CHECK, 0);
+			this.validateOptions = createButton(metadata.validateClangdOptions(), group, SWT.CHECK, 0);
 		} else {
 			this.logToConsole = null;
+			this.validateOptions = null;
 		}
 	}
 
@@ -190,6 +193,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 			if (logToConsole != null) {
 				logToConsole.setSelection(clangdOptions.logToConsole());
 			}
+			if (validateOptions != null) {
+				validateOptions.setSelection(clangdOptions.validateClangdOptions());
+			}
 		}
 	}
 
@@ -215,7 +221,8 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 				|| options.prettyPrint() != pretty.getSelection() || !options.queryDriver().equals(driver.getText())
 				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
 						.equals(additional.getText())
-				|| (logToConsole != null && options.logToConsole() != logToConsole.getSelection());
+				|| (logToConsole != null && options.logToConsole() != logToConsole.getSelection())
+				|| (validateOptions != null && options.validateClangdOptions() != validateOptions.getSelection());
 	}
 
 }
