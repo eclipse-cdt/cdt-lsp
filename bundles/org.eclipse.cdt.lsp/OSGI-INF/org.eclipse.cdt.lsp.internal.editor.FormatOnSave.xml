@@ -4,6 +4,6 @@
    <service>
       <provide interface="org.eclipse.lsp4e.format.IFormatRegionsProvider"/>
    </service>
-   <reference cardinality="1..1" field="configuration" interface="org.eclipse.cdt.lsp.config.Configuration" name="configuration"/>
+   <reference cardinality="1..1" field="configuration" interface="org.eclipse.cdt.lsp.editor.EditorConfiguration" name="configuration"/>
    <implementation class="org.eclipse.cdt.lsp.internal.editor.FormatOnSave"/>
 </scr:component>

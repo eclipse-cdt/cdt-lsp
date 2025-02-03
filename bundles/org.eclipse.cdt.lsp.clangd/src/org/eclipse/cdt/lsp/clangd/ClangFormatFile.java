@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.clangd;
 import org.eclipse.core.resources.IProject;
 
 /**
- * @since 2.2
+ * @since 3.0
  */
 public interface ClangFormatFile {
 

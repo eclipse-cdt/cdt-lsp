@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 ArSysOp.
+ * Copyright (c) 2023, 2025 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,31 +26,29 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
-public final class EditorConfigurationArea extends ConfigurationArea {
+public final class EditorConfigurationArea extends ConfigurationArea<EditorOptions> {
 
 	private final Button prefer;
 	private ConfigurationVisibility visibility;
 
-	public EditorConfigurationArea(Composite parent, EditorMetadata metadata, boolean isProjectScope) {
+	public EditorConfigurationArea(Composite parent, boolean isProjectScope) {
 		super(1);
 		this.visibility = PlatformUI.getWorkbench().getService(ConfigurationVisibility.class);
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		if (visibility.showPreferLsp(isProjectScope)) {
-			this.prefer = createButton(metadata.preferLspEditor(), composite, SWT.CHECK, 0);
+			this.prefer = createButton(EditorMetadata.preferLspEditor, composite, SWT.CHECK, 0);
 		} else {
 			this.prefer = null;
 		}
 	}
 
 	@Override
-	public void load(Object options, boolean enable) {
-		if (options instanceof EditorOptions editorOptions) {
-			if (prefer != null) {
-				prefer.setSelection(editorOptions.preferLspEditor());
-				prefer.setEnabled(enable);
-			}
+	public void load(EditorOptions options, boolean enable) {
+		if (prefer != null) {
+			prefer.setSelection(options.preferLspEditor());
+			prefer.setEnabled(enable);
 		}
 	}
 

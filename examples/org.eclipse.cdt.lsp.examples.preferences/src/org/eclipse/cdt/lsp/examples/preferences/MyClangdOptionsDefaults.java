@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 COSEDA Technologies GmbH and others.
+ * Copyright (c) 2023, 2025 COSEDA Technologies GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -8,59 +8,38 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- * Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
+ *     Dominic Scharfe (COSEDA Technologies GmbH) - initial implementation
+ *     Alexander Fedorov (ArSysOp) - options API evolution
  *******************************************************************************/
 package org.eclipse.cdt.lsp.examples.preferences;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.eclipse.cdt.lsp.clangd.ClangdOptionsDefaults;
-import org.eclipse.cdt.utils.PathUtil;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.config.ConfigurationMetadataBase;
+import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.osgi.service.component.annotations.Component;
 
-@Component(service = ClangdOptionsDefaults.class, property = { "service.ranking:Integer=100" })
-public class MyClangdOptionsDefaults implements ClangdOptionsDefaults {
+@Component(property = { "service.ranking:Integer=100" })
+public class MyClangdOptionsDefaults extends ConfigurationMetadataBase implements ClangdMetadata {
 
 	@Override
-	public List<String> additionalOptions() {
-		return List.of("--header-insertion=never", "--default-config");
-	}
-
-	@Override
-	public String clangdPath() {
-		return Optional.ofNullable(PathUtil.findProgramLocation("clangd", null)) //$NON-NLS-1$
-				.map(IPath::toOSString)//
-				.orElse("clangd"); //  //$NON-NLS-1$
-	}
-
-	@Override
-	public boolean useTidy() {
-		return true;
-	}
-
-	@Override
-	public boolean useBackgroundIndex() {
-		return true;
-	}
-
-	@Override
-	public String completionStyle() {
-		return "detailed"; //$NON-NLS-1$
-	}
-
-	@Override
-	public boolean prettyPrint() {
-		return true;
-	}
-
-	@Override
-	public String queryDriver() {
-		return Optional.ofNullable(PathUtil.findProgramLocation("gcc", null)) //$NON-NLS-1$
-				.map(p -> p.removeLastSegments(1).append(IPath.SEPARATOR + "*"))// //$NON-NLS-1$
-				.map(IPath::toString)//
-				.orElse(""); //  //$NON-NLS-1$
+	protected List<PreferenceMetadata<?>> definePreferences() {
+		List<PreferenceMetadata<?>> defined = new ArrayList<>();
+		defined.add(clangdPath);
+		defined.add(useTidy);
+		defined.add(useBackgroundIndex);
+		defined.add(completionStyle);
+		defined.add(prettyPrint);
+		defined.add(queryDriver);
+		defined.add(overrideString(additionalOptions, //
+				List.of("--header-insertion=never", "--default-config").stream()
+						.collect(Collectors.joining(System.lineSeparator()))));
+		defined.add(logToConsole);
+		defined.add(validateClangdOptions);
+		return defined;
 	}
 
 }

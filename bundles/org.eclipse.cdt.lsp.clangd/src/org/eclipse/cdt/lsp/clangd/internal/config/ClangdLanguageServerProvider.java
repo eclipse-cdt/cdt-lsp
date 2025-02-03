@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
- * Alexander Fedorov (ArSysOp) - rework to OSGi components
- * Alexander Fedorov (ArSysOp) - rework access to preferences
+ *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *     Alexander Fedorov (ArSysOp) - rework to OSGi components
+ *     Alexander Fedorov (ArSysOp) - rework access to preferences
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
@@ -25,7 +25,7 @@ import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdFallbackFlags;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.IClangdCommandLineValidator;
-import org.eclipse.cdt.lsp.config.Configuration;
+import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.cdt.lsp.server.ICLanguageServerCommandLineValidator;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider3;
@@ -45,8 +45,8 @@ public final class ClangdLanguageServerProvider
 	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
 			ClangdConfiguration.class);
 
-	private final ServiceCaller<Configuration> editorConfiguration = new ServiceCaller<>(getClass(),
-			Configuration.class);
+	private final ServiceCaller<EditorConfiguration> editorConfiguration = new ServiceCaller<>(getClass(),
+			EditorConfiguration.class);
 
 	@Override
 	public Object getInitializationOptions(URI rootUri) {

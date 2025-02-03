@@ -13,7 +13,7 @@
 package org.eclipse.cdt.lsp.server;
 
 /**
- * @since 2.2
+ * @since 3.0
  */
 public interface ICLanguageServerProvider3 extends ICLanguageServerProvider {
 

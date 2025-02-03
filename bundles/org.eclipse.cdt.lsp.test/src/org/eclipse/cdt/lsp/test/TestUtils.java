@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- * Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
+ *     Alexander Fedorov (ArSysOp) - options API evolution
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.test;
@@ -17,7 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
-import org.eclipse.cdt.lsp.config.Configuration;
+import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -37,8 +38,8 @@ import org.junit.jupiter.api.TestInfo;
 public class TestUtils {
 
 	public static void setLspPreferred(IProject project, boolean value) {
-		ServiceCaller.callOnce(TestUtils.class, Configuration.class, //
-				cc -> cc.storage(project).save(value, ((EditorMetadata) cc.metadata()).preferLspEditor()));
+		ServiceCaller.callOnce(TestUtils.class, EditorConfiguration.class, //
+				cc -> cc.storage(project).save(value, EditorMetadata.preferLspEditor));
 	}
 
 	public static IProject createCProject(String projectName) throws CoreException {

@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 /**
  * Validator interface for clangd command line options.
  *
- * @since 2.2
+ * @since 3.0
  */
 public interface IClangdCommandLineValidator {
 

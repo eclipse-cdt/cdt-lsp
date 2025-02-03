@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -12,8 +12,7 @@
 
 package org.eclipse.cdt.lsp.internal.editor;
 
-import org.eclipse.cdt.lsp.config.Configuration;
-import org.eclipse.cdt.lsp.editor.EditorOptions;
+import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -26,13 +25,13 @@ import org.osgi.service.component.annotations.Reference;
 public class FormatOnSave implements IFormatRegionsProvider {
 
 	@Reference
-	private Configuration configuration;
+	private EditorConfiguration configuration;
 
 	@Override
 	public IRegion[] getFormattingRegions(IDocument document) {
 		var file = LSPEclipseUtils.getFile(document);
 		if (file != null) {
-			var editorOptions = (EditorOptions) configuration.options(file);
+			var editorOptions = configuration.options(file);
 			if (editorOptions != null && editorOptions.formatOnSave()) {
 				if (editorOptions.formatAllLines()) {
 					return IFormatRegionsProvider.allLines(document);

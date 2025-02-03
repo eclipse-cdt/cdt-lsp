@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 ArSysOp.
+ * Copyright (c) 2023, 2025 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,33 +17,35 @@ package org.eclipse.cdt.lsp.clangd.internal.ui;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
-import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
+import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
-import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 
-public final class ClangdConfigurationPage extends EditorConfigurationPage {
+public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
 
 	private final String id = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
 
 	@Override
-	public void init(IWorkbench workbench) {
-		this.configuration = workbench.getService(ClangdConfiguration.class);
-		this.workspace = workbench.getService(IWorkspace.class);
+	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
+		return workbench.getService(ClangdConfiguration.class);
 	}
 
 	@Override
-	protected Configuration getConfiguration() {
-		return PlatformUI.getWorkbench().getService(ClangdConfiguration.class);
+	protected ClangdOptions configurationDefaults() {
+		return configuration.defaults();
 	}
 
 	@Override
-	protected ConfigurationArea getConfigurationArea(Composite composite, boolean isProjectScope) {
-		return new ClangdConfigurationArea(composite, (ClangdMetadata) configuration.metadata(), isProjectScope);
+	protected ClangdOptions configurationOptions(IAdaptable element) {
+		return configuration.options(element);
+	}
+
+	@Override
+	protected ConfigurationArea<ClangdOptions> getConfigurationArea(Composite composite, boolean isProjectScope) {
+		return new ClangdConfigurationArea(composite, isProjectScope);
 	}
 
 	@Override
@@ -72,7 +74,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	 * @return
 	 */
 	private boolean configurationSettingsChanged() {
-		return ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions) configuration.options(getElement()));
+		return ((ClangdConfigurationArea) area).optionsChanged(configuration.options(getElement()));
 	}
 
 	/**
@@ -81,7 +83,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	 */
 	private boolean projectOptionsDifferFromWorkspace() {
 		return hasProjectSpecificOptions() != useProjectSettings()
-				&& ((ClangdConfigurationArea) area).optionsChanged((ClangdOptions) configuration.options(null));
+				&& ((ClangdConfigurationArea) area).optionsChanged(configuration.options(null));
 	}
 
 	private boolean isLsActive() {
@@ -93,7 +95,7 @@ public final class ClangdConfigurationPage extends EditorConfigurationPage {
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(((ClangdMetadata) configuration.metadata()).clangdPath().identifer(), null))//
+				.map(n -> n.get(ClangdMetadata.clangdPath.identifer(), null))//
 				.isPresent();
 	}
 

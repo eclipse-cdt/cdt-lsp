@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 ArSysOp.
+ * Copyright (c) 2023, 2025 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,59 +16,51 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
+import org.eclipse.cdt.lsp.PreferredOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
-final class ClangdPreferredOptions implements ClangdOptions {
+final class ClangdPreferredOptions extends PreferredOptions implements ClangdOptions {
 
-	private final String qualifier;
-	private final IScopeContext[] scopes;
-	private final ClangdMetadata metadata;
-
-	ClangdPreferredOptions(String qualifier, IScopeContext[] scopes, ClangdMetadata metadata) {
-		this.qualifier = Objects.requireNonNull(qualifier);
-		this.scopes = Objects.requireNonNull(scopes);
-		this.metadata = Objects.requireNonNull(metadata);
+	ClangdPreferredOptions(ClangdMetadata metadata, String qualifier, IScopeContext[] scopes) {
+		super(metadata, qualifier, scopes);
 	}
 
 	@Override
 	public String clangdPath() {
-		return stringValue(metadata.clangdPath());
+		return stringValue(ClangdMetadata.clangdPath);
 	}
 
 	@Override
 	public boolean useTidy() {
-		return booleanValue(metadata.useTidy());
+		return booleanValue(ClangdMetadata.useTidy);
 	}
 
 	@Override
 	public boolean useBackgroundIndex() {
-		return booleanValue(metadata.useBackgroundIndex());
+		return booleanValue(ClangdMetadata.useBackgroundIndex);
 	}
 
 	@Override
 	public String completionStyle() {
-		return stringValue(metadata.completionStyle());
+		return stringValue(ClangdMetadata.completionStyle);
 	}
 
 	@Override
 	public boolean prettyPrint() {
-		return booleanValue(metadata.prettyPrint());
+		return booleanValue(ClangdMetadata.prettyPrint);
 	}
 
 	@Override
 	public String queryDriver() {
-		return stringValue(metadata.queryDriver());
+		return stringValue(ClangdMetadata.queryDriver);
 	}
 
 	@Override
 	public List<String> additionalOptions() {
-		var options = stringValue(metadata.additionalOptions());
+		var options = stringValue(ClangdMetadata.additionalOptions);
 		if (options.isBlank()) {
 			return new ArrayList<>();
 		}
@@ -77,29 +69,12 @@ final class ClangdPreferredOptions implements ClangdOptions {
 
 	@Override
 	public boolean logToConsole() {
-		return booleanValue(metadata.logToConsole());
+		return booleanValue(ClangdMetadata.logToConsole);
 	}
 
 	@Override
 	public boolean validateClangdOptions() {
-		return booleanValue(metadata.validateClangdOptions());
-	}
-
-	private String stringValue(PreferenceMetadata<?> meta) {
-		String actual = String.valueOf(meta.defaultValue());
-		for (int i = scopes.length - 1; i >= 0; i--) {
-			IScopeContext scope = scopes[i];
-			String previous = actual;
-			actual = scope.getNode(qualifier).get(meta.identifer(), previous);
-		}
-		return actual;
-	}
-
-	private boolean booleanValue(PreferenceMetadata<Boolean> meta) {
-		return Optional.of(meta)//
-				.map(this::stringValue)//
-				.map(Boolean::valueOf)//
-				.orElseGet(meta::defaultValue);
+		return booleanValue(ClangdMetadata.validateClangdOptions);
 	}
 
 }

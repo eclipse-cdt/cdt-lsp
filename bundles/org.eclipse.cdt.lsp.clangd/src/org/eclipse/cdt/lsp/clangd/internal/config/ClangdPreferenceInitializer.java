@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 ArSysOp.
+ * Copyright (c) 2023, 2025 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,37 +14,15 @@
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.config.ConfigurationPreferencesDefaults;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
 public final class ClangdPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	@Override
 	public void initializeDefaultPreferences() {
-		ServiceCaller.callOnce(getClass(), ClangdConfiguration.class, this::initializeDefaults);
+		ServiceCaller.callOnce(getClass(), ClangdConfiguration.class, new ConfigurationPreferencesDefaults<>());
 	}
 
-	private void initializeDefaults(ClangdConfiguration configuration) {
-		ClangdMetadata metadata = (ClangdMetadata) configuration.metadata();
-		String qualifier = configuration.qualifier();
-		initializeString(metadata.clangdPath(), qualifier);
-		initializeBoolean(metadata.useTidy(), qualifier);
-		initializeBoolean(metadata.useBackgroundIndex(), qualifier);
-		initializeString(metadata.completionStyle(), qualifier);
-		initializeBoolean(metadata.prettyPrint(), qualifier);
-		initializeString(metadata.queryDriver(), qualifier);
-		initializeString(metadata.additionalOptions(), qualifier);
-		initializeBoolean(metadata.logToConsole(), qualifier);
-	}
-
-	private void initializeBoolean(PreferenceMetadata<Boolean> preference, String qualifier) {
-		DefaultScope.INSTANCE.getNode(qualifier).putBoolean(preference.identifer(), preference.defaultValue());
-	}
-
-	private void initializeString(PreferenceMetadata<String> preference, String qualifier) {
-		DefaultScope.INSTANCE.getNode(qualifier).put(preference.identifer(), preference.defaultValue());
-	}
 }

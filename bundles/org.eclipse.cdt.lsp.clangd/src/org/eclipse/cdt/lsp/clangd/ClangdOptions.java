@@ -76,7 +76,7 @@ public interface ClangdOptions {
 	 *
 	 * @return true if clangd logging is enabled
 	 *
-	 * @since 2.2
+	 * @since 3.0
 	 */
 	default boolean logToConsole() {
 		return false;
@@ -87,7 +87,7 @@ public interface ClangdOptions {
 	 *
 	 * @return true if clangd command line options should be validated prior clangd launch.
 	 *
-	 * @since 2.2
+	 * @since 3.0
 	 */
 	default boolean validateClangdOptions() {
 		return true;

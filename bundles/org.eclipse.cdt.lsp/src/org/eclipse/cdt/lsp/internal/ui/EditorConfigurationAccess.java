@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -15,8 +15,8 @@ package org.eclipse.cdt.lsp.internal.ui;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.LspQualifier;
-import org.eclipse.cdt.lsp.config.Configuration;
 import org.eclipse.cdt.lsp.config.ConfigurationAccess;
+import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 
 @Component
-public class EditorConfigurationAccess extends ConfigurationAccess implements Configuration {
+public class EditorConfigurationAccess extends ConfigurationAccess implements EditorConfiguration {
 
 	@Reference
 	private EditorMetadata metadata;
@@ -50,7 +50,7 @@ public class EditorConfigurationAccess extends ConfigurationAccess implements Co
 
 	@Override
 	public EditorOptions defaults() {
-		return new EditorPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata, enable);
+		return new EditorPreferredOptions(metadata, qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, enable);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class EditorConfigurationAccess extends ConfigurationAccess implements Co
 		} else {
 			scopes = new IScopeContext[] { InstanceScope.INSTANCE, DefaultScope.INSTANCE };
 		}
-		return new EditorPreferredOptions(qualifier, scopes, metadata, enable);
+		return new EditorPreferredOptions(metadata, qualifier, scopes, enable);
 	}
 
 	@Override

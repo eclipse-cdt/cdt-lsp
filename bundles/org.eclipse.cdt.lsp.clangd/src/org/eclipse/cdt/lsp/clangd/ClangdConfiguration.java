@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 ArSysOp.
+ * Copyright (c) 2023, 2025 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,18 @@ import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
  * @since 2.0
  */
 public interface ClangdConfiguration extends Configuration {
+
+	/**
+	 * @since 3.0
+	 */
+	@Override
+	ClangdOptions defaults();
+
+	/**
+	 * @since 3.0
+	 */
+	@Override
+	ClangdOptions options(Object context);
 
 	/**
 	 * Provides list of commands suitable for {@link ProcessStreamConnectionProvider} for the given context like {@link IResource} or {@link URI}, must not return <code>null</code>

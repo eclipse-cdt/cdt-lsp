@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.server;
 import org.eclipse.core.resources.IProject;
 
 /**
- * @since 2.2
+ * @since 3.0
  *
  * This interface is deprecated and will be removed in the next release.
  */
