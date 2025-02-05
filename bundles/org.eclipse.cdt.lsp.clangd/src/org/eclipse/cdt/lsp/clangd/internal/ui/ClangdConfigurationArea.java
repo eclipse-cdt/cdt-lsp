@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 ArSysOp.
+ * Copyright (c) 2023, 2025 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public final class ClangdConfigurationArea extends ConfigurationArea {
+public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptions> {
 
 	private final Text path;
 	private final Button tidy;
@@ -65,7 +65,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 			LspEditorUiMessages.LspEditorPreferencePage_completion_default };
 	private final Map<String, String> completions;
 
-	public ClangdConfigurationArea(Composite parent, ClangdMetadata metadata, boolean isProjectScope) {
+	public ClangdConfigurationArea(Composite parent, boolean isProjectScope) {
 		super(3);
 		this.texts = new HashMap<>();
 		this.combos = new HashMap<>();
@@ -77,16 +77,16 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		this.group = createGroup(composite, LspEditorUiMessages.LspEditorPreferencePage_clangd_options_label, 3);
-		this.path = createFileSelector(metadata.clangdPath(), group, this::selectClangdExecutable);
-		this.tidy = createButton(metadata.useTidy(), group, SWT.CHECK, 0);
-		this.index = createButton(metadata.useBackgroundIndex(), group, SWT.CHECK, 0);
-		this.completion = createCombo(metadata.completionStyle(), group, completionsKeys);
-		this.pretty = createButton(metadata.prettyPrint(), group, SWT.CHECK, 0);
-		this.driver = createText(metadata.queryDriver(), group, false);
-		this.additional = createText(metadata.additionalOptions(), group, true);
+		this.path = createFileSelector(ClangdMetadata.clangdPath, group, this::selectClangdExecutable);
+		this.tidy = createButton(ClangdMetadata.useTidy, group, SWT.CHECK, 0);
+		this.index = createButton(ClangdMetadata.useBackgroundIndex, group, SWT.CHECK, 0);
+		this.completion = createCombo(ClangdMetadata.completionStyle, group, completionsKeys);
+		this.pretty = createButton(ClangdMetadata.prettyPrint, group, SWT.CHECK, 0);
+		this.driver = createText(ClangdMetadata.queryDriver, group, false);
+		this.additional = createText(ClangdMetadata.additionalOptions, group, true);
 		if (!isProjectScope) {
-			this.logToConsole = createButton(metadata.logToConsole(), group, SWT.CHECK, 0);
-			this.validateOptions = createButton(metadata.validateClangdOptions(), group, SWT.CHECK, 0);
+			this.logToConsole = createButton(ClangdMetadata.logToConsole, group, SWT.CHECK, 0);
+			this.validateOptions = createButton(ClangdMetadata.validateClangdOptions, group, SWT.CHECK, 0);
 		} else {
 			this.logToConsole = null;
 			this.validateOptions = null;
@@ -175,27 +175,24 @@ public final class ClangdConfigurationArea extends ConfigurationArea {
 	}
 
 	@Override
-	public void load(Object options, boolean enable) {
-		if (options instanceof ClangdOptions clangdOptions) {
-			path.setText(clangdOptions.clangdPath());
-			tidy.setSelection(clangdOptions.useTidy());
-			index.setSelection(clangdOptions.useBackgroundIndex());
-			for (int i = 0; i < completionOptions.length; i++) {
-				if (completionOptions[i].equals(clangdOptions.completionStyle())) {
-					completion.select(i);
-				}
+	public void load(ClangdOptions options, boolean enable) {
+		path.setText(options.clangdPath());
+		tidy.setSelection(options.useTidy());
+		index.setSelection(options.useBackgroundIndex());
+		for (int i = 0; i < completionOptions.length; i++) {
+			if (completionOptions[i].equals(options.completionStyle())) {
+				completion.select(i);
 			}
-			pretty.setSelection(clangdOptions.prettyPrint());
-			driver.setText(clangdOptions.queryDriver());
-			additional.setText(
-					clangdOptions.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
-			enablePreferenceContent(enable);
-			if (logToConsole != null) {
-				logToConsole.setSelection(clangdOptions.logToConsole());
-			}
-			if (validateOptions != null) {
-				validateOptions.setSelection(clangdOptions.validateClangdOptions());
-			}
+		}
+		pretty.setSelection(options.prettyPrint());
+		driver.setText(options.queryDriver());
+		additional.setText(options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
+		enablePreferenceContent(enable);
+		if (logToConsole != null) {
+			logToConsole.setSelection(options.logToConsole());
+		}
+		if (validateOptions != null) {
+			validateOptions.setSelection(options.validateClangdOptions());
 		}
 	}
 

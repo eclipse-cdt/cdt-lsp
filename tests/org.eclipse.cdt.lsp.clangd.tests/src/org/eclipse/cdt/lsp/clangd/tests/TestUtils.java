@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@
 
 package org.eclipse.cdt.lsp.clangd.tests;
 
-import org.eclipse.cdt.lsp.config.Configuration;
+import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -28,8 +28,8 @@ import org.junit.jupiter.api.TestInfo;
 public final class TestUtils {
 
 	public static void setLspPreferred(IProject project, boolean value) {
-		ServiceCaller.callOnce(TestUtils.class, Configuration.class, //
-				cc -> cc.storage(project).save(value, ((EditorMetadata) cc.metadata()).preferLspEditor()));
+		ServiceCaller.callOnce(TestUtils.class, EditorConfiguration.class, //
+				cc -> cc.storage(project).save(value, EditorMetadata.preferLspEditor));
 	}
 
 	public static IProject createCProject(String projectName) throws CoreException {

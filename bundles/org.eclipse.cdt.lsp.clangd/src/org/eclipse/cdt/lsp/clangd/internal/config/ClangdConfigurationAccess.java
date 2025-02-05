@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 ArSysOp.
+ * Copyright (c) 2023, 2025 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,7 +53,7 @@ public final class ClangdConfigurationAccess extends ConfigurationAccess impleme
 
 	@Override
 	public ClangdOptions defaults() {
-		return new ClangdPreferredOptions(qualifier, new IScopeContext[] { DefaultScope.INSTANCE }, metadata);
+		return new ClangdPreferredOptions(metadata, qualifier, new IScopeContext[] { DefaultScope.INSTANCE });
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public final class ClangdConfigurationAccess extends ConfigurationAccess impleme
 		} else {
 			scopes = new IScopeContext[] { InstanceScope.INSTANCE, DefaultScope.INSTANCE };
 		}
-		return new ClangdPreferredOptions(qualifier, scopes, metadata);
+		return new ClangdPreferredOptions(metadata, qualifier, scopes);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -12,8 +12,6 @@
 
 package org.eclipse.cdt.lsp.internal.editor;
 
-import java.util.Objects;
-
 import org.eclipse.cdt.lsp.PreferredOptions;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
@@ -21,35 +19,33 @@ import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
-public class EditorPreferredOptions extends PreferredOptions implements EditorOptions, LanguageServerEnable {
-	private final EditorMetadata metadata;
+public final class EditorPreferredOptions extends PreferredOptions implements EditorOptions, LanguageServerEnable {
 	private final LanguageServerEnable enable;
 
-	public EditorPreferredOptions(String qualifier, IScopeContext[] scopes, EditorMetadata metadata,
+	public EditorPreferredOptions(EditorMetadata metadata, String qualifier, IScopeContext[] scopes,
 			LanguageServerEnable enable) {
-		super(qualifier, scopes);
-		this.metadata = Objects.requireNonNull(metadata);
+		super(metadata, qualifier, scopes);
 		this.enable = enable;
 	}
 
 	@Override
 	public boolean preferLspEditor() {
-		return booleanValue(metadata.preferLspEditor());
+		return booleanValue(EditorMetadata.preferLspEditor);
 	}
 
 	@Override
 	public boolean formatOnSave() {
-		return booleanValue(metadata.formatOnSave());
+		return booleanValue(EditorMetadata.formatOnSave);
 	}
 
 	@Override
 	public boolean formatAllLines() {
-		return booleanValue(metadata.formatAllLines());
+		return booleanValue(EditorMetadata.formatAllLines);
 	}
 
 	@Override
 	public boolean formatEditedLines() {
-		return booleanValue(metadata.formatEditedLines());
+		return booleanValue(EditorMetadata.formatEditedLines);
 	}
 
 	@Override
@@ -57,7 +53,7 @@ public class EditorPreferredOptions extends PreferredOptions implements EditorOp
 		if (enable != null) {
 			return enable.isEnabledFor(project);
 		}
-		return booleanValue(metadata.preferLspEditor());
+		return booleanValue(EditorMetadata.preferLspEditor);
 	}
 
 }

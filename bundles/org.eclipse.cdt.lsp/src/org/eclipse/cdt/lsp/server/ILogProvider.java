@@ -15,7 +15,7 @@ package org.eclipse.cdt.lsp.server;
 import java.io.OutputStream;
 
 /**
- * @since 2.2
+ * @since 3.0
  */
 public interface ILogProvider {
 

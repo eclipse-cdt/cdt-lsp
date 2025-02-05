@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
+
 package org.eclipse.cdt.lsp.internal.ui;
 
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
@@ -13,21 +25,21 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-public class SaveActionsConfigurationArea extends ConfigurationArea {
+public final class SaveActionsConfigurationArea extends ConfigurationArea<EditorOptions> {
 
 	private final Button format;
 	private final Button formatAll;
 	private final Button formatEdited;
 
-	public SaveActionsConfigurationArea(Composite parent, EditorMetadata metadata, boolean isProjectScope) {
+	public SaveActionsConfigurationArea(Composite parent, boolean isProjectScope) {
 		super(1);
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 
-		this.format = createButton(metadata.formatOnSave(), composite, SWT.CHECK, 0);
-		this.formatAll = createButton(metadata.formatAllLines(), composite, SWT.RADIO, 15);
-		this.formatEdited = createButton(metadata.formatEditedLines(), composite, SWT.RADIO, 15);
+		this.format = createButton(EditorMetadata.formatOnSave, composite, SWT.CHECK, 0);
+		this.formatAll = createButton(EditorMetadata.formatAllLines, composite, SWT.RADIO, 15);
+		this.formatEdited = createButton(EditorMetadata.formatEditedLines, composite, SWT.RADIO, 15);
 
 		final SelectionAdapter formatListener = new SelectionAdapter() {
 			@Override
@@ -41,15 +53,13 @@ public class SaveActionsConfigurationArea extends ConfigurationArea {
 	}
 
 	@Override
-	public void load(Object options, boolean enable) {
-		if (options instanceof EditorOptions editorOptions) {
-			format.setSelection(editorOptions.formatOnSave());
-			formatAll.setSelection(editorOptions.formatAllLines());
-			formatEdited.setSelection(editorOptions.formatEditedLines());
-			format.setEnabled(enable);
-			formatAll.setEnabled(enable && format.getSelection());
-			formatEdited.setEnabled(enable && format.getSelection());
-		}
+	public void load(EditorOptions options, boolean enable) {
+		format.setSelection(options.formatOnSave());
+		formatAll.setSelection(options.formatAllLines());
+		formatEdited.setSelection(options.formatEditedLines());
+		format.setEnabled(enable);
+		formatAll.setEnabled(enable && format.getSelection());
+		formatEdited.setEnabled(enable && format.getSelection());
 	}
 
 	@Override
