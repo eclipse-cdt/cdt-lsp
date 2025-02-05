@@ -16,6 +16,8 @@ package org.eclipse.cdt.lsp.internal.server;
 
 import java.io.File;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.cdt.core.model.ICProject;
@@ -38,6 +40,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ServiceCaller<InitialUri> initial;
 	private final ServiceCaller<IWorkspace> workspace;
 	private Optional<IProject> project;
+	private final Map<URI, Boolean> cache = new HashMap<>();
 
 	public HasLanguageServerPropertyTester() {
 		this.cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
@@ -49,16 +52,22 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 		if (cLanguageServerProvider != null) {
-			if (receiver instanceof URI) {
+			if (receiver instanceof URI uri) {
 				// called from the language server enabler for LSP4E:
-				var uri = (URI) receiver;
-				if (!validContentType(uri))
+				var value = cache.get(uri);
+				if (value != null) {
+					return value.booleanValue();
+				}
+				if (!validContentType(uri)) {
+					cache.put(uri, false);
 					return false;
+				}
 				// when getProject is empty, it's an external file: Check if the file is already opened, if not check the active editor:
 				var isEnabled = enabledFor(uri);
 				if (isEnabled) {
 					initial.call(iu -> iu.register(uri));
 				}
+				cache.put(uri, isEnabled);
 				return isEnabled;
 			} else if (receiver instanceof ITranslationUnit) {
 				// called to enable the LS based CSymbolsContentProvider:
