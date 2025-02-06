@@ -59,6 +59,7 @@ public final class URIEnableCache
 
 	public static void stop() {
 		if (instance != null) {
+			ContentTypeManager.getInstance().removeContentTypeChangeListener(instance);
 			var workbench = PlatformUI.getWorkbench();
 			workbench.removeWindowListener(instance);
 			Arrays.stream(workbench.getWorkbenchWindows()).map(IWorkbenchWindow::getPages).flatMap(Arrays::stream)
