@@ -37,7 +37,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
 	private final ServiceCaller<InitialUri> initial;
 	private final ServiceCaller<IWorkspace> workspace;
-	private final URIEnableCache cache = URIEnableCache.getInstance();
+	private final URICache cache = URICache.getInstance();
 	private Optional<IProject> project;
 
 	public HasLanguageServerPropertyTester() {

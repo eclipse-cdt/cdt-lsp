@@ -38,16 +38,16 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
  * The cache is getting cleared: on changes in the C/C++ content types or the prefer LSP editor option has been changed (workspace or project level).
  * A resource URI shall be removed from the cache if it's getting closed in the editor.
  */
-public final class URIEnableCache
+public final class URICache
 		implements IPreferenceChangeListener, IContentTypeChangeListener, IPartListener, IWindowListener {
 	private static final String C_SOURCE = "org.eclipse.cdt.core.cSource"; //$NON-NLS-1$
 	private static final String CXX_SOURCE = "org.eclipse.cdt.core.cxxSource"; //$NON-NLS-1$
 	private static final String C_HEADER = "org.eclipse.cdt.core.cHeader"; //$NON-NLS-1$
 	private static final String CXX_HEADER = "org.eclipse.cdt.core.cxxHeader"; //$NON-NLS-1$
 	private static final Map<URI, Boolean> cache = Collections.synchronizedMap(new LRUCache<>(100));
-	private static URIEnableCache instance = null;
+	private static URICache instance = null;
 
-	private URIEnableCache() {
+	private URICache() {
 		ContentTypeManager.getInstance().addContentTypeChangeListener(this);
 		if (PlatformUI.isWorkbenchRunning()) {
 			var workbench = PlatformUI.getWorkbench();
@@ -64,13 +64,17 @@ public final class URIEnableCache
 			workbench.removeWindowListener(instance);
 			Arrays.stream(workbench.getWorkbenchWindows()).map(IWorkbenchWindow::getPages).flatMap(Arrays::stream)
 					.forEach(p -> p.removePartListener(instance));
-			cache.clear();
 		}
+		cache.clear();
 	}
 
-	public static synchronized URIEnableCache getInstance() {
+	public static void clear() {
+		cache.clear();
+	}
+
+	public static synchronized URICache getInstance() {
 		if (instance == null) {
-			instance = new URIEnableCache();
+			instance = new URICache();
 		}
 		return instance;
 	}
