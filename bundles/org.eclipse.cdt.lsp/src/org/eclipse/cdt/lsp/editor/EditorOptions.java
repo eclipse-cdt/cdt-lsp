@@ -12,6 +12,8 @@
 
 package org.eclipse.cdt.lsp.editor;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+
 public interface EditorOptions {
 
 	/**
@@ -41,5 +43,15 @@ public interface EditorOptions {
 	 * @return if only edited lines should be formatted
 	 */
 	boolean formatEditedLines();
+
+	/**
+	 * @since 3.0
+	 */
+	void addPreferenceChangedListener(IPreferenceChangeListener listener);
+
+	/**
+	 * @since 3.0
+	 */
+	void removePreferenceChangedListener(IPreferenceChangeListener listener);
 
 }

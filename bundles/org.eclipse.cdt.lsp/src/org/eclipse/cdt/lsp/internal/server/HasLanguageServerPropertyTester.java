@@ -16,8 +16,6 @@ package org.eclipse.cdt.lsp.internal.server;
 
 import java.io.File;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.cdt.core.model.ICProject;
@@ -39,8 +37,8 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
 	private final ServiceCaller<InitialUri> initial;
 	private final ServiceCaller<IWorkspace> workspace;
+	private final URIEnableCache cache = URIEnableCache.getInstance();
 	private Optional<IProject> project;
-	private final Map<URI, Boolean> cache = new HashMap<>();
 
 	public HasLanguageServerPropertyTester() {
 		this.cLanguageServerProvider = LspPlugin.getDefault().getCLanguageServerProvider();
@@ -64,10 +62,10 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				}
 				// when getProject is empty, it's an external file: Check if the file is already opened, if not check the active editor:
 				var isEnabled = enabledFor(uri);
+				cache.put(uri, isEnabled);
 				if (isEnabled) {
 					initial.call(iu -> iu.register(uri));
 				}
-				cache.put(uri, isEnabled);
 				return isEnabled;
 			} else if (receiver instanceof ITranslationUnit) {
 				// called to enable the LS based CSymbolsContentProvider:

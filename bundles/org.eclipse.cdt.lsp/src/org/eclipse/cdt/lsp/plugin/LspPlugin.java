@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.cdt.lsp.internal.server.CLanguageServerRegistry;
+import org.eclipse.cdt.lsp.internal.server.URIEnableCache;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -58,6 +59,7 @@ public class LspPlugin extends AbstractUIPlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		URIEnableCache.stop();
 		plugin = null;
 		super.stop(context);
 	}
