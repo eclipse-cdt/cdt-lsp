@@ -45,13 +45,26 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 public final class CLanguageServerEnableCache
 		implements IPreferenceChangeListener, IContentTypeChangeListener, IPartListener, IWindowListener {
 
+	private class Data {
+		boolean enable = false;
+		int counter = 0; // reflects the opened LSP based C/C++ Editors for this URI
+
+		private Data(boolean enable) {
+			this.enable = enable;
+		}
+
+		private Data(boolean enable, int counter) {
+			this.enable = enable;
+			this.counter = counter;
+		}
+	}
+
 	private static final int BUFFER_SIZE = 100;
 	private static final String C_SOURCE = "org.eclipse.cdt.core.cSource"; //$NON-NLS-1$
 	private static final String CXX_SOURCE = "org.eclipse.cdt.core.cxxSource"; //$NON-NLS-1$
 	private static final String C_HEADER = "org.eclipse.cdt.core.cHeader"; //$NON-NLS-1$
 	private static final String CXX_HEADER = "org.eclipse.cdt.core.cxxHeader"; //$NON-NLS-1$
-	private static final Map<URI, Boolean> cache = Collections.synchronizedMap(new LRUCache<>(BUFFER_SIZE));
-	private static final Map<URI, Integer> counter = Collections.synchronizedMap(new LRUCache<>(BUFFER_SIZE));
+	private static final Map<URI, Data> cache = Collections.synchronizedMap(new LRUCache<>(BUFFER_SIZE));
 	private static CLanguageServerEnableCache instance = null;
 
 	private CLanguageServerEnableCache() {
@@ -66,7 +79,6 @@ public final class CLanguageServerEnableCache
 
 	private static void clearAll() {
 		cache.clear();
-		counter.clear();
 	}
 
 	public static void stop() {
@@ -92,11 +104,15 @@ public final class CLanguageServerEnableCache
 	}
 
 	public Boolean get(URI uri) {
-		return cache.get(uri);
+		var data = cache.get(uri);
+		if (data != null) {
+			return data.enable;
+		}
+		return null;
 	}
 
-	public void put(URI uri, Boolean value) {
-		cache.put(uri, value);
+	public void put(URI uri, boolean value) {
+		cache.put(uri, new Data(value));
 	}
 
 	@Override
@@ -131,12 +147,13 @@ public final class CLanguageServerEnableCache
 		if (part instanceof ExtensionBasedTextEditor editor
 				&& LspUtils.isCContentType(LspUtils.getContentType(editor.getEditorInput()))) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
-				var cnt = counter.getOrDefault(uri, 1);
-				if (--cnt <= 0) {
-					cache.remove(uri);
-					counter.remove(uri);
-				} else {
-					counter.put(uri, cnt);
+				var data = cache.get(uri);
+				if (data != null) {
+					if (--data.counter <= 0) {
+						cache.remove(uri);
+					} else {
+						cache.put(uri, data);
+					}
 				}
 			});
 		}
@@ -152,10 +169,13 @@ public final class CLanguageServerEnableCache
 		if (part instanceof ExtensionBasedTextEditor editor
 				&& LspUtils.isCContentType(LspUtils.getContentType(editor.getEditorInput()))) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
-				cache.put(uri, true);
-				var cnt = counter.putIfAbsent(uri, 1);
-				if (cnt != null) {
-					counter.put(uri, ++cnt);
+				var data = cache.get(uri);
+				if (data != null) {
+					data.enable = true;
+					++data.counter;
+					cache.put(uri, data);
+				} else {
+					cache.put(uri, new Data(true, 1));
 				}
 			});
 		}
