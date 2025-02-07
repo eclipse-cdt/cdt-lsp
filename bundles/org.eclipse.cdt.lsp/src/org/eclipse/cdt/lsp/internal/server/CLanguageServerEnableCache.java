@@ -147,8 +147,6 @@ public final class CLanguageServerEnableCache
 				if (data != null) {
 					if (--data.counter <= 0) {
 						cache.remove(uri);
-					} else {
-						cache.put(uri, data);
 					}
 				}
 			});
@@ -168,7 +166,6 @@ public final class CLanguageServerEnableCache
 				if (data != null) {
 					data.enable = true;
 					++data.counter;
-					cache.put(uri, data);
 				} else {
 					cache.put(uri, new Data(true, 1));
 				}
