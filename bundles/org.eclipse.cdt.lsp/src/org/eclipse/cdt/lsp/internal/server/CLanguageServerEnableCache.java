@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import org.eclipse.cdt.internal.core.LRUCache;
 import org.eclipse.cdt.lsp.util.LspUtils;
-import org.eclipse.core.internal.content.ContentTypeManager;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentTypeManager.ContentTypeChangeEvent;
 import org.eclipse.core.runtime.content.IContentTypeManager.IContentTypeChangeListener;
 import org.eclipse.lsp4e.LSPEclipseUtils;
@@ -45,6 +45,7 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 	private class Data {
 		boolean enable = false;
 		int opened = 0; // reflects the opened LSP based C/C++ Editors for this URI
+		boolean restored = false; // cache has been restored after content type change
 
 		private Data(boolean enable) {
 			this.enable = enable;
@@ -53,6 +54,12 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 		private Data(boolean enable, int opened) {
 			this.enable = enable;
 			this.opened = opened;
+		}
+
+		private Data(boolean enable, int opened, boolean restored) {
+			this.enable = enable;
+			this.opened = opened;
+			this.restored = restored;
 		}
 	}
 
@@ -65,7 +72,7 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 	private static CLanguageServerEnableCache instance = null;
 
 	private CLanguageServerEnableCache() {
-		ContentTypeManager.getInstance().addContentTypeChangeListener(this);
+		Platform.getContentTypeManager().addContentTypeChangeListener(this);
 		if (PlatformUI.isWorkbenchRunning()) {
 			var workbench = PlatformUI.getWorkbench();
 			workbench.addWindowListener(this);
@@ -80,7 +87,7 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 
 	public static void stop() {
 		if (instance != null) {
-			ContentTypeManager.getInstance().removeContentTypeChangeListener(instance);
+			Platform.getContentTypeManager().removeContentTypeChangeListener(instance);
 			var workbench = PlatformUI.getWorkbench();
 			workbench.removeWindowListener(instance);
 			Arrays.stream(workbench.getWorkbenchWindows()).map(IWorkbenchWindow::getPages).flatMap(Arrays::stream)
@@ -117,7 +124,7 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 				if (data != null) {
 					++data.opened;
 				} else {
-					cache.put(uri, new Data(true, 1));
+					cache.put(uri, new Data(true, 1, true));
 				}
 			});
 		}
@@ -158,10 +165,10 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 		if (part instanceof ExtensionBasedTextEditor editor && LspUtils.checkForCContentType(editor.getEditorInput())) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
 				var data = cache.get(uri);
-				if (data != null) {
+				if (data != null && !data.restored) {
 					data.enable = true;
 					++data.opened;
-				} else {
+				} else if (data == null) {
 					cache.put(uri, new Data(true, 1));
 				}
 			});
