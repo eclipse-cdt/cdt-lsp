@@ -37,7 +37,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
 	private final ServiceCaller<InitialUri> initial;
 	private final ServiceCaller<IWorkspace> workspace;
-	private final URICache cache = URICache.getInstance();
+	private final CLanguageServerEnableCache cache = CLanguageServerEnableCache.getInstance();
 	private Optional<IProject> project;
 
 	public HasLanguageServerPropertyTester() {
@@ -62,7 +62,6 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 				}
 				// when getProject is empty, it's an external file: Check if the file is already opened, if not check the active editor:
 				var isEnabled = enabledFor(uri);
-				cache.put(uri, isEnabled);
 				if (isEnabled) {
 					initial.call(iu -> iu.register(uri));
 				}

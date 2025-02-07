@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import org.eclipse.cdt.internal.core.LRUCache;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
+import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.internal.content.ContentTypeManager;
 import org.eclipse.core.runtime.content.IContentTypeManager.ContentTypeChangeEvent;
 import org.eclipse.core.runtime.content.IContentTypeManager.IContentTypeChangeListener;
@@ -31,23 +32,28 @@ import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 
 /**
- * Caches the enable status for a given resource URI. Used by {@link HasLanguageServerPropertyTester#test(Object, String, Object[], Object)}
- * The cache is getting cleared: on changes in the C/C++ content types or the prefer LSP editor option has been changed (workspace or project level).
+ * Caches the Language Server enable for a given resource URI. Used by {@link HasLanguageServerPropertyTester#test(Object, String, Object[], Object)}
+ * The cache is getting cleared:
+ * - on changes in the C/C++ related content types or
+ * - the prefer LSP editor option has been changed (workspace or project level) or
+ * - the LS has been stopped.
  * A resource URI shall be removed from the cache if it's getting closed in the editor.
+ * The enable Language Server is cached when the file has been opened in the LSP based C/C++ editor.
  */
-public final class URICache
+public final class CLanguageServerEnableCache
 		implements IPreferenceChangeListener, IContentTypeChangeListener, IPartListener, IWindowListener {
 	private static final String C_SOURCE = "org.eclipse.cdt.core.cSource"; //$NON-NLS-1$
 	private static final String CXX_SOURCE = "org.eclipse.cdt.core.cxxSource"; //$NON-NLS-1$
 	private static final String C_HEADER = "org.eclipse.cdt.core.cHeader"; //$NON-NLS-1$
 	private static final String CXX_HEADER = "org.eclipse.cdt.core.cxxHeader"; //$NON-NLS-1$
 	private static final Map<URI, Boolean> cache = Collections.synchronizedMap(new LRUCache<>(100));
-	private static URICache instance = null;
+	private static CLanguageServerEnableCache instance = null;
 
-	private URICache() {
+	private CLanguageServerEnableCache() {
 		ContentTypeManager.getInstance().addContentTypeChangeListener(this);
 		if (PlatformUI.isWorkbenchRunning()) {
 			var workbench = PlatformUI.getWorkbench();
@@ -72,9 +78,9 @@ public final class URICache
 		cache.clear();
 	}
 
-	public static synchronized URICache getInstance() {
+	public static synchronized CLanguageServerEnableCache getInstance() {
 		if (instance == null) {
-			instance = new URICache();
+			instance = new CLanguageServerEnableCache();
 		}
 		return instance;
 	}
@@ -115,7 +121,7 @@ public final class URICache
 
 	@Override
 	public void partClosed(IWorkbenchPart part) {
-		if (part instanceof ExtensionBasedTextEditor editor) {
+		if (part instanceof TextEditor editor) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> cache.remove(uri));
 		}
 	}
@@ -127,7 +133,10 @@ public final class URICache
 
 	@Override
 	public void partOpened(IWorkbenchPart part) {
-		// do nothing
+		if (part instanceof ExtensionBasedTextEditor editor
+				&& LspUtils.isCContentType(LspUtils.getContentType(editor.getEditorInput()))) {
+			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> cache.put(uri, true));
+		}
 	}
 
 	@Override

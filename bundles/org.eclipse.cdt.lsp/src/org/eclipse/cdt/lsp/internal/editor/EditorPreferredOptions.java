@@ -18,7 +18,7 @@ import org.eclipse.cdt.lsp.PreferredOptions;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
-import org.eclipse.cdt.lsp.internal.server.URICache;
+import org.eclipse.cdt.lsp.internal.server.CLanguageServerEnableCache;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -30,7 +30,7 @@ public final class EditorPreferredOptions extends PreferredOptions implements Ed
 			LanguageServerEnable enable) {
 		super(metadata, qualifier, scopes);
 		this.enable = enable;
-		this.addPreferenceChangedListener(URICache.getInstance());
+		this.addPreferenceChangedListener(CLanguageServerEnableCache.getInstance());
 	}
 
 	@Override

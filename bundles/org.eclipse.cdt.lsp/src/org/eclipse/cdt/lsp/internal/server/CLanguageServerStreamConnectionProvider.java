@@ -89,7 +89,7 @@ public final class CLanguageServerStreamConnectionProvider extends ProcessStream
 		super.stop();
 		// then close output stream.
 		getLogProvider().ifPresent(lp -> lp.close());
-		URICache.clear();
+		CLanguageServerEnableCache.clear();
 	}
 
 	private boolean logEnabled() {
