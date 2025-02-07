@@ -39,8 +39,7 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
  * Caches the Language Server enable for a given resource URI. Used by {@link HasLanguageServerPropertyTester#test(Object, String, Object[], Object)}
  * The cache is getting cleared:
  * - on changes in the C/C++ related content types or
- * - the prefer LSP editor option has been changed (workspace or project level) or
- * - the LS has been stopped.
+ * - the prefer LSP editor option has been changed (workspace or project level)
  * A resource URI shall be removed from the cache if it's getting closed in the editor.
  * The enable Language Server is cached when the file has been opened in the LSP based C/C++ editor.
  */
