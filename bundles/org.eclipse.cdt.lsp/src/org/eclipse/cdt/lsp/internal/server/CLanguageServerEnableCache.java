@@ -138,7 +138,7 @@ public final class CLanguageServerEnableCache
 		// do nothing
 	}
 
-	// remove cache only if the URI is not opened in any other LSP based editor editor.
+	// remove cache only if the URI is not opened in any other LSP based editor.
 	@Override
 	public void partClosed(IWorkbenchPart part) {
 		if (part instanceof ExtensionBasedTextEditor editor && LspUtils.checkForCContentType(editor.getEditorInput())) {
