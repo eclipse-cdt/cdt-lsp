@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
-import org.eclipse.core.internal.content.ContentTypeManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -84,6 +83,32 @@ public class LspUtils {
 		return false;
 	}
 
+	public static List<URI> getFilesInLspBasedEditor() {
+		var uris = new ArrayList<URI>();
+		var editors = getEditors();
+		if (!editors.isEmpty()) {
+			for (IEditorReference editor : editors) {
+				if (LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId())) {
+					IEditorInput editorInput = null;
+					try {
+						editorInput = editor.getEditorInput();
+					} catch (PartInitException e) {
+						Platform.getLog(LspUtils.class).error(e.getMessage(), e);
+						continue;
+					}
+					if (checkForCContentType(editorInput)) {
+						if (editorInput instanceof IURIEditorInput uriEditorInput) {
+							uris.add(uriEditorInput.getURI());
+						} else if (editorInput instanceof FileEditorInput fileEditorInput) {
+							uris.add(fileEditorInput.getFile().getLocationURI());
+						}
+					}
+				}
+			}
+		}
+		return uris;
+	}
+
 	public static boolean isFileOpenedInLspEditor(IEditorInput editorInput, IContentType contentType) {
 		if (editorInput == null) {
 			return false;
@@ -145,11 +170,9 @@ public class LspUtils {
 		} else if (editorInput instanceof FileStoreEditorInput fileStore) {
 			File file = fileStore.getAdapter(File.class);
 			if (file != null) {
-				var contentTypes = ContentTypeManager.getInstance().findContentTypesFor(file.getName());
-				for (var contentType : contentTypes) {
-					if (isCContentType(contentType.getId())) {
-						return true;
-					}
+				var contentType = Platform.getContentTypeManager().findContentTypeFor(file.getName());
+				if (contentType != null) {
+					return isCContentType(contentType.getId());
 				}
 			}
 		}

@@ -57,7 +57,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 					return value.booleanValue();
 				}
 				if (!validContentType(uri)) {
-					cache.put(uri, false);
+					cache.disable(uri);
 					return false;
 				}
 				// when getProject is empty, it's an external file: Check if the file is already opened, if not check the active editor:

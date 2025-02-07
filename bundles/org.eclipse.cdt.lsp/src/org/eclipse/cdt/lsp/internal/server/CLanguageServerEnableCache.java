@@ -43,15 +43,15 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 
 	private class Data {
 		boolean enable = false;
-		int counter = 0; // reflects the opened LSP based C/C++ Editors for this URI
+		int opened = 0; // reflects the opened LSP based C/C++ Editors for this URI
 
 		private Data(boolean enable) {
 			this.enable = enable;
 		}
 
-		private Data(boolean enable, int counter) {
+		private Data(boolean enable, int opened) {
 			this.enable = enable;
-			this.counter = counter;
+			this.opened = opened;
 		}
 	}
 
@@ -88,10 +88,6 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 		clearAll();
 	}
 
-	public static void clear() {
-		clearAll();
-	}
-
 	public static synchronized CLanguageServerEnableCache getInstance() {
 		if (instance == null) {
 			instance = new CLanguageServerEnableCache();
@@ -104,8 +100,8 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 		return data != null ? data.enable : null;
 	}
 
-	public void put(URI uri, boolean value) {
-		cache.put(uri, new Data(value));
+	public void disable(URI uri) {
+		cache.put(uri, new Data(false));
 	}
 
 	@Override
@@ -114,6 +110,15 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 		if (C_SOURCE.contentEquals(id) || CXX_SOURCE.contentEquals(id) || C_HEADER.contentEquals(id)
 				|| CXX_HEADER.contentEquals(id)) {
 			clearAll();
+			// add all opened files again if content type is still a C/C++ source or header:
+			LspUtils.getFilesInLspBasedEditor().stream().forEach(uri -> {
+				var data = cache.get(uri);
+				if (data != null) {
+					++data.opened;
+				} else {
+					cache.put(uri, new Data(true, 1));
+				}
+			});
 		}
 	}
 
@@ -134,7 +139,7 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
 				var data = cache.get(uri);
 				if (data != null) {
-					if (--data.counter <= 0) {
+					if (--data.opened <= 0) {
 						cache.remove(uri);
 					}
 				}
@@ -154,7 +159,7 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 				var data = cache.get(uri);
 				if (data != null) {
 					data.enable = true;
-					++data.counter;
+					++data.opened;
 				} else {
 					cache.put(uri, new Data(true, 1));
 				}
