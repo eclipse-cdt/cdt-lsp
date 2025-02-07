@@ -19,13 +19,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.cdt.internal.core.LRUCache;
-import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.internal.content.ContentTypeManager;
 import org.eclipse.core.runtime.content.IContentTypeManager.ContentTypeChangeEvent;
 import org.eclipse.core.runtime.content.IContentTypeManager.IContentTypeChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.lsp4e.LSPEclipseUtils;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWindowListener;
@@ -36,14 +33,13 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 
 /**
  * Caches the Language Server enable for a given resource URI. Used by {@link HasLanguageServerPropertyTester#test(Object, String, Object[], Object)}
- * The cache is getting cleared:
- * - on changes in the C/C++ related content types or
- * - the prefer LSP editor option has been changed (workspace or project level)
+ * The cache is getting cleared on changes in the C/C++ related content types.
+ *
+ * The cache is limited to 100 elements. The oldest entry will be removed.
  * A resource URI shall be removed from the cache if it's getting closed in the editor.
  * The enable Language Server is cached when the file has been opened in the LSP based C/C++ editor.
  */
-public final class CLanguageServerEnableCache
-		implements IPreferenceChangeListener, IContentTypeChangeListener, IPartListener, IWindowListener {
+public final class CLanguageServerEnableCache implements IContentTypeChangeListener, IPartListener, IWindowListener {
 
 	private class Data {
 		boolean enable = false;
@@ -110,13 +106,6 @@ public final class CLanguageServerEnableCache
 
 	public void put(URI uri, boolean value) {
 		cache.put(uri, new Data(value));
-	}
-
-	@Override
-	public void preferenceChange(PreferenceChangeEvent event) {
-		if (EditorMetadata.PREFER_LSP_KEY.contentEquals(event.getKey())) {
-			clearAll();
-		}
 	}
 
 	@Override
