@@ -105,10 +105,7 @@ public final class CLanguageServerEnableCache
 
 	public Boolean get(URI uri) {
 		var data = cache.get(uri);
-		if (data != null) {
-			return data.enable;
-		}
-		return null;
+		return data != null ? data.enable : null;
 	}
 
 	public void put(URI uri, boolean value) {
@@ -144,8 +141,7 @@ public final class CLanguageServerEnableCache
 	// remove cache only if the URI is not opened in any other LSP based editor editor.
 	@Override
 	public void partClosed(IWorkbenchPart part) {
-		if (part instanceof ExtensionBasedTextEditor editor
-				&& LspUtils.isCContentType(LspUtils.getContentType(editor.getEditorInput()))) {
+		if (part instanceof ExtensionBasedTextEditor editor && LspUtils.checkForCContentType(editor.getEditorInput())) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
 				var data = cache.get(uri);
 				if (data != null) {
@@ -166,8 +162,7 @@ public final class CLanguageServerEnableCache
 
 	@Override
 	public void partOpened(IWorkbenchPart part) {
-		if (part instanceof ExtensionBasedTextEditor editor
-				&& LspUtils.isCContentType(LspUtils.getContentType(editor.getEditorInput()))) {
+		if (part instanceof ExtensionBasedTextEditor editor && LspUtils.checkForCContentType(editor.getEditorInput())) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
 				var data = cache.get(uri);
 				if (data != null) {

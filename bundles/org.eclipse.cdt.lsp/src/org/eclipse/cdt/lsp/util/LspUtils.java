@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.util;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
+import org.eclipse.core.internal.content.ContentTypeManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -33,10 +35,10 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
 public class LspUtils {
-	private static final String EMPTY = ""; //$NON-NLS-1$
 
 	/**
 	 * Checks if given ContentType id matches the content types for C/C++ files.
@@ -131,16 +133,27 @@ public class LspUtils {
 		return false;
 	}
 
-	public static String getContentType(IEditorInput editorInput) {
+	public static boolean checkForCContentType(IEditorInput editorInput) {
 		if (editorInput instanceof IFileEditorInput fileEditorInput) {
 			try {
 				return Optional.ofNullable(fileEditorInput.getFile().getContentDescription())
-						.map(cd -> cd.getContentType()).map(ct -> ct.getId()).orElse(EMPTY);
+						.map(cd -> cd.getContentType()).map(ct -> ct.getId()).map(LspUtils::isCContentType)
+						.orElse(false);
 			} catch (CoreException e) {
 				// do nothing
 			}
+		} else if (editorInput instanceof FileStoreEditorInput fileStore) {
+			File file = fileStore.getAdapter(File.class);
+			if (file != null) {
+				var contentTypes = ContentTypeManager.getInstance().findContentTypesFor(file.getName());
+				for (var contentType : contentTypes) {
+					if (isCContentType(contentType.getId())) {
+						return true;
+					}
+				}
+			}
 		}
-		return EMPTY;
+		return false;
 	}
 
 	//FIXME: AF: consider removing, since it doesn't recognize containers, use UriResource instead
