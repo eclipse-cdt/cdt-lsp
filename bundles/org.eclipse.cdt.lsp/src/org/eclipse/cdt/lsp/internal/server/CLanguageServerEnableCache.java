@@ -32,7 +32,6 @@ import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 
 /**
@@ -45,11 +44,14 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
  */
 public final class CLanguageServerEnableCache
 		implements IPreferenceChangeListener, IContentTypeChangeListener, IPartListener, IWindowListener {
+
+	private static final int BUFFER_SIZE = 100;
 	private static final String C_SOURCE = "org.eclipse.cdt.core.cSource"; //$NON-NLS-1$
 	private static final String CXX_SOURCE = "org.eclipse.cdt.core.cxxSource"; //$NON-NLS-1$
 	private static final String C_HEADER = "org.eclipse.cdt.core.cHeader"; //$NON-NLS-1$
 	private static final String CXX_HEADER = "org.eclipse.cdt.core.cxxHeader"; //$NON-NLS-1$
-	private static final Map<URI, Boolean> cache = Collections.synchronizedMap(new LRUCache<>(100));
+	private static final Map<URI, Boolean> cache = Collections.synchronizedMap(new LRUCache<>(BUFFER_SIZE));
+	private static final Map<URI, Integer> counter = Collections.synchronizedMap(new LRUCache<>(BUFFER_SIZE));
 	private static CLanguageServerEnableCache instance = null;
 
 	private CLanguageServerEnableCache() {
@@ -62,6 +64,11 @@ public final class CLanguageServerEnableCache
 		}
 	}
 
+	private static void clearAll() {
+		cache.clear();
+		counter.clear();
+	}
+
 	public static void stop() {
 		if (instance != null) {
 			ContentTypeManager.getInstance().removeContentTypeChangeListener(instance);
@@ -70,11 +77,11 @@ public final class CLanguageServerEnableCache
 			Arrays.stream(workbench.getWorkbenchWindows()).map(IWorkbenchWindow::getPages).flatMap(Arrays::stream)
 					.forEach(p -> p.removePartListener(instance));
 		}
-		cache.clear();
+		clearAll();
 	}
 
 	public static void clear() {
-		cache.clear();
+		clearAll();
 	}
 
 	public static synchronized CLanguageServerEnableCache getInstance() {
@@ -95,7 +102,7 @@ public final class CLanguageServerEnableCache
 	@Override
 	public void preferenceChange(PreferenceChangeEvent event) {
 		if (EditorMetadata.PREFER_LSP_KEY.contentEquals(event.getKey())) {
-			cache.clear();
+			clearAll();
 		}
 	}
 
@@ -104,7 +111,7 @@ public final class CLanguageServerEnableCache
 		var id = event.getContentType().getId();
 		if (C_SOURCE.contentEquals(id) || CXX_SOURCE.contentEquals(id) || C_HEADER.contentEquals(id)
 				|| CXX_HEADER.contentEquals(id)) {
-			cache.clear();
+			clearAll();
 		}
 	}
 
@@ -118,10 +125,20 @@ public final class CLanguageServerEnableCache
 		// do nothing
 	}
 
+	// remove cache only if the URI is not opened in any other LSP based editor editor.
 	@Override
 	public void partClosed(IWorkbenchPart part) {
-		if (part instanceof TextEditor editor) {
-			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> cache.remove(uri));
+		if (part instanceof ExtensionBasedTextEditor editor
+				&& LspUtils.isCContentType(LspUtils.getContentType(editor.getEditorInput()))) {
+			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
+				var cnt = counter.getOrDefault(uri, 1);
+				if (--cnt <= 0) {
+					cache.remove(uri);
+					counter.remove(uri);
+				} else {
+					counter.put(uri, cnt);
+				}
+			});
 		}
 	}
 
@@ -134,7 +151,13 @@ public final class CLanguageServerEnableCache
 	public void partOpened(IWorkbenchPart part) {
 		if (part instanceof ExtensionBasedTextEditor editor
 				&& LspUtils.isCContentType(LspUtils.getContentType(editor.getEditorInput()))) {
-			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> cache.put(uri, true));
+			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
+				cache.put(uri, true);
+				var cnt = counter.putIfAbsent(uri, 1);
+				if (cnt != null) {
+					counter.put(uri, ++cnt);
+				}
+			});
 		}
 	}
 
