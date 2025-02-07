@@ -85,23 +85,20 @@ public class LspUtils {
 
 	public static List<URI> getFilesInLspBasedEditor() {
 		var uris = new ArrayList<URI>();
-		var editors = getEditors();
-		if (!editors.isEmpty()) {
-			for (IEditorReference editor : editors) {
-				if (LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId())) {
-					IEditorInput editorInput = null;
-					try {
-						editorInput = editor.getEditorInput();
-					} catch (PartInitException e) {
-						Platform.getLog(LspUtils.class).error(e.getMessage(), e);
-						continue;
-					}
-					if (checkForCContentType(editorInput)) {
-						if (editorInput instanceof IURIEditorInput uriEditorInput) {
-							uris.add(uriEditorInput.getURI());
-						} else if (editorInput instanceof FileEditorInput fileEditorInput) {
-							uris.add(fileEditorInput.getFile().getLocationURI());
-						}
+		for (IEditorReference editor : getEditors()) {
+			if (LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId())) {
+				IEditorInput editorInput = null;
+				try {
+					editorInput = editor.getEditorInput();
+				} catch (PartInitException e) {
+					Platform.getLog(LspUtils.class).error(e.getMessage(), e);
+					continue;
+				}
+				if (checkForCContentType(editorInput)) {
+					if (editorInput instanceof IURIEditorInput uriEditorInput) {
+						uris.add(uriEditorInput.getURI());
+					} else if (editorInput instanceof FileEditorInput fileEditorInput) {
+						uris.add(fileEditorInput.getFile().getLocationURI());
 					}
 				}
 			}
