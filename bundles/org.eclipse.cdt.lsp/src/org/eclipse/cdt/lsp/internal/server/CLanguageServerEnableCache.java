@@ -147,6 +147,7 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
 				var data = cache.get(uri);
 				if (data != null) {
+					data.restored = false;
 					if (--data.opened <= 0) {
 						cache.remove(uri);
 					}
@@ -170,6 +171,9 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 					++data.opened;
 				} else if (data == null) {
 					cache.put(uri, new Data(true, 1));
+				}
+				if (data != null) {
+					data.restored = false;
 				}
 			});
 		}
