@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -11,8 +11,6 @@
  *******************************************************************************/
 
 package org.eclipse.cdt.lsp.editor;
-
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 
 public interface EditorOptions {
 
@@ -43,15 +41,5 @@ public interface EditorOptions {
 	 * @return if only edited lines should be formatted
 	 */
 	boolean formatEditedLines();
-
-	/**
-	 * @since 3.0
-	 */
-	void addPreferenceChangedListener(IPreferenceChangeListener listener);
-
-	/**
-	 * @since 3.0
-	 */
-	void removePreferenceChangedListener(IPreferenceChangeListener listener);
 
 }

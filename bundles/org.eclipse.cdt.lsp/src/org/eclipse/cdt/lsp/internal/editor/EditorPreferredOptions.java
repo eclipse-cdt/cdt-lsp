@@ -12,14 +12,11 @@
 
 package org.eclipse.cdt.lsp.internal.editor;
 
-import java.util.Optional;
-
 import org.eclipse.cdt.lsp.PreferredOptions;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.cdt.lsp.editor.LanguageServerEnable;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
 public final class EditorPreferredOptions extends PreferredOptions implements EditorOptions, LanguageServerEnable {
@@ -57,20 +54,6 @@ public final class EditorPreferredOptions extends PreferredOptions implements Ed
 			return enable.isEnabledFor(project);
 		}
 		return booleanValue(EditorMetadata.preferLspEditor);
-	}
-
-	@Override
-	public void addPreferenceChangedListener(IPreferenceChangeListener listener) {
-		for (var scope : scopes) {
-			Optional.ofNullable(scope.getNode(qualifier)).ifPresent(n -> n.addPreferenceChangeListener(listener));
-		}
-	}
-
-	@Override
-	public void removePreferenceChangedListener(IPreferenceChangeListener listener) {
-		for (var scope : scopes) {
-			Optional.ofNullable(scope.getNode(qualifier)).ifPresent(n -> n.removePreferenceChangeListener(listener));
-		}
 	}
 
 }

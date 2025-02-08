@@ -17,10 +17,6 @@ import org.eclipse.cdt.lsp.internal.messages.LspUiMessages;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
 public interface EditorMetadata extends ConfigurationMetadata {
-	/**
-	 * @since 3.0
-	 */
-	public static final String PREFER_LSP_KEY = "prefer_lsp"; //$NON-NLS-1$
 
 	/**
 	 * The predefined metadata for the "Prefer C/C++ Editor (LSP)" option
@@ -30,7 +26,8 @@ public interface EditorMetadata extends ConfigurationMetadata {
 	 * @since 3.0
 	 */
 	PreferenceMetadata<Boolean> preferLspEditor = new PreferenceMetadata<>(Boolean.class, //
-			PREFER_LSP_KEY, false, //
+			"prefer_lsp", //$NON-NLS-1$
+			false, //
 			LspUiMessages.LspEditorConfigurationPage_preferLspEditor,
 			LspUiMessages.LspEditorConfigurationPage_preferLspEditor_description);
 
