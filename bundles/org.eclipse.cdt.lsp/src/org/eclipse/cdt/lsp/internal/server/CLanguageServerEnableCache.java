@@ -166,14 +166,14 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 		if (part instanceof ExtensionBasedTextEditor editor && LspUtils.checkForCContentType(editor.getEditorInput())) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
 				var data = cache.get(uri);
-				if (data != null && !data.restored) {
+				if (data != null) {
 					data.enable = true;
-					++data.opened;
+					if (!data.restored) {
+						++data.opened;
+					}
+					data.restored = false;
 				} else if (data == null) {
 					cache.put(uri, new Data(true, 1));
-				}
-				if (data != null) {
-					data.restored = false;
 				}
 			});
 		}
