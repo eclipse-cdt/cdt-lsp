@@ -25,6 +25,7 @@ import org.eclipse.cdt.lsp.test.TestUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.tests.harness.util.DisplayHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,6 +69,7 @@ class CLanguageServerEnableCacheTest {
 		// GIVEN is an opened file in the LSP based C/C++ editor:
 		var uri = externalFile.toURI();
 		editor = TestUtils.openInEditor(uri, LspPlugin.LSP_C_EDITOR_ID);
+		DisplayHelper.sleep(1000);
 		// WHEN accessing the cached enable value:
 		var cachedUri = cache.get(uri);
 		// THEN the cache for the given URI is present:
@@ -76,6 +78,7 @@ class CLanguageServerEnableCacheTest {
 		assertTrue(cachedUri.booleanValue());
 		// WHEN when the file gets closed:
 		TestUtils.closeEditor(editor, false);
+		DisplayHelper.sleep(1000);
 		// THEN the cached URI has been removed:
 		assertNull(cache.get(uri));
 	}
@@ -86,6 +89,7 @@ class CLanguageServerEnableCacheTest {
 		var uri = externalFile.toURI();
 		editor = TestUtils.openInEditor(uri, LspPlugin.LSP_C_EDITOR_ID);
 		editor2 = TestUtils.openInEditorInNewWindow(uri, LspPlugin.LSP_C_EDITOR_ID);
+		DisplayHelper.sleep(1000);
 		// WHEN accessing the cached enable value:
 		var cachedUri = cache.get(uri);
 		// THEN the cache for the given URI is present:
@@ -94,11 +98,13 @@ class CLanguageServerEnableCacheTest {
 		assertTrue(cachedUri.booleanValue());
 		// WHEN when the file gets closed in the first window:
 		TestUtils.closeEditor(editor, false);
+		DisplayHelper.sleep(1000);
 		// THEN the cached URI has NOT been removed:
 		assertNotNull(cache.get(uri));
 		assertTrue(cache.get(uri).booleanValue());
 		// WHEN the file gets closed in the second window:
 		TestUtils.closeEditor(editor2, false);
+		DisplayHelper.sleep(1000);
 		// THEN the cached URI has been removed:
 		assertNull(cache.get(uri));
 	}
