@@ -26,12 +26,14 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.ide.IDE;
 import org.junit.jupiter.api.TestInfo;
 
@@ -83,6 +85,12 @@ public class TestUtils {
 		return part;
 	}
 
+	public static IEditorPart openInEditorInNewWindow(URI uri, String editorID) throws PartInitException {
+		IEditorPart part = IDE.openEditor(getNewWorkbenchWindowPage(), uri, editorID, true);
+		part.setFocus();
+		return part;
+	}
+
 	public static boolean closeEditor(IEditorPart editor, boolean save) {
 		IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page = workbenchWindow.getActivePage();
@@ -98,6 +106,15 @@ public class TestUtils {
 
 	private static IWorkbenchPage getWorkbenchPage() {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+	}
+
+	private static IWorkbenchPage getNewWorkbenchWindowPage() {
+		try {
+			return PlatformUI.getWorkbench().openWorkbenchWindow(null).getActivePage();
+		} catch (WorkbenchException e) {
+			Platform.getLog(TestUtils.class).error(e.getMessage(), e);
+		}
+		return null;
 	}
 
 }
