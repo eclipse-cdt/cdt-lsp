@@ -13,8 +13,10 @@
 package org.eclipse.cdt.lsp.internal.server;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,24 +44,35 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
  */
 public final class CLanguageServerEnableCache implements IContentTypeChangeListener, IPartListener, IWindowListener {
 
-	private class Data {
+	private final class Data {
 		boolean enable = false;
-		int opened = 0; // reflects the opened LSP based C/C++ Editors for this URI
-		boolean restored = false; // cache has been restored after content type change
+		List<Integer> editorHashes = new ArrayList<>();
 
 		private Data(boolean enable) {
 			this.enable = enable;
 		}
 
-		private Data(boolean enable, int opened) {
+		private Data(boolean enable, int hash) {
 			this.enable = enable;
-			this.opened = opened;
+			addEditor(hash);
 		}
 
-		private Data(boolean enable, int opened, boolean restored) {
-			this.enable = enable;
-			this.opened = opened;
-			this.restored = restored;
+		private void addEditor(Integer hash) {
+			var h = hash;
+			if (h != 0) {
+				editorHashes.add(h);
+			}
+		}
+
+		private void removeEditor(Integer hash) {
+			var h = hash;
+			if (editorHashes.contains(h)) {
+				editorHashes.remove(h);
+			}
+		}
+
+		private boolean allEditorsClosed() {
+			return editorHashes.isEmpty();
 		}
 	}
 
@@ -119,12 +132,12 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 				|| CXX_HEADER.contentEquals(id)) {
 			clearAll();
 			// add all opened files again if content type is still a C/C++ source or header:
-			LspUtils.getFilesInLspBasedEditor().stream().forEach(uri -> {
+			LspUtils.getFilesInLspBasedEditor().forEach((hash, uri) -> {
 				var data = cache.get(uri);
 				if (data != null) {
-					++data.opened;
+					data.addEditor(hash);
 				} else {
-					cache.put(uri, new Data(true, 1, true));
+					cache.put(uri, new Data(true, hash));
 				}
 			});
 		}
@@ -147,8 +160,8 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
 				var data = cache.get(uri);
 				if (data != null) {
-					data.restored = false;
-					if (--data.opened <= 0) {
+					data.removeEditor(part.hashCode());
+					if (data.allEditorsClosed()) {
 						cache.remove(uri);
 					}
 				}
@@ -165,15 +178,13 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 	public void partOpened(IWorkbenchPart part) {
 		if (part instanceof ExtensionBasedTextEditor editor && LspUtils.checkForCContentType(editor.getEditorInput())) {
 			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
+				var hash = part.hashCode();
 				var data = cache.get(uri);
 				if (data != null) {
 					data.enable = true;
-					if (!data.restored) {
-						++data.opened;
-					}
-					data.restored = false;
-				} else if (data == null) {
-					cache.put(uri, new Data(true, 1));
+					data.addEditor(hash);
+				} else {
+					cache.put(uri, new Data(true, hash));
 				}
 			});
 		}

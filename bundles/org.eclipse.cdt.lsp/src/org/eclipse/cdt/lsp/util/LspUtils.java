@@ -15,7 +15,9 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
@@ -83,8 +85,8 @@ public class LspUtils {
 		return false;
 	}
 
-	public static List<URI> getFilesInLspBasedEditor() {
-		var uris = new ArrayList<URI>();
+	public static Map<Integer, URI> getFilesInLspBasedEditor() {
+		var uris = new HashMap<Integer, URI>();
 		for (IEditorReference editor : getEditors()) {
 			if (LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId())) {
 				IEditorInput editorInput = null;
@@ -94,11 +96,12 @@ public class LspUtils {
 					Platform.getLog(LspUtils.class).error(e.getMessage(), e);
 					continue;
 				}
-				if (checkForCContentType(editorInput)) {
+				int hash = Optional.ofNullable(editor.getPart(true)).map(p -> p.hashCode()).orElse(0);
+				if (hash != 0 && checkForCContentType(editorInput)) {
 					if (editorInput instanceof IURIEditorInput uriEditorInput) {
-						uris.add(uriEditorInput.getURI());
+						uris.put(hash, uriEditorInput.getURI());
 					} else if (editorInput instanceof FileEditorInput fileEditorInput) {
-						uris.add(fileEditorInput.getFile().getLocationURI());
+						uris.put(hash, fileEditorInput.getFile().getLocationURI());
 					}
 				}
 			}
