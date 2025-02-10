@@ -6,6 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse.org
 Fragment-Host: org.eclipse.cdt.lsp
 Require-Bundle: junit-jupiter-api,
- org.eclipse.ui.tests.harness
+ org.eclipse.ui.tests.harness,
+ org.eclipse.egit.ui,
+ org.eclipse.egit.core
 Automatic-Module-Name: org.eclipse.cdt.lsp.test
 Bundle-RequiredExecutionEnvironment: JavaSE-17
