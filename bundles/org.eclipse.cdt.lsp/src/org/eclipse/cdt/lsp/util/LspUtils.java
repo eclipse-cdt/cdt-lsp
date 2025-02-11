@@ -168,13 +168,10 @@ public class LspUtils {
 				// do nothing
 			}
 		} else if (editorInput instanceof FileStoreEditorInput fileStore) {
-			File file = fileStore.getAdapter(File.class);
-			if (file != null) {
-				var contentType = Platform.getContentTypeManager().findContentTypeFor(file.getName());
+				var contentType = Platform.getContentTypeManager().findContentTypeFor(fileStore.getName());
 				if (contentType != null) {
 					return isCContentType(contentType.getId());
 				}
-			}
 		}
 		return false;
 	}
