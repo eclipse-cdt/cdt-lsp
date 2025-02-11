@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2023, 2024, 2025 Contributors to the Eclipse Foundation.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -14,13 +14,16 @@ package org.eclipse.cdt.lsp.util;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.content.IContentType;
@@ -28,9 +31,11 @@ import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.lsp4e.LanguageServiceAccessor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
 public class LspUtils {
@@ -79,6 +84,30 @@ public class LspUtils {
 		return false;
 	}
 
+	public static Map<Integer, URI> getFilesInLspBasedEditor() {
+		var uris = new HashMap<Integer, URI>();
+		for (IEditorReference editor : getEditors()) {
+			if (LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId())) {
+				IEditorInput editorInput = null;
+				try {
+					editorInput = editor.getEditorInput();
+				} catch (PartInitException e) {
+					Platform.getLog(LspUtils.class).error(e.getMessage(), e);
+					continue;
+				}
+				int hash = Optional.ofNullable(editor.getPart(true)).map(p -> p.hashCode()).orElse(0);
+				if (hash != 0 && checkForCContentType(editorInput)) {
+					if (editorInput instanceof IURIEditorInput uriEditorInput) {
+						uris.put(hash, uriEditorInput.getURI());
+					} else if (editorInput instanceof FileEditorInput fileEditorInput) {
+						uris.put(hash, fileEditorInput.getFile().getLocationURI());
+					}
+				}
+			}
+		}
+		return uris;
+	}
+
 	public static boolean isFileOpenedInLspEditor(IEditorInput editorInput, IContentType contentType) {
 		if (editorInput == null) {
 			return false;
@@ -123,6 +152,24 @@ public class LspUtils {
 			var activeEditor = activeWorkbenchWindow.getActivePage().getActiveEditor();
 			if (activeEditor != null) {
 				return LspPlugin.LSP_C_EDITOR_ID.equals(activeEditor.getEditorSite().getId());
+			}
+		}
+		return false;
+	}
+
+	public static boolean checkForCContentType(IEditorInput editorInput) {
+		if (editorInput instanceof IFileEditorInput fileEditorInput) {
+			try {
+				return Optional.ofNullable(fileEditorInput.getFile().getContentDescription())
+						.map(cd -> cd.getContentType()).map(ct -> ct.getId()).map(LspUtils::isCContentType)
+						.orElse(false);
+			} catch (CoreException e) {
+				// do nothing
+			}
+		} else if (editorInput instanceof FileStoreEditorInput fileStore) {
+			var contentType = Platform.getContentTypeManager().findContentTypeFor(fileStore.getName());
+			if (contentType != null) {
+				return isCContentType(contentType.getId());
 			}
 		}
 		return false;

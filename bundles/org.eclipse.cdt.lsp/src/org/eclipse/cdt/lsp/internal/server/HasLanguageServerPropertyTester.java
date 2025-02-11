@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2024, 2025 Bachmann electronic GmbH and others.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -37,6 +37,7 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	private final ICLanguageServerProvider cLanguageServerProvider;
 	private final ServiceCaller<InitialUri> initial;
 	private final ServiceCaller<IWorkspace> workspace;
+	private final CLanguageServerEnableCache cache = CLanguageServerEnableCache.getInstance();
 	private Optional<IProject> project;
 
 	public HasLanguageServerPropertyTester() {
@@ -49,11 +50,16 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 		if (cLanguageServerProvider != null) {
-			if (receiver instanceof URI) {
+			if (receiver instanceof URI uri) {
 				// called from the language server enabler for LSP4E:
-				var uri = (URI) receiver;
-				if (!validContentType(uri))
+				var value = cache.get(uri);
+				if (value.isPresent()) {
+					return value.get().booleanValue();
+				}
+				if (!validContentType(uri)) {
+					cache.disable(uri);
 					return false;
+				}
 				// when getProject is empty, it's an external file: Check if the file is already opened, if not check the active editor:
 				var isEnabled = enabledFor(uri);
 				if (isEnabled) {
