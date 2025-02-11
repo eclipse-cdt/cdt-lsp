@@ -116,9 +116,8 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 		return instance;
 	}
 
-	public Boolean get(URI uri) {
-		var data = cache.get(uri);
-		return data != null ? data.enable : null;
+	public Optional<Boolean> get(URI uri) {
+		return Optional.ofNullable(cache.get(uri)).map(data -> data.enable);
 	}
 
 	public void disable(URI uri) {

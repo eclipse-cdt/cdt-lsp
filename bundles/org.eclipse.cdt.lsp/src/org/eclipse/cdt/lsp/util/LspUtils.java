@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.util;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,10 +167,10 @@ public class LspUtils {
 				// do nothing
 			}
 		} else if (editorInput instanceof FileStoreEditorInput fileStore) {
-				var contentType = Platform.getContentTypeManager().findContentTypeFor(fileStore.getName());
-				if (contentType != null) {
-					return isCContentType(contentType.getId());
-				}
+			var contentType = Platform.getContentTypeManager().findContentTypeFor(fileStore.getName());
+			if (contentType != null) {
+				return isCContentType(contentType.getId());
+			}
 		}
 		return false;
 	}

@@ -53,8 +53,8 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 			if (receiver instanceof URI uri) {
 				// called from the language server enabler for LSP4E:
 				var value = cache.get(uri);
-				if (value != null) {
-					return value.booleanValue();
+				if (value.isPresent()) {
+					return value.get().booleanValue();
 				}
 				if (!validContentType(uri)) {
 					cache.disable(uri);
