@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdContentAssistConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdContentAssistOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.ClangdQualifier;
@@ -35,6 +37,9 @@ import org.osgi.service.component.annotations.Reference;
 
 @Component
 public final class ClangdConfigurationAccess extends ConfigurationAccess implements ClangdConfiguration {
+
+	@Reference
+	private ClangdContentAssistConfiguration contentAssistConfiguration;
 
 	@Reference
 	private ClangdMetadata metadata;
@@ -102,6 +107,9 @@ public final class ClangdConfigurationAccess extends ConfigurationAccess impleme
 		if (!options.queryDriver().isBlank()) {
 			list.add(NLS.bind("--query-driver={0}", options.queryDriver())); //$NON-NLS-1$
 		}
+		ClangdContentAssistOptions contentAssistOptions = contentAssistConfiguration.options(context);
+		list.add(NLS.bind("--function-arg-placeholders={0}", //$NON-NLS-1$
+				String.valueOf(contentAssistOptions.fillFunctionArguments())));
 
 		list.addAll(options.additionalOptions());
 		return list;
