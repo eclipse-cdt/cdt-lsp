@@ -38,6 +38,12 @@
             class="org.eclipse.cdt.lsp.clangd.internal.ui.ContentAssistConfigurationPage"
             id="org.eclipse.cdt.lsp.clangd.editor.contentAssistPreferencePage"
             name="%ContentAssistPreferencePage.name">
+         <keywordReference
+               id="org.eclipse.cdt.ui.contentassist">
+         </keywordReference>
+         <keywordReference
+               id="org.eclipse.cdt.ui.common">
+         </keywordReference>
       </page>
    </extension>
    <extension
