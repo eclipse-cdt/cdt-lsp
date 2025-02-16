@@ -92,9 +92,15 @@
          point="org.eclipse.ui.commands">
       <!-- FIXME: AF: Register "org.eclipse.cdt.lsp.clangd.editor.commands.category.extensions" -->
       <command
+            categoryId="org.eclipse.cdt.lsp.clangd.command.category"
             id="org.eclipse.cdt.lsp.clangd.editor.commands.command.switchSourceHeader"
             name="%Commands.ToggleSourceAndHeader.name">
       </command>
+      <category
+            description="%Commands.Category.name.description"
+            id="org.eclipse.cdt.lsp.clangd.command.category"
+            name="%Commands.Category.name">
+      </category>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
