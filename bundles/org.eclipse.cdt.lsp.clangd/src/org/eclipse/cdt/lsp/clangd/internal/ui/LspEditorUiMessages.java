@@ -50,4 +50,8 @@ public class LspEditorUiMessages extends NLS {
 	public static String ClangFormatConfigurationPage_openProjectFormatFile;
 	public static String ClangFormatConfigurationPage_openFormatFileTooltip;
 
+	public static String ContentAssistConfigurationPage_fill_function_arguments;
+	public static String ContentAssistConfigurationPage_fill_function_arguments_description;
+	public static String ContentAssistConfigurationPage_insertion_group_name;
+
 }

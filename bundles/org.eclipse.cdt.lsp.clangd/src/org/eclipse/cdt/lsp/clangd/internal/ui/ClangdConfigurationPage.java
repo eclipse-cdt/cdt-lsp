@@ -58,15 +58,12 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 		var configSettingsChanged = configurationSettingsChanged();
 		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
 		var done = super.performOk();
-		if (done && isLsActive() && (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
-				|| projectOptionsDifferFromWorkspace)) {
-			restartClangd();
+		if (done && LspUtils.isLsActive()
+				&& (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
+						|| projectOptionsDifferFromWorkspace)) {
+			LspUtils.restartClangd();
 		}
 		return done;
-	}
-
-	private void restartClangd() {
-		LspUtils.getLanguageServers(false).forEach(w -> w.restart());
 	}
 
 	/**
@@ -84,11 +81,6 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	private boolean projectOptionsDifferFromWorkspace() {
 		return hasProjectSpecificOptions() != useProjectSettings()
 				&& ((ClangdConfigurationArea) area).optionsChanged(configuration.options(null));
-	}
-
-	private boolean isLsActive() {
-		return LspUtils.getLanguageServers(false).stream().findFirst().filter(w -> w.startupFailed() || w.isActive())
-				.isPresent();
 	}
 
 	@Override

@@ -16,6 +16,9 @@
       <initializer
             class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdPreferenceInitializer">
       </initializer>
+      <initializer
+            class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdContentAssistPreferenceInitializer">
+      </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
@@ -28,6 +31,18 @@
             name="%ClangdConfigurationPage.name">
          <keywordReference
                id="org.eclipse.cdt.ui.ceditor">
+         </keywordReference>
+      </page>
+      <page
+            category="org.eclipse.cdt.lsp.editor.preferencePage"
+            class="org.eclipse.cdt.lsp.clangd.internal.ui.ContentAssistConfigurationPage"
+            id="org.eclipse.cdt.lsp.clangd.editor.contentAssistPreferencePage"
+            name="%ContentAssistPreferencePage.name">
+         <keywordReference
+               id="org.eclipse.cdt.ui.contentassist">
+         </keywordReference>
+         <keywordReference
+               id="org.eclipse.cdt.ui.common">
          </keywordReference>
       </page>
    </extension>

@@ -205,4 +205,13 @@ public class LspUtils {
 				.filter(w -> "org.eclipse.cdt.lsp.server".equals(w.serverDefinition.id)).toList(); //$NON-NLS-1$
 	}
 
+	public static boolean isLsActive() {
+		return getLanguageServers(false).stream().findFirst().filter(w -> w.startupFailed() || w.isActive())
+				.isPresent();
+	}
+
+	public static void restartClangd() {
+		getLanguageServers(false).forEach(w -> w.restart());
+	}
+
 }

@@ -34,6 +34,8 @@ Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangForm
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdCommandLineValidator.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdContentAssistConfigurationAccess.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdContentAssistMetadataDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdFallbackManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdMetadataDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings.xml
