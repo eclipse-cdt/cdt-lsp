@@ -57,6 +57,8 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	private final Button validateOptions;
 	private final Group group;
 	private ControlEnableState enableState;
+	private final Button setCompilationDatabase;
+	private ControlEnableState enableSetDatabaseState;
 
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private final Map<PreferenceMetadata<String>, Combo> combos;
@@ -107,6 +109,14 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 			enableState = null;
 		} else {
 			enableState = ControlEnableState.disable(group);
+		}
+		if (enableSetDatabaseState != null) {
+			enableSetDatabaseState.restore();
+		}
+		if (enable) {
+			enableSetDatabaseState = null;
+		} else {
+			enableSetDatabaseState = ControlEnableState.disable(setCompilationDatabase);
 		}
 	}
 
