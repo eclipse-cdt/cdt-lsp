@@ -14,7 +14,9 @@
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -202,6 +204,21 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		buttons.entrySet().forEach(e -> store.save(e.getValue().getSelection(), e.getKey()));
 		texts.entrySet().forEach(e -> store.save(e.getValue().getText(), e.getKey()));
 		combos.entrySet().forEach(e -> store.save(completions.get(e.getValue().getText()), e.getKey()));
+	}
+
+	@Override
+	public List<String> getPreferenceKeys() {
+		var list = new ArrayList<String>(1);
+		list.add(ClangdMetadata.additionalOptions.identifer());
+		list.add(ClangdMetadata.clangdPath.identifer());
+		list.add(ClangdMetadata.completionStyle.identifer());
+		list.add(ClangdMetadata.logToConsole.identifer());
+		list.add(ClangdMetadata.prettyPrint.identifer());
+		list.add(ClangdMetadata.queryDriver.identifer());
+		list.add(ClangdMetadata.useBackgroundIndex.identifer());
+		list.add(ClangdMetadata.useTidy.identifer());
+		list.add(ClangdMetadata.validateClangdOptions.identifer());
+		return list;
 	}
 
 	@Override

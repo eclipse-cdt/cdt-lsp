@@ -201,8 +201,11 @@ public abstract class ConfigurationPage<C extends Configuration, O> extends Prop
 		}
 		IEclipsePreferences prefs = manager.getWorkingCopy(scope().getNode(configuration.qualifier()));
 		try {
+			var areaKeys = area.getPreferenceKeys();
 			for (String key : prefs.keys()) {
-				prefs.remove(key);
+				if (areaKeys.contains(key)) {
+					prefs.remove(key);
+				}
 			}
 		} catch (BackingStoreException e) {
 			Platform.getLog(getClass()).error("Unable to restore default values.", e); //$NON-NLS-1$
