@@ -14,5 +14,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.cdt.lsp.examples.preferences
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.HidePreferLsp.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.HideTryNewExperienceBanner.xml,
  OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.MyClangdEnable.xml,
  OSGI-INF/org.eclipse.cdt.lsp.examples.preferences.MyClangdOptionsDefaults.xml

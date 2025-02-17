@@ -275,4 +275,8 @@ public abstract class ConfigurationPage<C extends Configuration, O> extends Prop
 		super.dispose();
 	}
 
+	@Override
+	public void applyData(Object data) {
+		Optional.ofNullable(area).ifPresent(area -> area.applyData(data));
+	}
 }

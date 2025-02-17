@@ -6,6 +6,7 @@ Bundle-Version: 3.0.0.qualifier
 Export-Package: org.eclipse.cdt.lsp,
  org.eclipse.cdt.lsp.config,
  org.eclipse.cdt.lsp.editor,
+ org.eclipse.cdt.lsp.internal.switchtolsp;x-internal:=true,
  org.eclipse.cdt.lsp.plugin;x-friends:="org.eclipse.cdt.lsp.clangd",
  org.eclipse.cdt.lsp.server,
  org.eclipse.cdt.lsp.services,
@@ -36,12 +37,15 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.cdt.codan.core,
  org.eclipse.cdt.debug.ui,
  org.eclipse.ui.workbench.texteditor,
- org.eclipse.tm4e.language_pack
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+ org.eclipse.tm4e.language_pack,
+ org.eclipse.jface.notifications
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.internal.editor.EditorMetadataDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.editor.FormatOnSave.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.editor.InitialFileManager.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.switchtolsp.SwitchBack.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.internal.switchtolsp.SwitchToLsp.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.ui.DefaultConfigurationVisibility.xml,
  OSGI-INF/org.eclipse.cdt.lsp.internal.ui.EditorConfigurationAccess.xml

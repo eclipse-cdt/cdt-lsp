@@ -16,17 +16,30 @@ package org.eclipse.cdt.lsp.ui;
 
 import java.util.Optional;
 
+import org.eclipse.cdt.lsp.ResolveProjectScope;
 import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.cdt.lsp.internal.ui.EditorConfigurationArea;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 
 public final class EditorConfigurationPage extends ConfigurationPage<EditorConfiguration, EditorOptions> {
 
-	private final String id = "org.eclipse.cdt.lsp.editor.preferencePage"; //$NON-NLS-1$
+	/**
+	 * @noreference This field is not intended to be referenced by clients.
+	 */
+	public static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.editor.preferencePage"; //$NON-NLS-1$
+	/**
+	 * @noreference This field is not intended to be referenced by clients.
+	 */
+	public static final String PROPERTY_PAGE_ID = "org.eclipse.cdt.lsp.editor.propertyPage"; //$NON-NLS-1$
+	/**
+	 * @noreference This field is not intended to be referenced by clients.
+	 */
+	public static final String HIGHLIGHT_PREFER_LSP = "HIGHLIGHT_PREFER_LSP"; //$NON-NLS-1$
 
 	@Override
 	protected EditorConfiguration getConfiguration(IWorkbench workbench) {
@@ -50,7 +63,7 @@ public final class EditorConfigurationPage extends ConfigurationPage<EditorConfi
 
 	@Override
 	protected String getPreferenceId() {
-		return id;
+		return PREFERENCE_PAGE_ID;
 	}
 
 	@Override
