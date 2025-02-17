@@ -73,7 +73,7 @@ public final class SaveActionsConfigurationArea extends ConfigurationArea<Editor
 
 	@Override
 	public List<String> getPreferenceKeys() {
-		var list = new ArrayList<String>(1);
+		var list = new ArrayList<String>(3);
 		list.add(EditorMetadata.formatOnSave.identifer());
 		list.add(EditorMetadata.formatAllLines.identifer());
 		list.add(EditorMetadata.formatEditedLines.identifer());
