@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.internal.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.cdt.lsp.editor.ConfigurationVisibility;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
@@ -45,6 +48,12 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 	}
 
 	@Override
+	public void store(IEclipsePreferences prefs) {
+		OsgiPreferenceMetadataStore store = new OsgiPreferenceMetadataStore(prefs);
+		buttons.entrySet().forEach(e -> store.save(e.getValue().getSelection(), e.getKey()));
+	}
+
+	@Override
 	public void load(EditorOptions options, boolean enable) {
 		if (prefer != null) {
 			prefer.setSelection(options.preferLspEditor());
@@ -53,9 +62,10 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 	}
 
 	@Override
-	public void store(IEclipsePreferences prefs) {
-		OsgiPreferenceMetadataStore store = new OsgiPreferenceMetadataStore(prefs);
-		buttons.entrySet().forEach(e -> store.save(e.getValue().getSelection(), e.getKey()));
+	public List<String> getPreferenceKeys() {
+		var list = new ArrayList<String>(1);
+		list.add(EditorMetadata.preferLspEditor.identifer());
+		return list;
 	}
 
 }

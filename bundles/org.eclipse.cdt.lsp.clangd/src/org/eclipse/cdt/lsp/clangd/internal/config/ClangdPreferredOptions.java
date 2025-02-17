@@ -77,4 +77,9 @@ final class ClangdPreferredOptions extends PreferredOptions implements ClangdOpt
 		return booleanValue(ClangdMetadata.validateClangdOptions);
 	}
 
+	@Override
+	public boolean fillFunctionArguments() {
+		return booleanValue(ClangdMetadata.fillFunctionArguments);
+	}
+
 }

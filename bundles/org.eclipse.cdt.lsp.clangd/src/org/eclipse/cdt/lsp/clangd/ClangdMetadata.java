@@ -151,4 +151,17 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 			LspEditorUiMessages.LspEditorPreferencePage_Validate_clangd_options, //
 			LspEditorUiMessages.LspEditorPreferencePage_Validate_clangd_options_description);
 
+	/**
+	 * Returns the metadata for the "Fill function arguments and show guessed arguments" option.
+	 *
+	 * @see ClangdOptions#fillFunctionArguments()
+	 *
+	 * @since 3.0
+	 */
+	PreferenceMetadata<Boolean> fillFunctionArguments = new PreferenceMetadata<>(Boolean.class, //
+			"fill_function_arguments", //$NON-NLS-1$
+			true, //
+			LspEditorUiMessages.ContentAssistConfigurationPage_fill_function_arguments,
+			LspEditorUiMessages.ContentAssistConfigurationPage_fill_function_arguments_description);
+
 }

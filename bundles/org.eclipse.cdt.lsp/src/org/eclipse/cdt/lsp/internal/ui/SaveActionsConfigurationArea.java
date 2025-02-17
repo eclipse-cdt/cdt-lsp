@@ -12,6 +12,9 @@
 
 package org.eclipse.cdt.lsp.internal.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
@@ -66,6 +69,15 @@ public final class SaveActionsConfigurationArea extends ConfigurationArea<Editor
 	public void store(IEclipsePreferences prefs) {
 		OsgiPreferenceMetadataStore store = new OsgiPreferenceMetadataStore(prefs);
 		buttons.entrySet().forEach(e -> store.save(e.getValue().getSelection(), e.getKey()));
+	}
+
+	@Override
+	public List<String> getPreferenceKeys() {
+		var list = new ArrayList<String>(3);
+		list.add(EditorMetadata.formatOnSave.identifer());
+		list.add(EditorMetadata.formatAllLines.identifer());
+		list.add(EditorMetadata.formatEditedLines.identifer());
+		return list;
 	}
 
 }

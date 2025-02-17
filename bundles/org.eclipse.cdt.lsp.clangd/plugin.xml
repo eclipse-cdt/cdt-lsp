@@ -16,9 +16,6 @@
       <initializer
             class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdPreferenceInitializer">
       </initializer>
-      <initializer
-            class="org.eclipse.cdt.lsp.clangd.internal.config.ClangdContentAssistPreferenceInitializer">
-      </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">

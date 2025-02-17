@@ -83,4 +83,6 @@ public abstract class ConfigurationArea<O> {
 
 	public abstract void store(IEclipsePreferences prefs);
 
+	public abstract List<String> getPreferenceKeys();
+
 }
