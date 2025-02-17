@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.internal.ui.LspEditorUiMessages;
 import org.eclipse.cdt.lsp.config.ConfigurationMetadata;
-import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
@@ -155,7 +154,7 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 	/**
 	 * Returns the metadata for the "Fill function arguments and show guessed arguments" option.
 	 *
-	 * @see EditorOptions#fillFunctionArguments()
+	 * @see ClangdOptions#fillFunctionArguments()
 	 *
 	 * @since 3.0
 	 */
