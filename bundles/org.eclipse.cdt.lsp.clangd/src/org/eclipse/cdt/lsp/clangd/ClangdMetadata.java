@@ -171,4 +171,17 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 
 	}
 
+	/**
+	 * Returns the metadata for the "Set compilation database path" option.
+	 *
+	 * @see ClangdOptions#setCompilationDatabase()
+	 *
+	 * @since 3.0
+	 */
+	PreferenceMetadata<Boolean> setCompilationDatabase = new PreferenceMetadata<>(Boolean.class, //
+			"set_compilation_database", //$NON-NLS-1$
+			true, //
+			LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database,
+			LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database_description);
+
 }
