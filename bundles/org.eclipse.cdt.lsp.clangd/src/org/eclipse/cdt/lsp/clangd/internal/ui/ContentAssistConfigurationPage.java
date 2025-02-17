@@ -54,19 +54,10 @@ public final class ContentAssistConfigurationPage
 	public boolean performOk() {
 		var settingsChanged = configurationSettingsChanged(); // must be called prior to super.performOK(), otherwise we cannot detect pref changes.
 		var done = super.performOk();
-		if (done && isLsActive() && settingsChanged) {
-			restartClangd();
+		if (done && LspUtils.isLsActive() && settingsChanged) {
+			LspUtils.restartClangd();
 		}
 		return done;
-	}
-
-	private boolean isLsActive() {
-		return LspUtils.getLanguageServers(false).stream().findFirst().filter(w -> w.startupFailed() || w.isActive())
-				.isPresent();
-	}
-
-	private void restartClangd() {
-		LspUtils.getLanguageServers(false).forEach(w -> w.restart());
 	}
 
 	/**
