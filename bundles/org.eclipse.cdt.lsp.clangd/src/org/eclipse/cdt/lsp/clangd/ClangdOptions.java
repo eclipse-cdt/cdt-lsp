@@ -92,4 +92,14 @@ public interface ClangdOptions {
 	default boolean validateClangdOptions() {
 		return true;
 	}
+
+	/**
+	 * When disabled, completions contain only parentheses for function calls. When enabled, completions also contain placeholders for function parameters
+	 * @return true if completions shall also contain placeholders for function parameters
+	 *
+	 * @since 3.0
+	 */
+	default boolean fillFunctionArguments() {
+		return true;
+	}
 }

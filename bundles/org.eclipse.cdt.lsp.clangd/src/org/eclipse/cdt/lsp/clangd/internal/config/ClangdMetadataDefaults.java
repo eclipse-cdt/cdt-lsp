@@ -36,6 +36,7 @@ public final class ClangdMetadataDefaults extends ConfigurationMetadataBase impl
 		defined.add(additionalOptions);
 		defined.add(logToConsole);
 		defined.add(validateClangdOptions);
+		defined.add(fillFunctionArguments);
 		return defined;
 	}
 

@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
-import org.eclipse.cdt.lsp.clangd.ClangdContentAssistConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdContentAssistOptions;
+import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
@@ -20,28 +20,26 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 
-public final class ContentAssistConfigurationPage
-		extends ConfigurationPage<ClangdContentAssistConfiguration, ClangdContentAssistOptions> {
+public final class ContentAssistConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
 	private final String id = "org.eclipse.cdt.lsp.clangd.editor.contentAssistPreferencePage"; //$NON-NLS-1$
 
 	@Override
-	protected ClangdContentAssistConfiguration getConfiguration(IWorkbench workbench) {
-		return workbench.getService(ClangdContentAssistConfiguration.class);
+	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
+		return workbench.getService(ClangdConfiguration.class);
 	}
 
 	@Override
-	protected ClangdContentAssistOptions configurationDefaults() {
+	protected ClangdOptions configurationDefaults() {
 		return configuration.defaults();
 	}
 
 	@Override
-	protected ClangdContentAssistOptions configurationOptions(IAdaptable element) {
+	protected ClangdOptions configurationOptions(IAdaptable element) {
 		return configuration.options(element);
 	}
 
 	@Override
-	protected ConfigurationArea<ClangdContentAssistOptions> getConfigurationArea(Composite composite,
-			boolean isProjectScope) {
+	protected ConfigurationArea<ClangdOptions> getConfigurationArea(Composite composite, boolean isProjectScope) {
 		return new ContentAssistConfigurationArea(composite, isProjectScope);
 	}
 

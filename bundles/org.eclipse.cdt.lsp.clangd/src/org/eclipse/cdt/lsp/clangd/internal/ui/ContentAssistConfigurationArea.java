@@ -14,8 +14,8 @@ package org.eclipse.cdt.lsp.clangd.internal.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.cdt.lsp.clangd.ClangdContentAssistMetadata;
-import org.eclipse.cdt.lsp.clangd.ClangdContentAssistOptions;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-public final class ContentAssistConfigurationArea extends ConfigurationArea<ClangdContentAssistOptions> {
+public final class ContentAssistConfigurationArea extends ConfigurationArea<ClangdOptions> {
 
 	private final Button fillFunctionArguments;
 	private final Group group;
@@ -37,12 +37,11 @@ public final class ContentAssistConfigurationArea extends ConfigurationArea<Clan
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		this.group = createGroup(composite, LspEditorUiMessages.ContentAssistConfigurationPage_insertion_group_name, 3);
-		this.fillFunctionArguments = createButton(ClangdContentAssistMetadata.fillFunctionArguments, group, SWT.CHECK,
-				0);
+		this.fillFunctionArguments = createButton(ClangdMetadata.fillFunctionArguments, group, SWT.CHECK, 0);
 	}
 
 	@Override
-	public void load(ClangdContentAssistOptions options, boolean enable) {
+	public void load(ClangdOptions options, boolean enable) {
 		fillFunctionArguments.setSelection(options.fillFunctionArguments());
 		fillFunctionArguments.setEnabled(enable);
 	}
@@ -56,11 +55,11 @@ public final class ContentAssistConfigurationArea extends ConfigurationArea<Clan
 	@Override
 	public List<String> getPreferenceKeys() {
 		var list = new ArrayList<String>(1);
-		list.add(ClangdContentAssistMetadata.fillFunctionArguments.identifer());
+		list.add(ClangdMetadata.fillFunctionArguments.identifer());
 		return list;
 	}
 
-	public boolean optionsChanged(ClangdContentAssistOptions options) {
+	public boolean optionsChanged(ClangdOptions options) {
 		return options.fillFunctionArguments() != fillFunctionArguments.getSelection();
 	}
 
