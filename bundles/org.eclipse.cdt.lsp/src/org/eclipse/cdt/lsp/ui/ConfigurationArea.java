@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.layout.GridData;
@@ -84,5 +85,12 @@ public abstract class ConfigurationArea<O> {
 	public abstract void store(IEclipsePreferences prefs);
 
 	public abstract List<String> getPreferenceKeys();
+
+	/**
+	 * {@link ConfigurationArea} specific version of {@link PreferencePage#applyData(Object)}
+	 */
+	public void applyData(Object data) {
+
+	}
 
 }

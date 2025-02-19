@@ -19,6 +19,7 @@ import org.eclipse.cdt.lsp.editor.ConfigurationVisibility;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
+import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -31,6 +32,7 @@ import org.eclipse.ui.PlatformUI;
 public final class EditorConfigurationArea extends ConfigurationArea<EditorOptions> {
 
 	private final Button prefer;
+	private final Button showBanner;
 	private ConfigurationVisibility visibility;
 
 	public EditorConfigurationArea(Composite parent, boolean isProjectScope) {
@@ -41,8 +43,14 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		if (visibility.showPreferLsp(isProjectScope)) {
 			this.prefer = createButton(EditorMetadata.Predefined.preferLspEditor, composite, SWT.CHECK, 0);
+			if (!isProjectScope) {
+				this.showBanner = createButton(EditorMetadata.Predefined.showTryLspBanner, composite, SWT.CHECK, 0);
+			} else {
+				this.showBanner = null;
+			}
 		} else {
 			this.prefer = null;
+			this.showBanner = null;
 		}
 	}
 
@@ -58,11 +66,23 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 			prefer.setSelection(options.preferLspEditor());
 			prefer.setEnabled(enable);
 		}
+		if (showBanner != null) {
+			showBanner.setSelection(options.showTryLspBanner());
+			showBanner.setEnabled(enable);
+		}
 	}
 
 	@Override
 	public List<String> getPreferenceKeys() {
-		return List.of(EditorMetadata.Predefined.preferLspEditor.identifer());
+		return List.of(EditorMetadata.Predefined.preferLspEditor.identifer(),
+				EditorMetadata.Predefined.showTryLspBanner.identifer());
+	}
+
+	@Override
+	public void applyData(Object data) {
+		if (data == EditorConfigurationPage.HIGHLIGHT_PREFER_LSP) {
+			prefer.setFocus();
+		}
 	}
 
 }

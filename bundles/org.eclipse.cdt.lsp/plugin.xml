@@ -22,7 +22,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor"
+            class="org.eclipse.cdt.lsp.internal.editor.CLspEditor"
             contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
             default="false"
             icon="icons/c.png"

@@ -40,6 +40,20 @@ public interface EditorMetadata extends ConfigurationMetadata {
 				false, //
 				LspUiMessages.LspEditorConfigurationPage_preferLspEditor,
 				LspUiMessages.LspEditorConfigurationPage_preferLspEditor_description);
+
+		/**
+		 * The predefined metadata for the "Show Try LSP Banner" option
+		 *
+		 * @see EditorOptions#showTryLspBanner()
+		 *
+		 * @since 3.0
+		 */
+		PreferenceMetadata<Boolean> showTryLspBanner = new PreferenceMetadata<>(Boolean.class, //
+				"show_try_lsp_banner", //$NON-NLS-1$
+				true, //
+				LspUiMessages.LspEditorConfigurationPage_showTryLspBanner,
+				LspUiMessages.LspEditorConfigurationPage_showTryLspBanner_description);
+
 		/**
 		 * The predefined metadata for the "Format source code" option
 		 *
@@ -50,6 +64,7 @@ public interface EditorMetadata extends ConfigurationMetadata {
 				false, //
 				LspUiMessages.SaveActionsConfigurationPage_FormatSourceCode,
 				LspUiMessages.SaveActionsConfigurationPage_FormatSourceCode_description);
+
 		/**
 		 * The predefined metadata for the "Format all lines" option.
 		 *
@@ -60,6 +75,7 @@ public interface EditorMetadata extends ConfigurationMetadata {
 				true, //
 				LspUiMessages.SaveActionsConfigurationPage_FormatAllLines,
 				LspUiMessages.SaveActionsConfigurationPage_FormatAllLines_description);
+
 		/**
 		 * Returns the metadata for the "Format edited lines" option.
 		 *
@@ -76,6 +92,7 @@ public interface EditorMetadata extends ConfigurationMetadata {
 		 */
 		List<PreferenceMetadata<?>> defaults = List.of(//
 				preferLspEditor, //
+				showTryLspBanner, //
 				formatOnSave, //
 				formatAllLines, //
 				formatEditedLines//

@@ -34,6 +34,11 @@ public final class EditorPreferredOptions extends PreferredOptions implements Ed
 	}
 
 	@Override
+	public boolean showTryLspBanner() {
+		return booleanValue(EditorMetadata.Predefined.showTryLspBanner);
+	}
+
+	@Override
 	public boolean formatOnSave() {
 		return booleanValue(EditorMetadata.Predefined.formatOnSave);
 	}

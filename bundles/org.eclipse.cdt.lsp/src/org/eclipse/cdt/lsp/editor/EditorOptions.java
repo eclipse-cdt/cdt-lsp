@@ -22,6 +22,14 @@ public interface EditorOptions {
 	boolean preferLspEditor();
 
 	/**
+	 * Show the try new experience banner in the editor
+	 *
+	 * @return if banner should be displayed
+	 * @since 3.0
+	 */
+	boolean showTryLspBanner();
+
+	/**
 	 * Format source code on file save action
 	 *
 	 * @return if source code should be formatted on file save action
