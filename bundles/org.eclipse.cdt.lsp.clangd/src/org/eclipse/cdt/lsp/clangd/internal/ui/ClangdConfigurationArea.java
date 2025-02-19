@@ -79,16 +79,16 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		this.group = createGroup(composite, LspEditorUiMessages.LspEditorPreferencePage_clangd_options_label, 3);
-		this.path = createFileSelector(ClangdMetadata.clangdPath, group, this::selectClangdExecutable);
-		this.tidy = createButton(ClangdMetadata.useTidy, group, SWT.CHECK, 0);
-		this.index = createButton(ClangdMetadata.useBackgroundIndex, group, SWT.CHECK, 0);
-		this.completion = createCombo(ClangdMetadata.completionStyle, group, completionsKeys);
-		this.pretty = createButton(ClangdMetadata.prettyPrint, group, SWT.CHECK, 0);
-		this.driver = createText(ClangdMetadata.queryDriver, group, false);
-		this.additional = createText(ClangdMetadata.additionalOptions, group, true);
+		this.path = createFileSelector(ClangdMetadata.Predefined.clangdPath, group, this::selectClangdExecutable);
+		this.tidy = createButton(ClangdMetadata.Predefined.useTidy, group, SWT.CHECK, 0);
+		this.index = createButton(ClangdMetadata.Predefined.useBackgroundIndex, group, SWT.CHECK, 0);
+		this.completion = createCombo(ClangdMetadata.Predefined.completionStyle, group, completionsKeys);
+		this.pretty = createButton(ClangdMetadata.Predefined.prettyPrint, group, SWT.CHECK, 0);
+		this.driver = createText(ClangdMetadata.Predefined.queryDriver, group, false);
+		this.additional = createText(ClangdMetadata.Predefined.additionalOptions, group, true);
 		if (!isProjectScope) {
-			this.logToConsole = createButton(ClangdMetadata.logToConsole, group, SWT.CHECK, 0);
-			this.validateOptions = createButton(ClangdMetadata.validateClangdOptions, group, SWT.CHECK, 0);
+			this.logToConsole = createButton(ClangdMetadata.Predefined.logToConsole, group, SWT.CHECK, 0);
+			this.validateOptions = createButton(ClangdMetadata.Predefined.validateClangdOptions, group, SWT.CHECK, 0);
 		} else {
 			this.logToConsole = null;
 			this.validateOptions = null;
@@ -209,15 +209,15 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	@Override
 	public List<String> getPreferenceKeys() {
 		var list = new ArrayList<String>(9);
-		list.add(ClangdMetadata.additionalOptions.identifer());
-		list.add(ClangdMetadata.clangdPath.identifer());
-		list.add(ClangdMetadata.completionStyle.identifer());
-		list.add(ClangdMetadata.logToConsole.identifer());
-		list.add(ClangdMetadata.prettyPrint.identifer());
-		list.add(ClangdMetadata.queryDriver.identifer());
-		list.add(ClangdMetadata.useBackgroundIndex.identifer());
-		list.add(ClangdMetadata.useTidy.identifer());
-		list.add(ClangdMetadata.validateClangdOptions.identifer());
+		list.add(ClangdMetadata.Predefined.additionalOptions.identifer());
+		list.add(ClangdMetadata.Predefined.clangdPath.identifer());
+		list.add(ClangdMetadata.Predefined.completionStyle.identifer());
+		list.add(ClangdMetadata.Predefined.logToConsole.identifer());
+		list.add(ClangdMetadata.Predefined.prettyPrint.identifer());
+		list.add(ClangdMetadata.Predefined.queryDriver.identifer());
+		list.add(ClangdMetadata.Predefined.useBackgroundIndex.identifer());
+		list.add(ClangdMetadata.Predefined.useTidy.identifer());
+		list.add(ClangdMetadata.Predefined.validateClangdOptions.identifer());
 		return list;
 	}
 

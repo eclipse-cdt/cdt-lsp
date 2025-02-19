@@ -30,37 +30,37 @@ final class ClangdPreferredOptions extends PreferredOptions implements ClangdOpt
 
 	@Override
 	public String clangdPath() {
-		return stringValue(ClangdMetadata.clangdPath);
+		return stringValue(ClangdMetadata.Predefined.clangdPath);
 	}
 
 	@Override
 	public boolean useTidy() {
-		return booleanValue(ClangdMetadata.useTidy);
+		return booleanValue(ClangdMetadata.Predefined.useTidy);
 	}
 
 	@Override
 	public boolean useBackgroundIndex() {
-		return booleanValue(ClangdMetadata.useBackgroundIndex);
+		return booleanValue(ClangdMetadata.Predefined.useBackgroundIndex);
 	}
 
 	@Override
 	public String completionStyle() {
-		return stringValue(ClangdMetadata.completionStyle);
+		return stringValue(ClangdMetadata.Predefined.completionStyle);
 	}
 
 	@Override
 	public boolean prettyPrint() {
-		return booleanValue(ClangdMetadata.prettyPrint);
+		return booleanValue(ClangdMetadata.Predefined.prettyPrint);
 	}
 
 	@Override
 	public String queryDriver() {
-		return stringValue(ClangdMetadata.queryDriver);
+		return stringValue(ClangdMetadata.Predefined.queryDriver);
 	}
 
 	@Override
 	public List<String> additionalOptions() {
-		var options = stringValue(ClangdMetadata.additionalOptions);
+		var options = stringValue(ClangdMetadata.Predefined.additionalOptions);
 		if (options.isBlank()) {
 			return new ArrayList<>();
 		}
@@ -69,17 +69,17 @@ final class ClangdPreferredOptions extends PreferredOptions implements ClangdOpt
 
 	@Override
 	public boolean logToConsole() {
-		return booleanValue(ClangdMetadata.logToConsole);
+		return booleanValue(ClangdMetadata.Predefined.logToConsole);
 	}
 
 	@Override
 	public boolean validateClangdOptions() {
-		return booleanValue(ClangdMetadata.validateClangdOptions);
+		return booleanValue(ClangdMetadata.Predefined.validateClangdOptions);
 	}
 
 	@Override
 	public boolean fillFunctionArguments() {
-		return booleanValue(ClangdMetadata.fillFunctionArguments);
+		return booleanValue(ClangdMetadata.Predefined.fillFunctionArguments);
 	}
 
 }

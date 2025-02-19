@@ -24,7 +24,7 @@ public final class EditorMetadataDefaults extends ConfigurationMetadataBase impl
 
 	@Override
 	protected List<PreferenceMetadata<?>> definePreferences() {
-		return List.of(preferLspEditor, formatOnSave, formatAllLines, formatEditedLines);
+		return Predefined.defaults;
 	}
 
 }

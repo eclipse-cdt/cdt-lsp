@@ -40,9 +40,9 @@ public final class SaveActionsConfigurationArea extends ConfigurationArea<Editor
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 
-		this.format = createButton(EditorMetadata.formatOnSave, composite, SWT.CHECK, 0);
-		this.formatAll = createButton(EditorMetadata.formatAllLines, composite, SWT.RADIO, 15);
-		this.formatEdited = createButton(EditorMetadata.formatEditedLines, composite, SWT.RADIO, 15);
+		this.format = createButton(EditorMetadata.Predefined.formatOnSave, composite, SWT.CHECK, 0);
+		this.formatAll = createButton(EditorMetadata.Predefined.formatAllLines, composite, SWT.RADIO, 15);
+		this.formatEdited = createButton(EditorMetadata.Predefined.formatEditedLines, composite, SWT.RADIO, 15);
 
 		final SelectionAdapter formatListener = new SelectionAdapter() {
 			@Override
@@ -74,9 +74,9 @@ public final class SaveActionsConfigurationArea extends ConfigurationArea<Editor
 	@Override
 	public List<String> getPreferenceKeys() {
 		var list = new ArrayList<String>(3);
-		list.add(EditorMetadata.formatOnSave.identifer());
-		list.add(EditorMetadata.formatAllLines.identifer());
-		list.add(EditorMetadata.formatEditedLines.identifer());
+		list.add(EditorMetadata.Predefined.formatOnSave.identifer());
+		list.add(EditorMetadata.Predefined.formatAllLines.identifer());
+		list.add(EditorMetadata.Predefined.formatEditedLines.identifer());
 		return list;
 	}
 

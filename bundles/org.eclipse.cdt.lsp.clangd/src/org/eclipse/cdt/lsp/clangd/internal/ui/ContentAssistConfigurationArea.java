@@ -37,7 +37,7 @@ public final class ContentAssistConfigurationArea extends ConfigurationArea<Clan
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		this.group = createGroup(composite, LspEditorUiMessages.ContentAssistConfigurationPage_insertion_group_name, 3);
-		this.fillFunctionArguments = createButton(ClangdMetadata.fillFunctionArguments, group, SWT.CHECK, 0);
+		this.fillFunctionArguments = createButton(ClangdMetadata.Predefined.fillFunctionArguments, group, SWT.CHECK, 0);
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public final class ContentAssistConfigurationArea extends ConfigurationArea<Clan
 	@Override
 	public List<String> getPreferenceKeys() {
 		var list = new ArrayList<String>(1);
-		list.add(ClangdMetadata.fillFunctionArguments.identifer());
+		list.add(ClangdMetadata.Predefined.fillFunctionArguments.identifer());
 		return list;
 	}
 

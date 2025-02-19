@@ -57,7 +57,7 @@ public final class EditorConfigurationPage extends ConfigurationPage<EditorConfi
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(EditorMetadata.preferLspEditor.identifer(), null))//
+				.map(n -> n.get(EditorMetadata.Predefined.preferLspEditor.identifer(), null))//
 				.isPresent();
 	}
 

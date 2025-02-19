@@ -29,7 +29,7 @@ public final class TestUtils {
 
 	public static void setLspPreferred(IProject project, boolean value) {
 		ServiceCaller.callOnce(TestUtils.class, EditorConfiguration.class, //
-				cc -> cc.storage(project).save(value, EditorMetadata.preferLspEditor));
+				cc -> cc.storage(project).save(value, EditorMetadata.Predefined.preferLspEditor));
 	}
 
 	public static IProject createCProject(String projectName) throws CoreException {

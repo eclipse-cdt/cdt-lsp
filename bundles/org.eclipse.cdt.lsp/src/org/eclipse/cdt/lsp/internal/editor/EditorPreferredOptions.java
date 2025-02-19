@@ -30,22 +30,22 @@ public final class EditorPreferredOptions extends PreferredOptions implements Ed
 
 	@Override
 	public boolean preferLspEditor() {
-		return booleanValue(EditorMetadata.preferLspEditor);
+		return booleanValue(EditorMetadata.Predefined.preferLspEditor);
 	}
 
 	@Override
 	public boolean formatOnSave() {
-		return booleanValue(EditorMetadata.formatOnSave);
+		return booleanValue(EditorMetadata.Predefined.formatOnSave);
 	}
 
 	@Override
 	public boolean formatAllLines() {
-		return booleanValue(EditorMetadata.formatAllLines);
+		return booleanValue(EditorMetadata.Predefined.formatAllLines);
 	}
 
 	@Override
 	public boolean formatEditedLines() {
-		return booleanValue(EditorMetadata.formatEditedLines);
+		return booleanValue(EditorMetadata.Predefined.formatEditedLines);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public final class EditorPreferredOptions extends PreferredOptions implements Ed
 		if (enable != null) {
 			return enable.isEnabledFor(project);
 		}
-		return booleanValue(EditorMetadata.preferLspEditor);
+		return booleanValue(EditorMetadata.Predefined.preferLspEditor);
 	}
 
 }

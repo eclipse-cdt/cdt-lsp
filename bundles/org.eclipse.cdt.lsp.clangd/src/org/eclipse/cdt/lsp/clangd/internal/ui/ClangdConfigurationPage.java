@@ -87,7 +87,7 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(ClangdMetadata.clangdPath.identifer(), null))//
+				.map(n -> n.get(ClangdMetadata.Predefined.clangdPath.identifer(), null))//
 				.isPresent();
 	}
 

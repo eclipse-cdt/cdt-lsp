@@ -53,7 +53,7 @@ public final class SaveActionsConfigurationPage extends ConfigurationPage<Editor
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(EditorMetadata.formatAllLines.identifer(), null))//
+				.map(n -> n.get(EditorMetadata.Predefined.formatAllLines.identifer(), null))//
 				.isPresent();
 	}
 
