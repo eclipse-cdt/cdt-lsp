@@ -164,4 +164,22 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 			LspEditorUiMessages.ContentAssistConfigurationPage_fill_function_arguments,
 			LspEditorUiMessages.ContentAssistConfigurationPage_fill_function_arguments_description);
 
+	/**
+	 * Returns the default {@link List} of {@link PreferenceMetadata}
+	 *
+	 * @since 3.0
+	 */
+	List<PreferenceMetadata<?>> defaults = List.of(//
+			clangdPath, //
+			useTidy, //
+			useBackgroundIndex, //
+			completionStyle, //
+			prettyPrint, //
+			queryDriver, //
+			additionalOptions, //
+			logToConsole, //
+			validateClangdOptions, //
+			fillFunctionArguments//
+	);
+
 }

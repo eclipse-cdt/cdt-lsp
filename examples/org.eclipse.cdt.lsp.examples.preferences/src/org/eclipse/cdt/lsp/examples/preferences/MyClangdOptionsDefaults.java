@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.examples.preferences;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,19 +26,9 @@ public class MyClangdOptionsDefaults extends ConfigurationMetadataBase implement
 
 	@Override
 	protected List<PreferenceMetadata<?>> definePreferences() {
-		List<PreferenceMetadata<?>> defined = new ArrayList<>();
-		defined.add(clangdPath);
-		defined.add(useTidy);
-		defined.add(useBackgroundIndex);
-		defined.add(completionStyle);
-		defined.add(prettyPrint);
-		defined.add(queryDriver);
-		defined.add(overrideString(additionalOptions, //
+		return overrideOne(defaults, overrideString(additionalOptions, //
 				List.of("--header-insertion=never", "--default-config").stream()
 						.collect(Collectors.joining(System.lineSeparator()))));
-		defined.add(logToConsole);
-		defined.add(validateClangdOptions);
-		return defined;
 	}
 
 }
