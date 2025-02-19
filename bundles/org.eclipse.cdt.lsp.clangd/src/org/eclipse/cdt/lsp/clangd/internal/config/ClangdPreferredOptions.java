@@ -84,7 +84,7 @@ final class ClangdPreferredOptions extends PreferredOptions implements ClangdOpt
 
 	@Override
 	public boolean setCompilationDatabase() {
-		return booleanValue(ClangdMetadata.setCompilationDatabase);
+		return booleanValue(ClangdMetadata.Predefined.setCompilationDatabase);
 	}
 
 }

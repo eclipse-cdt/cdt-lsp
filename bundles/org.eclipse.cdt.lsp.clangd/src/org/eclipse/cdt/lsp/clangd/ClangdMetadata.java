@@ -154,6 +154,18 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 				LspEditorUiMessages.ContentAssistConfigurationPage_fill_function_arguments_description);
 
 		/**
+		 * Returns the metadata for the "Set compilation database path in .clangd file" option.
+		 *
+		 * @see ClangdOptions#setCompilationDatabase()
+		 *
+		 */
+		PreferenceMetadata<Boolean> setCompilationDatabase = new PreferenceMetadata<>(Boolean.class, //
+				"set_compilation_database", //$NON-NLS-1$
+				true, //
+				LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database,
+				LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database_description);
+
+		/**
 		 * Returns the default {@link List} of {@link PreferenceMetadata}
 		 */
 		List<PreferenceMetadata<?>> defaults = List.of(//
@@ -166,22 +178,10 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 				additionalOptions, //
 				logToConsole, //
 				validateClangdOptions, //
-				fillFunctionArguments//
+				fillFunctionArguments, //
+				setCompilationDatabase //
 		);
 
 	}
-
-	/**
-	 * Returns the metadata for the "Set compilation database path" option.
-	 *
-	 * @see ClangdOptions#setCompilationDatabase()
-	 *
-	 * @since 3.0
-	 */
-	PreferenceMetadata<Boolean> setCompilationDatabase = new PreferenceMetadata<>(Boolean.class, //
-			"set_compilation_database", //$NON-NLS-1$
-			true, //
-			LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database,
-			LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database_description);
 
 }

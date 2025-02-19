@@ -95,6 +95,8 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 			this.logToConsole = null;
 			this.validateOptions = null;
 		}
+		this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite,
+				SWT.CHECK, 0);
 	}
 
 	void enablePreferenceContent(boolean enable) {
@@ -206,6 +208,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		if (validateOptions != null) {
 			validateOptions.setSelection(options.validateClangdOptions());
 		}
+		setCompilationDatabase.setSelection(options.setCompilationDatabase());
 	}
 
 	@Override
@@ -228,6 +231,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		list.add(ClangdMetadata.Predefined.useBackgroundIndex.identifer());
 		list.add(ClangdMetadata.Predefined.useTidy.identifer());
 		list.add(ClangdMetadata.Predefined.validateClangdOptions.identifer());
+		list.add(ClangdMetadata.Predefined.setCompilationDatabase.identifer());
 		return list;
 	}
 
