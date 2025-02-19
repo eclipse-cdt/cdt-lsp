@@ -1,5 +1,5 @@
 ////
-Copyright (c) 2024 John Dallaway and others
+Copyright (c) 2024, 2025 John Dallaway and others
 This program and the accompanying materials
 are made available under the terms of the Eclipse Public License 2.0
 which accompanies this distribution, and is available at
@@ -29,6 +29,8 @@ The Language Server based editor is invoked automatically when you open a C/{cpp
 Projects created using an older version of CDT may be configured to use this editor from the menu:Project[Preferences > C/{cpp} General > Editor (LSP)] properties page:
 
 image:lsp_editor_properties.png[width=526]
+
+When the C/{cpp} editor (LSP) is enabled for a project, source code files are presented with a decorated icon (image:lsp_decoration.png[]) in the _Project Explorer_ view.
 
 The C/{cpp} editor (LSP) includes the following features:
 

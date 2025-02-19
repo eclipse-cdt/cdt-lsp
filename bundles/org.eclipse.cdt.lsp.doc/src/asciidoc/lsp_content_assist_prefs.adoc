@@ -1,5 +1,5 @@
 ////
-Copyright (c) 2024, 2025 John Dallaway and others
+Copyright (c) 2025 John Dallaway and others
 This program and the accompanying materials
 are made available under the terms of the Eclipse Public License 2.0
 which accompanies this distribution, and is available at
@@ -18,19 +18,19 @@ ifdef::env-github[]
 :toc-placement!:
 endif::[]
 
-= Save actions
+= Content assist
 
-Use the image:command_link.png[] link:javascript:executeCommand('org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.cdt.lsp.editor.SaveActionsPreferencePage)')[Save Actions] preference page to configure actions performed by the C/{cpp} editor (LSP) while saving a file:
+Use the image:command_link.png[] link:javascript:executeCommand('org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.cdt.lsp.clangd.editor.contentAssistPreferencePage)')[Content Assist] preference page to configure the content assistance provided by the C/{cpp} editor (LSP):
 
-image:lsp_save_prefs.png[width=550]
+image:lsp_content_assist_prefs.png[width=550]
 
-.Save Actions Preference Options
+.Content Assist Preference Options
 :!table-caption:
 [%autowidth]
 [options="header"]
 |===
 |Option              |Description
-|Format source code  |While saving a file, the editor will format all lines or edited lines only.
+|Fill function arguments and show guessed arguments |While editing a file, the editor will provide function argument assistance.
 |===
 
 Related concepts:
