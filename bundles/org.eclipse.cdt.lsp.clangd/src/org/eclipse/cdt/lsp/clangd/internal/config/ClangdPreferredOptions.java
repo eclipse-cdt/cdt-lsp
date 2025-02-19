@@ -82,4 +82,9 @@ final class ClangdPreferredOptions extends PreferredOptions implements ClangdOpt
 		return booleanValue(ClangdMetadata.Predefined.fillFunctionArguments);
 	}
 
+	@Override
+	public boolean setCompilationDatabase() {
+		return booleanValue(ClangdMetadata.Predefined.setCompilationDatabase);
+	}
+
 }

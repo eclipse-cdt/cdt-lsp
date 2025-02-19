@@ -102,4 +102,13 @@ public interface ClangdOptions {
 	default boolean fillFunctionArguments() {
 		return true;
 	}
+
+	/**
+	 * Tries to detect compilation database in active build folder. Updates the .clangd file in the project root depending on (active) build configuration.
+	 *
+	 * @since 3.0
+	 */
+	default boolean setCompilationDatabase() {
+		return false;
+	}
 }

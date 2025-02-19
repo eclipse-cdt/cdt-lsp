@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings">
    <property name="service.ranking" type="Integer" value="0"/>
    <service>
       <provide interface="org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings"/>
    </service>
+   <reference cardinality="1..1" field="configuration" interface="org.eclipse.cdt.lsp.clangd.ClangdConfiguration" name="configuration"/>
    <implementation class="org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings"/>
 </scr:component>
