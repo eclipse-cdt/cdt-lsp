@@ -48,6 +48,37 @@ public abstract class ConfigurationMetadataBase implements ConfigurationMetadata
 				predefined.name(), predefined.description());
 	}
 
+	protected final PreferenceMetadata<byte[]> overrideByteArray(PreferenceMetadata<byte[]> predefined,
+			byte[] override) {
+		return new PreferenceMetadata<>(predefined.valueClass(), predefined.identifer(), //
+				override, //
+				predefined.name(), predefined.description());
+	}
+
+	protected final PreferenceMetadata<Double> overrideDouble(PreferenceMetadata<Double> predefined, double override) {
+		return new PreferenceMetadata<>(predefined.valueClass(), predefined.identifer(), //
+				override, //
+				predefined.name(), predefined.description());
+	}
+
+	protected final PreferenceMetadata<Float> overrideFloat(PreferenceMetadata<Float> predefined, float override) {
+		return new PreferenceMetadata<>(predefined.valueClass(), predefined.identifer(), //
+				override, //
+				predefined.name(), predefined.description());
+	}
+
+	protected final PreferenceMetadata<Integer> overrideInt(PreferenceMetadata<Integer> predefined, int override) {
+		return new PreferenceMetadata<>(predefined.valueClass(), predefined.identifer(), //
+				override, //
+				predefined.name(), predefined.description());
+	}
+
+	protected final PreferenceMetadata<Long> overrideLong(PreferenceMetadata<Long> predefined, long override) {
+		return new PreferenceMetadata<>(predefined.valueClass(), predefined.identifer(), //
+				override, //
+				predefined.name(), predefined.description());
+	}
+
 	protected final PreferenceMetadata<String> overrideString(PreferenceMetadata<String> predefined, String override) {
 		return new PreferenceMetadata<>(predefined.valueClass(), predefined.identifer(), //
 				override, //
