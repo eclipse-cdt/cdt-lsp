@@ -25,7 +25,7 @@ public final class ClangdMetadataDefaults extends ConfigurationMetadataBase impl
 
 	@Override
 	protected List<PreferenceMetadata<?>> definePreferences() {
-		return defaults;
+		return Predefined.defaults;
 	}
 
 }

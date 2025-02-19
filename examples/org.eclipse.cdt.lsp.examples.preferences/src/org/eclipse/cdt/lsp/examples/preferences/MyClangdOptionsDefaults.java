@@ -26,7 +26,7 @@ public class MyClangdOptionsDefaults extends ConfigurationMetadataBase implement
 
 	@Override
 	protected List<PreferenceMetadata<?>> definePreferences() {
-		return overrideOne(defaults, overrideString(additionalOptions, //
+		return overrideOne(Predefined.defaults, overrideString(Predefined.additionalOptions, //
 				List.of("--header-insertion=never", "--default-config").stream()
 						.collect(Collectors.joining(System.lineSeparator()))));
 	}

@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.internal.ui;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.lsp.editor.ConfigurationVisibility;
@@ -41,7 +40,7 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		if (visibility.showPreferLsp(isProjectScope)) {
-			this.prefer = createButton(EditorMetadata.preferLspEditor, composite, SWT.CHECK, 0);
+			this.prefer = createButton(EditorMetadata.Predefined.preferLspEditor, composite, SWT.CHECK, 0);
 		} else {
 			this.prefer = null;
 		}
@@ -63,9 +62,7 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 
 	@Override
 	public List<String> getPreferenceKeys() {
-		var list = new ArrayList<String>(1);
-		list.add(EditorMetadata.preferLspEditor.identifer());
-		return list;
+		return List.of(EditorMetadata.Predefined.preferLspEditor.identifer());
 	}
 
 }
