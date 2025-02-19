@@ -14,11 +14,14 @@
 
 package org.eclipse.cdt.lsp.config;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
 
@@ -40,6 +43,24 @@ public abstract class ConfigurationMetadataBase implements ConfigurationMetadata
 	 * @return the list of defined preferences
 	 */
 	protected abstract List<PreferenceMetadata<?>> definePreferences();
+
+	protected final List<PreferenceMetadata<?>> overrideOne(List<PreferenceMetadata<?>> input,
+			PreferenceMetadata<?> with) {
+		return overrideList(input, List.of(with));
+	}
+
+	protected final List<PreferenceMetadata<?>> overrideList(List<PreferenceMetadata<?>> input,
+			List<PreferenceMetadata<?>> with) {
+		Map<String, PreferenceMetadata<?>> overrides = with.stream()
+				.collect(Collectors.toMap(PreferenceMetadata::identifer, Function.identity()));
+		List<PreferenceMetadata<?>> result = new ArrayList<>();
+		for (PreferenceMetadata<?> metadata : input) {
+			Optional<PreferenceMetadata<?>> found = Optional.ofNullable(overrides.remove(metadata.identifer()));
+			result.add(found.orElse(metadata));
+		}
+		overrides.values().forEach(result::add);
+		return result;
+	}
 
 	protected final PreferenceMetadata<Boolean> overrideBoolean(PreferenceMetadata<Boolean> predefined,
 			boolean override) {

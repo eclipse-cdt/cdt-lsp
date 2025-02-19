@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
@@ -26,18 +25,7 @@ public final class ClangdMetadataDefaults extends ConfigurationMetadataBase impl
 
 	@Override
 	protected List<PreferenceMetadata<?>> definePreferences() {
-		List<PreferenceMetadata<?>> defined = new ArrayList<>();
-		defined.add(clangdPath);
-		defined.add(useTidy);
-		defined.add(useBackgroundIndex);
-		defined.add(completionStyle);
-		defined.add(prettyPrint);
-		defined.add(queryDriver);
-		defined.add(additionalOptions);
-		defined.add(logToConsole);
-		defined.add(validateClangdOptions);
-		defined.add(fillFunctionArguments);
-		return defined;
+		return defaults;
 	}
 
 }
