@@ -169,6 +169,23 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            locationURI="popup:#TextEditorContext?before=org.eclipse.lsp4e.openTypeHierarchy">
+         <command
+               commandId="org.eclipse.ui.edit.text.open.hyperlink"
+               label="%Commands.OpenDeclaration"
+               tooltip="%Commands.OpenDeclaration.description">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeEditorId">
+                  <equals
+                        value="org.eclipse.cdt.lsp.CEditor">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          id="org.eclipse.cdt.lsp.clangd.config.marker"
