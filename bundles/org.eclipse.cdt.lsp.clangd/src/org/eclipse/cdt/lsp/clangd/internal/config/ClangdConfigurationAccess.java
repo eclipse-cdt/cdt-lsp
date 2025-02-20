@@ -102,8 +102,7 @@ public final class ClangdConfigurationAccess extends ConfigurationAccess impleme
 		if (!options.queryDriver().isBlank()) {
 			list.add(NLS.bind("--query-driver={0}", options.queryDriver())); //$NON-NLS-1$
 		}
-		list.add(NLS.bind("--function-arg-placeholders={0}", //$NON-NLS-1$
-				String.valueOf(options.fillFunctionArguments())));
+		list.add(NLS.bind("--function-arg-placeholders={0}", options.fillFunctionArguments() ? 1 : 0)); //$NON-NLS-1$
 
 		list.addAll(options.additionalOptions());
 		return list;
