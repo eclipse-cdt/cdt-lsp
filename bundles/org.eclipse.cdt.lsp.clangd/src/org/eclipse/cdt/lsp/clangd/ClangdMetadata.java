@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.cdt.internal.core.MinGW;
 import org.eclipse.cdt.lsp.clangd.internal.ui.LspEditorUiMessages;
 import org.eclipse.cdt.lsp.config.ConfigurationMetadata;
 import org.eclipse.cdt.utils.PathUtil;
@@ -48,6 +49,8 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 		PreferenceMetadata<String> clangdPath = new PreferenceMetadata<>(String.class, //
 				"clangd_path", //$NON-NLS-1$
 				Optional.ofNullable(PathUtil.findProgramLocation("clangd", null)) //$NON-NLS-1$
+						.or(() -> Optional.ofNullable(MinGW.getMinGWHome())
+								.map(mingw -> PathUtil.findProgramLocation("clangd", mingw + "\\bin"))) //$NON-NLS-1$ //$NON-NLS-2$
 						.map(IPath::toOSString).orElse("clangd"), //$NON-NLS-1$
 				LspEditorUiMessages.LspEditorPreferencePage_path, //
 				LspEditorUiMessages.LspEditorPreferencePage_path_description);
