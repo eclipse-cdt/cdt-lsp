@@ -13,9 +13,13 @@
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
+import org.eclipse.cdt.lsp.clangd.format.ClangFormatFileMonitor;
 import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -31,7 +35,6 @@ import org.osgi.service.component.annotations.Component;
 
 @Component(property = { "service.ranking:Integer=0" })
 public final class ClangFormatFileHandler implements ClangFormatFile {
-	public static final String format_file = ".clang-format"; //$NON-NLS-1$
 
 	/**
 	 * Opens the .clang-format file in the given project. Creates a file with default values, if not yet existing prior to the opening.
@@ -39,7 +42,7 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	 */
 	@Override
 	public void openClangFormatFile(IProject project) {
-		runClangFormatFileCreatorJob(project, true);
+		findOrCreateClangFormatFile(project, true);
 	}
 
 	/**
@@ -48,27 +51,62 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	 */
 	@Override
 	public void createClangFormatFile(IProject project) {
-		runClangFormatFileCreatorJob(project, false);
+		findOrCreateClangFormatFile(project, false);
 	}
 
-	private void runClangFormatFileCreatorJob(IProject project, boolean openFile) {
-		var formatFile = project.getFile(format_file);
-		WorkbenchJob job = new WorkbenchJob("Create " + format_file + " file") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				return createFileFromResource(formatFile);
-			}
+	private void findOrCreateClangFormatFile(IProject project, boolean openFile) {
+		IFile formatFileInProject = project.getFile(ClangFormatFileMonitor.CLANG_FORMAT_FILE);
+		IFileStore formatFileInParentFolder = null;
 
-			@Override
-			public void performDone(IJobChangeEvent event) {
-				if (openFile) {
-					LSPEclipseUtils.open(formatFile.getLocationURI().toString(), null);
+		if (!formatFileInProject.exists()) {
+			formatFileInParentFolder = findClangFormatFileInParentFolders(project);
+		}
+
+		boolean createFormatFile = !formatFileInProject.exists() && formatFileInParentFolder == null;
+
+		if (createFormatFile) {
+			WorkbenchJob job = new WorkbenchJob("Create " + ClangFormatFileMonitor.CLANG_FORMAT_FILE + " file") { //$NON-NLS-1$ //$NON-NLS-2$
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					return createFileFromResource(formatFileInProject);
 				}
-			}
-		};
-		job.setSystem(true);
-		job.setRule(formatFile.getWorkspace().getRuleFactory().createRule(formatFile));
-		job.schedule();
+
+				@Override
+				public void performDone(IJobChangeEvent event) {
+					if (openFile) {
+						openClangFormatFile(formatFileInProject.getLocationURI());
+					}
+				}
+			};
+			job.setSystem(true);
+			job.setRule(formatFileInProject.getWorkspace().getRuleFactory().createRule(formatFileInProject));
+			job.schedule();
+		} else if (openFile) {
+			URI formatFileUri = (formatFileInParentFolder != null) ? formatFileInParentFolder.toURI()
+					: formatFileInProject.getLocationURI();
+			openClangFormatFile(formatFileUri);
+		}
+	}
+
+	private void openClangFormatFile(URI fileUri) {
+		LSPEclipseUtils.open(fileUri.toString(), null);
+	}
+
+	private IFileStore findClangFormatFileInParentFolders(IProject project) {
+		IFileStore currentDirStore = EFS.getLocalFileSystem().getStore(project.getLocation());
+		IFileStore clangFormatFileStore = currentDirStore.getChild(ClangFormatFileMonitor.CLANG_FORMAT_FILE);
+
+		while (!clangFormatFileStore.fetchInfo().exists() && currentDirStore.getParent() != null
+				&& currentDirStore.getParent().fetchInfo().exists()) {
+			// move up one level to the parent directory and check again
+			currentDirStore = currentDirStore.getParent();
+			clangFormatFileStore = currentDirStore.getChild(ClangFormatFileMonitor.CLANG_FORMAT_FILE);
+		}
+
+		if (clangFormatFileStore.fetchInfo().exists()) {
+			return clangFormatFileStore;
+		}
+		return null;
 	}
 
 	private IStatus createFileFromResource(IFile formatFile) {
@@ -77,7 +115,8 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 				formatFile.create(source, true, new NullProgressMonitor());
 			} catch (IOException | CoreException e) {
 				Platform.getLog(getClass()).error(e.getMessage(), e);
-				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, "Cannot create " + format_file + " file", e); //$NON-NLS-1$ //$NON-NLS-2$
+				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID,
+						"Cannot create " + ClangFormatFileMonitor.CLANG_FORMAT_FILE + " file", e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return Status.OK_STATUS;

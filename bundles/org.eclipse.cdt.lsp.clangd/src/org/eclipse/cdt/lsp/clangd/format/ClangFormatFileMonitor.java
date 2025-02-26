@@ -40,7 +40,7 @@ import org.eclipse.core.variables.VariablesPlugin;
  * to add error markers to the modified <code>.clang-format</code> file.
  */
 public class ClangFormatFileMonitor {
-	private static final String CLANG_FORMAT_FILE = ".clang-format"; //$NON-NLS-1$
+	public static final String CLANG_FORMAT_FILE = ".clang-format"; //$NON-NLS-1$
 	public static final String CLANG_FORMAT_CHECK_FILE = "clang-format-check"; //$NON-NLS-1$
 	private final ConcurrentLinkedQueue<IFile> pendingFiles = new ConcurrentLinkedQueue<>();
 	private final IWorkspace workspace;
@@ -76,13 +76,13 @@ public class ClangFormatFileMonitor {
 		this.workspace = workspace;
 	}
 
-	private final WorkspaceJob checkJob = new WorkspaceJob("Check .clang-format file") { //$NON-NLS-1$
+	private final WorkspaceJob checkJob = new WorkspaceJob("Check " + CLANG_FORMAT_FILE + " file") { //$NON-NLS-1$ //$NON-NLS-2$
 
 		@Override
 		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 			var clangdPath = getClangdPath();
 			if (clangdPath.isEmpty()) {
-				String msg = "Cannot determine clangd path for .clang-format file validation"; //$NON-NLS-1$
+				String msg = "Cannot determine clangd path for " + CLANG_FORMAT_FILE + " file validation"; //$NON-NLS-1$ //$NON-NLS-2$
 				Platform.getLog(getClass()).error(msg);
 				return Status.error(msg);
 			}

@@ -20,13 +20,15 @@ import org.eclipse.core.resources.IProject;
 public interface ClangFormatFile {
 
 	/**
-	 * Opens the .clang-format file in the given project. Creates a file with default values, if not yet existing prior to the opening.
+	 * Opens the .clang-format file in the given project or in one of its parent directories.
+	 * Creates a file with default values, if not yet existing prior to the opening.
 	 * @param formatFile
 	 */
 	void openClangFormatFile(IProject project);
 
 	/**
-	 * Creates a new .clang-format file with default settings in the project root directory if not yet existing.
+	 * Creates a new .clang-format file with default settings in the project root directory if not yet existing
+	 * or uses an existing file on one of the project's parent directories.
 	 * @param project
 	 */
 	void createClangFormatFile(IProject project);
