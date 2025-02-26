@@ -42,7 +42,7 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	 */
 	@Override
 	public void openClangFormatFile(IProject project) {
-		runClangFormatFileCreatorJob(project, true);
+		findOrCreateClangFormatFile(project, true);
 	}
 
 	/**
@@ -51,10 +51,10 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	 */
 	@Override
 	public void createClangFormatFile(IProject project) {
-		runClangFormatFileCreatorJob(project, false);
+		findOrCreateClangFormatFile(project, false);
 	}
 
-	private void runClangFormatFileCreatorJob(IProject project, boolean openFile) {
+	private void findOrCreateClangFormatFile(IProject project, boolean openFile) {
 		IFile formatFileInProject = project.getFile(format_file);
 		IFileStore formatFileInParentFolder = null;
 
@@ -62,24 +62,9 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 			formatFileInParentFolder = findClangFormatFileInParentFolders(project);
 		}
 
-		if (formatFileInParentFolder != null) {
-			URI formatFileUri = formatFileInParentFolder.toURI();
-			WorkbenchJob job = new WorkbenchJob("Open " + format_file + " file from file system") { //$NON-NLS-1$ //$NON-NLS-2$
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					return Status.OK_STATUS;
-				}
+		boolean createFormatFile = !formatFileInProject.exists() && formatFileInParentFolder == null;
 
-				@Override
-				public void performDone(IJobChangeEvent event) {
-					if (openFile) {
-						LSPEclipseUtils.open(formatFileUri.toString(), null);
-					}
-				}
-			};
-			job.setSystem(true);
-			job.schedule();
-		} else {
+		if (createFormatFile) {
 			WorkbenchJob job = new WorkbenchJob("Create " + format_file + " file") { //$NON-NLS-1$ //$NON-NLS-2$
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -89,20 +74,30 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 				@Override
 				public void performDone(IJobChangeEvent event) {
 					if (openFile) {
-						LSPEclipseUtils.open(formatFileInProject.getLocationURI().toString(), null);
+						openClangFormatFile(formatFileInProject.getLocationURI());
 					}
 				}
 			};
 			job.setSystem(true);
 			job.setRule(formatFileInProject.getWorkspace().getRuleFactory().createRule(formatFileInProject));
 			job.schedule();
+		} else if (openFile) {
+			URI formatFileUri = (formatFileInParentFolder != null) ? formatFileInParentFolder.toURI()
+					: formatFileInProject.getLocationURI();
+			openClangFormatFile(formatFileUri);
 		}
+	}
+
+	private void openClangFormatFile(URI fileUri) {
+		LSPEclipseUtils.open(fileUri.toString(), null);
 	}
 
 	private IFileStore findClangFormatFileInParentFolders(IProject project) {
 		IFileStore currentDirStore = EFS.getLocalFileSystem().getStore(project.getLocation());
 		IFileStore clangFormatFileStore = currentDirStore.getChild(format_file);
-		while (!clangFormatFileStore.fetchInfo().exists() && currentDirStore.getParent().fetchInfo().exists()) {
+
+		while (!clangFormatFileStore.fetchInfo().exists() && currentDirStore.getParent() != null
+				&& currentDirStore.getParent().fetchInfo().exists()) {
 			// move up one level to the parent directory and check again
 			currentDirStore = currentDirStore.getParent();
 			clangFormatFileStore = currentDirStore.getChild(format_file);
