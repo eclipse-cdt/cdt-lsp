@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
+import org.eclipse.cdt.lsp.clangd.format.ClangFormatFileMonitor;
 import org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -34,7 +35,6 @@ import org.osgi.service.component.annotations.Component;
 
 @Component(property = { "service.ranking:Integer=0" })
 public final class ClangFormatFileHandler implements ClangFormatFile {
-	public static final String format_file = ".clang-format"; //$NON-NLS-1$
 
 	/**
 	 * Opens the .clang-format file in the given project. Creates a file with default values, if not yet existing prior to the opening.
@@ -55,7 +55,7 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	}
 
 	private void findOrCreateClangFormatFile(IProject project, boolean openFile) {
-		IFile formatFileInProject = project.getFile(format_file);
+		IFile formatFileInProject = project.getFile(ClangFormatFileMonitor.CLANG_FORMAT_FILE);
 		IFileStore formatFileInParentFolder = null;
 
 		if (!formatFileInProject.exists()) {
@@ -65,7 +65,7 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 		boolean createFormatFile = !formatFileInProject.exists() && formatFileInParentFolder == null;
 
 		if (createFormatFile) {
-			WorkbenchJob job = new WorkbenchJob("Create " + format_file + " file") { //$NON-NLS-1$ //$NON-NLS-2$
+			WorkbenchJob job = new WorkbenchJob("Create " + ClangFormatFileMonitor.CLANG_FORMAT_FILE + " file") { //$NON-NLS-1$ //$NON-NLS-2$
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					return createFileFromResource(formatFileInProject);
@@ -94,13 +94,13 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 
 	private IFileStore findClangFormatFileInParentFolders(IProject project) {
 		IFileStore currentDirStore = EFS.getLocalFileSystem().getStore(project.getLocation());
-		IFileStore clangFormatFileStore = currentDirStore.getChild(format_file);
+		IFileStore clangFormatFileStore = currentDirStore.getChild(ClangFormatFileMonitor.CLANG_FORMAT_FILE);
 
 		while (!clangFormatFileStore.fetchInfo().exists() && currentDirStore.getParent() != null
 				&& currentDirStore.getParent().fetchInfo().exists()) {
 			// move up one level to the parent directory and check again
 			currentDirStore = currentDirStore.getParent();
-			clangFormatFileStore = currentDirStore.getChild(format_file);
+			clangFormatFileStore = currentDirStore.getChild(ClangFormatFileMonitor.CLANG_FORMAT_FILE);
 		}
 
 		if (clangFormatFileStore.fetchInfo().exists()) {
@@ -115,7 +115,8 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 				formatFile.create(source, true, new NullProgressMonitor());
 			} catch (IOException | CoreException e) {
 				Platform.getLog(getClass()).error(e.getMessage(), e);
-				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID, "Cannot create " + format_file + " file", e); //$NON-NLS-1$ //$NON-NLS-2$
+				return new Status(IStatus.ERROR, ClangdPlugin.PLUGIN_ID,
+						"Cannot create " + ClangFormatFileMonitor.CLANG_FORMAT_FILE + " file", e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return Status.OK_STATUS;
