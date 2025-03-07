@@ -206,12 +206,7 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 
 	private Object[] getCompileUnitElements(Object object) {
 		if (object instanceof ITranslationUnit unit) {
-			CompileUnit compileUnit = null;
-			if (unit.getFile() != null) {
-				compileUnit = getCompileUnit(unit.getLocationURI(), unit.getFile());
-			} else {
-				compileUnit = getCompileUnit(unit.getLocationURI(), null);
-			}
+			CompileUnit compileUnit = getCompileUnit(unit.getLocationURI(), unit.getFile());
 			if (compileUnit == null) {
 				return EMPTY;
 			}
