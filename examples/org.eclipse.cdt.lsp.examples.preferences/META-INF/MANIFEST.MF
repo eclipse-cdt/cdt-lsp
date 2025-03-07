@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.cdt.lsp.examples.preferences;singleton:=true
 Bundle-Vendor: %Bundle-Vendor
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.0.100.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.cdt.lsp.clangd,
