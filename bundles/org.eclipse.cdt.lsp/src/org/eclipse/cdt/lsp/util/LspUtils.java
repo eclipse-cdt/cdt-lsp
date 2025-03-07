@@ -81,7 +81,7 @@ public class LspUtils {
 			// the file has not been opened yet -> goto definition/declaration case
 			return isLspEditorActive();
 		}
-		return false;
+		return true; // we're lazy here
 	}
 
 	public static Map<Integer, URI> getFilesInLspBasedEditor() {
@@ -154,7 +154,7 @@ public class LspUtils {
 				return LspPlugin.LSP_C_EDITOR_ID.equals(activeEditor.getEditorSite().getId());
 			}
 		}
-		return false;
+		return true; // activeWorkbenchWindow or active page is null. We've been called probably from a non UI thread. This occurs when LSP4E searches for valid LS. It's fine to return true here.
 	}
 
 	public static boolean checkForCContentType(IEditorInput editorInput) {
