@@ -28,7 +28,9 @@ import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filebuffers.IFileBufferListener;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -228,9 +230,8 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 				document = LSPEclipseUtils.getDocument(compileUnit.file);
 				if (document == null) {
 					document = LSPEclipseUtils.getDocument(compileUnit.uri);
-				} else {
-					temporaryLoadedDocument = true;
 				}
+				temporaryLoadedDocument = true;
 			}
 			if (document != null) {
 				var isTimeoutException = new boolean[1];
@@ -267,11 +268,23 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 			if (temporaryLoadedDocument) {
 				//Note: the LS will be terminated via the shutdown command by LSP4E, when all documents have been disconnected.
 				//This is the case when no file is opened in the LSP based C/C++ editor.
-				try {
-					FileBuffers.getTextFileBufferManager().disconnect(compileUnit.file.getFullPath(),
-							LocationKind.IFILE, new NullProgressMonitor());
-				} catch (CoreException e) {
-					Platform.getLog(getClass()).error(e.getMessage(), e);
+				var file = LSPEclipseUtils.getFileHandle(compileUnit.uri);
+				if (file != null) {
+					try {
+						FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE,
+								new NullProgressMonitor());
+					} catch (CoreException e) {
+						Platform.getLog(getClass()).error(e.getMessage(), e);
+					}
+				} else {
+					try {
+						ITextFileBufferManager bufferManager = FileBuffers.getTextFileBufferManager();
+						if (bufferManager != null) {
+							bufferManager.disconnectFileStore(EFS.getStore(compileUnit.uri), new NullProgressMonitor());
+						}
+					} catch (CoreException e) {
+						Platform.getLog(getClass()).error(e.getMessage(), e);
+					}
 				}
 			}
 			lock.unlock();
