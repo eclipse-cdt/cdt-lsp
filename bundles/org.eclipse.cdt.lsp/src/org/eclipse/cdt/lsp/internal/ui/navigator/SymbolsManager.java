@@ -268,11 +268,10 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 			if (temporaryLoadedDocument) {
 				//Note: the LS will be terminated via the shutdown command by LSP4E, when all documents have been disconnected.
 				//This is the case when no file is opened in the LSP based C/C++ editor.
-				var file = LSPEclipseUtils.getFileHandle(compileUnit.uri);
-				if (file != null) {
+				if (compileUnit.file != null) {
 					try {
-						FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE,
-								new NullProgressMonitor());
+						FileBuffers.getTextFileBufferManager().disconnect(compileUnit.file.getFullPath(),
+								LocationKind.IFILE, new NullProgressMonitor());
 					} catch (CoreException e) {
 						Platform.getLog(getClass()).error(e.getMessage(), e);
 					}
