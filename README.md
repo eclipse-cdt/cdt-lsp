@@ -183,8 +183,10 @@ For plug-in dependencies the MANIFEST.MF's dependency information will provide t
 
 | CDT LSP Version | clangd | cmake* | Eclipse IDE Release |
 |:-:|:-:|:-:|:-:|
-| 1.0.x | 15.0.x | 3.x | 2023-09 |
+| 3.0.x | 17.0.x | 3.x | 2025-03 |
+| 2.0.x | 17.0.x | 3.x | 2024-06 |
 | 1.1.x | 17.0.x | 3.x | 2023-12 |
+| 1.0.x | 15.0.x | 3.x | 2023-09 |
 
 \* cmake is required to run through the demo flow, but any tool that can create compile_commands.json or otherwise feed settings to clangd is suitable.
 
