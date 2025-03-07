@@ -57,13 +57,15 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 
 	class CompileUnit {
 		public final IFile file;
+		public final URI uri;
 		public final SymbolsModel symbolsModel;
 		public volatile boolean isDirty = true;
 
-		public CompileUnit(IFile file) {
+		public CompileUnit(URI uri, IFile file) {
 			this.file = file;
+			this.uri = uri;
 			this.symbolsModel = new SymbolsModel();
-			this.symbolsModel.setUri(file.getLocationURI());
+			this.symbolsModel.setUri(uri);
 		}
 
 		public Object[] getElements() {
@@ -150,21 +152,17 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 	}
 
 	public Object[] getTranslationUnitElements(ITranslationUnit translationUnit) {
-		if (translationUnit.getFile() != null) {
-			CompileUnit compileUnit = getCompileUnit(translationUnit.getFile().getLocationURI());
-			if (compileUnit != null) {
-				return compileUnit.getElements();
-			}
+		CompileUnit compileUnit = getCompileUnit(translationUnit.getLocationURI());
+		if (compileUnit != null) {
+			return compileUnit.getElements();
 		}
 		return null;
 	}
 
 	public boolean isDirty(ITranslationUnit translationUnit) {
-		if (translationUnit.getFile() != null) {
-			CompileUnit compileUnit = getCompileUnit(translationUnit.getFile().getLocationURI());
-			if (compileUnit != null) {
-				return compileUnit.isDirty;
-			}
+		CompileUnit compileUnit = getCompileUnit(translationUnit.getLocationURI());
+		if (compileUnit != null) {
+			return compileUnit.isDirty;
 		}
 		return true;
 	}
@@ -203,19 +201,16 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 	}
 
 	private synchronized CompileUnit getCompileUnit(URI key, IFile file) {
-		if (file != null) {
-			return cachedSymbols.computeIfAbsent(key, uri -> new CompileUnit(file));
-		}
-		return cachedSymbols.get(key);
+		return cachedSymbols.computeIfAbsent(key, uri -> new CompileUnit(key, file));
 	}
 
 	private Object[] getCompileUnitElements(Object object) {
 		if (object instanceof ITranslationUnit unit) {
 			CompileUnit compileUnit = null;
 			if (unit.getFile() != null) {
-				compileUnit = getCompileUnit(unit.getFile().getLocationURI(), unit.getFile());
+				compileUnit = getCompileUnit(unit.getLocationURI(), unit.getFile());
 			} else {
-				Platform.getLog(getClass()).error("Cannot fetch elements of translation unit " + unit.getElementName()); //$NON-NLS-1$
+				compileUnit = getCompileUnit(unit.getLocationURI(), null);
 			}
 			if (compileUnit == null) {
 				return EMPTY;
@@ -236,7 +231,11 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 			IDocument document = LSPEclipseUtils.getExistingDocument(compileUnit.file);
 			if (document == null) {
 				document = LSPEclipseUtils.getDocument(compileUnit.file);
-				temporaryLoadedDocument = true;
+				if (document == null) {
+					document = LSPEclipseUtils.getDocument(compileUnit.uri);
+				} else {
+					temporaryLoadedDocument = true;
+				}
 			}
 			if (document != null) {
 				var isTimeoutException = new boolean[1];
