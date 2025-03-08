@@ -38,7 +38,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.cdt.debug.ui,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.tm4e.language_pack,
- org.eclipse.jface.notifications
+ org.eclipse.jface.notifications,
+ org.eclipse.core.filesystem
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.eclipse.cdt.lsp
 Bundle-ActivationPolicy: lazy

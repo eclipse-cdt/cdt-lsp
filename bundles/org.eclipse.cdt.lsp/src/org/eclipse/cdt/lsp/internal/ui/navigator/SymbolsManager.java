@@ -28,7 +28,9 @@ import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filebuffers.IFileBufferListener;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,13 +59,15 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 
 	class CompileUnit {
 		public final IFile file;
+		public final URI uri;
 		public final SymbolsModel symbolsModel;
 		public volatile boolean isDirty = true;
 
-		public CompileUnit(IFile file) {
+		public CompileUnit(URI uri, IFile file) {
 			this.file = file;
+			this.uri = uri;
 			this.symbolsModel = new SymbolsModel();
-			this.symbolsModel.setUri(file.getLocationURI());
+			this.symbolsModel.setUri(uri);
 		}
 
 		public Object[] getElements() {
@@ -150,21 +154,17 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 	}
 
 	public Object[] getTranslationUnitElements(ITranslationUnit translationUnit) {
-		if (translationUnit.getFile() != null) {
-			CompileUnit compileUnit = getCompileUnit(translationUnit.getFile().getLocationURI());
-			if (compileUnit != null) {
-				return compileUnit.getElements();
-			}
+		CompileUnit compileUnit = getCompileUnit(translationUnit.getLocationURI());
+		if (compileUnit != null) {
+			return compileUnit.getElements();
 		}
 		return null;
 	}
 
 	public boolean isDirty(ITranslationUnit translationUnit) {
-		if (translationUnit.getFile() != null) {
-			CompileUnit compileUnit = getCompileUnit(translationUnit.getFile().getLocationURI());
-			if (compileUnit != null) {
-				return compileUnit.isDirty;
-			}
+		CompileUnit compileUnit = getCompileUnit(translationUnit.getLocationURI());
+		if (compileUnit != null) {
+			return compileUnit.isDirty;
 		}
 		return true;
 	}
@@ -203,20 +203,12 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 	}
 
 	private synchronized CompileUnit getCompileUnit(URI key, IFile file) {
-		if (file != null) {
-			return cachedSymbols.computeIfAbsent(key, uri -> new CompileUnit(file));
-		}
-		return cachedSymbols.get(key);
+		return cachedSymbols.computeIfAbsent(key, uri -> new CompileUnit(key, file));
 	}
 
 	private Object[] getCompileUnitElements(Object object) {
 		if (object instanceof ITranslationUnit unit) {
-			CompileUnit compileUnit = null;
-			if (unit.getFile() != null) {
-				compileUnit = getCompileUnit(unit.getFile().getLocationURI(), unit.getFile());
-			} else {
-				Platform.getLog(getClass()).error("Cannot fetch elements of translation unit " + unit.getElementName()); //$NON-NLS-1$
-			}
+			CompileUnit compileUnit = getCompileUnit(unit.getLocationURI(), unit.getFile());
 			if (compileUnit == null) {
 				return EMPTY;
 			}
@@ -236,6 +228,9 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 			IDocument document = LSPEclipseUtils.getExistingDocument(compileUnit.file);
 			if (document == null) {
 				document = LSPEclipseUtils.getDocument(compileUnit.file);
+				if (document == null) {
+					document = LSPEclipseUtils.getDocument(compileUnit.uri);
+				}
 				temporaryLoadedDocument = true;
 			}
 			if (document != null) {
@@ -273,11 +268,22 @@ public class SymbolsManager implements IDeferredWorkbenchAdapter {
 			if (temporaryLoadedDocument) {
 				//Note: the LS will be terminated via the shutdown command by LSP4E, when all documents have been disconnected.
 				//This is the case when no file is opened in the LSP based C/C++ editor.
-				try {
-					FileBuffers.getTextFileBufferManager().disconnect(compileUnit.file.getFullPath(),
-							LocationKind.IFILE, new NullProgressMonitor());
-				} catch (CoreException e) {
-					Platform.getLog(getClass()).error(e.getMessage(), e);
+				if (compileUnit.file != null) {
+					try {
+						FileBuffers.getTextFileBufferManager().disconnect(compileUnit.file.getFullPath(),
+								LocationKind.IFILE, new NullProgressMonitor());
+					} catch (CoreException e) {
+						Platform.getLog(getClass()).error(e.getMessage(), e);
+					}
+				} else {
+					try {
+						ITextFileBufferManager bufferManager = FileBuffers.getTextFileBufferManager();
+						if (bufferManager != null) {
+							bufferManager.disconnectFileStore(EFS.getStore(compileUnit.uri), new NullProgressMonitor());
+						}
+					} catch (CoreException e) {
+						Platform.getLog(getClass()).error(e.getMessage(), e);
+					}
 				}
 			}
 			lock.unlock();
