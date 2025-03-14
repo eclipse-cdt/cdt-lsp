@@ -93,7 +93,7 @@ public class CProjectChangeMonitor {
 	public CProjectChangeMonitor start(IWorkspace workspace) {
 		workspace.addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD);
 		CCorePlugin.getDefault().getProjectDescriptionManager().addCProjectDescriptionListener(listener,
-				CProjectDescriptionEvent.APPLIED | IResourceChangeEvent.POST_BUILD);
+				CProjectDescriptionEvent.APPLIED);
 		return this;
 	}
 
