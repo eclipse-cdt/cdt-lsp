@@ -22,15 +22,15 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.lsp4e.LSPEclipseUtils;
-import org.eclipse.ui.progress.WorkbenchJob;
+import org.eclipse.swt.widgets.Display;
 import org.osgi.service.component.annotations.Component;
 
 @Component(property = { "service.ranking:Integer=0" })
@@ -65,17 +65,14 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 		boolean createFormatFile = !formatFileInProject.exists() && formatFileInParentFolder == null;
 
 		if (createFormatFile) {
-			WorkbenchJob job = new WorkbenchJob("Create " + ClangFormatFileMonitor.CLANG_FORMAT_FILE + " file") { //$NON-NLS-1$ //$NON-NLS-2$
+			WorkspaceJob job = new WorkspaceJob("Create " + ClangFormatFileMonitor.CLANG_FORMAT_FILE + " file") { //$NON-NLS-1$ //$NON-NLS-2$
 				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					return createFileFromResource(formatFileInProject);
-				}
-
-				@Override
-				public void performDone(IJobChangeEvent event) {
-					if (openFile) {
+				public IStatus runInWorkspace(IProgressMonitor monitor) {
+					var status = createFileFromResource(formatFileInProject);
+					if (openFile && status.isOK()) {
 						openClangFormatFile(formatFileInProject.getLocationURI());
 					}
+					return status;
 				}
 			};
 			job.setSystem(true);
@@ -89,7 +86,9 @@ public final class ClangFormatFileHandler implements ClangFormatFile {
 	}
 
 	private void openClangFormatFile(URI fileUri) {
-		LSPEclipseUtils.open(fileUri.toString(), null);
+		Display.getDefault().asyncExec(() -> {
+			LSPEclipseUtils.open(fileUri.toString(), null);
+		});
 	}
 
 	private IFileStore findClangFormatFileInParentFolders(IProject project) {
