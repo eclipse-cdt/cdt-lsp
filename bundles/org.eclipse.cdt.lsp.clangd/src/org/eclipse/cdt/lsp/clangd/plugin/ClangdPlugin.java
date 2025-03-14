@@ -56,7 +56,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		workspaceTracker.open();
 		workspace = workspaceTracker.getService();
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
-		cProjectChangeMonitor = new CProjectChangeMonitor().start();
+		cProjectChangeMonitor = new CProjectChangeMonitor().start(workspace);
 		configFileMonitor = new ClangdConfigFileMonitor(workspace).start();
 		clangFormatMonitor = new ClangFormatFileMonitor(workspace).start();
 		formatMonitor = new ClangFormatMonitor().start();
@@ -66,7 +66,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		compileCommandsMonitor.stop();
-		cProjectChangeMonitor.stop();
+		cProjectChangeMonitor.stop(workspace);
 		configFileMonitor.stop();
 		clangFormatMonitor.stop();
 		formatMonitor.stop();
