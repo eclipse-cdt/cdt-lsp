@@ -56,7 +56,7 @@ class HasLanguageServerPropertyTesterTest {
 	}
 
 	/**
-	 * Tests whether LS enable test returns false for an external file when no (LSP) editor is opened.
+	 * Tests whether LS enable test returns true for an external file when no (LSP) editor is opened.
 	 * @throws IOException
 	 */
 	@Test
@@ -64,8 +64,8 @@ class HasLanguageServerPropertyTesterTest {
 		//GIVEN is an external file which is not opened:
 		externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		//WHEN the file is not opened,
-		//THEN the hasLanguageServerPropertyTester.test returns FALSE for the given file URI:
-		assertFalse(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
+		//THEN the hasLanguageServerPropertyTester.test returns TRUE for the given file URI:
+		assertTrue(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
 	}
 
 	/**
