@@ -74,7 +74,7 @@ public class DefaultClangdCompilationDatabaseSetter extends ClangdCompilationDat
 	 *
 	 * @param project
 	 * @param newCProjectDescription
-	 * @return project relative path to active build folder or empty String
+	 * @return project relative path to active build folder or empty optional
 	 */
 	private Optional<String> getRelativeDatabasePath(IProject project, ICProjectDescription newCProjectDescription) {
 		if (project != null && newCProjectDescription != null) {
