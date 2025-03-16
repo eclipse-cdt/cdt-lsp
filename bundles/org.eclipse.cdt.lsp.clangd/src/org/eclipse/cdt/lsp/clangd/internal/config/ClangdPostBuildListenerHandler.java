@@ -39,7 +39,7 @@ public class ClangdPostBuildListenerHandler extends ClangdConfigurationFileHandl
 
 	protected void setCompilationDatabasePath(IBuildConfiguration configuration) {
 		if (configuration != null && configuration.getProject() != null) {
-			var relativeDatabasePath = getConfiguration(configuration) //
+			getConfiguration(configuration) //
 					.map(bc -> {
 						if (bc instanceof CBuildConfiguration cbc) {
 							try {
@@ -51,10 +51,8 @@ public class ClangdPostBuildListenerHandler extends ClangdConfigurationFileHandl
 						}
 						return null;
 					}) //
-					.map(c -> c.getProjectRelativePath().toOSString()).orElse(EMPTY); //
-			if (!relativeDatabasePath.isEmpty()) {
-				setCompilationDatabase(configuration.getProject(), relativeDatabasePath);
-			}
+					.map(c -> c.getProjectRelativePath().toOSString())
+					.ifPresent(relativePath -> setCompilationDatabase(configuration.getProject(), relativePath));
 		}
 	}
 
