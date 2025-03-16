@@ -72,7 +72,7 @@ public class ClangdCProjectDescriptionListenerHandler extends ClangdConfiguratio
 
 	/**
 	 * Get project relative path to compile_commands.json file.
-	 * By de
+	 *
 	 * @param project
 	 * @param newCProjectDescription
 	 * @return project relative path to active build folder or empty String
@@ -81,11 +81,10 @@ public class ClangdCProjectDescriptionListenerHandler extends ClangdConfiguratio
 		if (project != null && newCProjectDescription != null) {
 			ICConfigurationDescription config = newCProjectDescription.getDefaultSettingConfiguration();
 			var cwdBuilder = config.getBuildSetting().getBuilderCWD();
-			var projectLocation = project.getLocation().addTrailingSeparator().toOSString();
 			if (cwdBuilder != null) {
 				try {
 					var cwdString = new MacroResolver().resolveValue(cwdBuilder.toOSString(), EMPTY, null, config);
-					return cwdString.replace(projectLocation, EMPTY);
+					return cwdString.replace(project.getLocation().addTrailingSeparator().toOSString(), EMPTY);
 				} catch (CdtVariableException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
 				}
