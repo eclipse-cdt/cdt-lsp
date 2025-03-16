@@ -21,8 +21,8 @@ import org.eclipse.core.resources.IProject;
 public interface ClangdCompilationDatabaseSettings {
 
 	/**
-	 * Enabler for ClangdConfigurationFileHandlers.
-	 * Can be overriden for customization.
+	 * Checks if the automatic setting of the compilation database (compile_commands.json) path in the .clangd configuration file is enabled for the given project.
+	 * Can be overridden for customization.
 	 * @param project
 	 * @return true if the database path should be written to .clangd file in the project root.
 	 */

@@ -32,11 +32,11 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
  org.eclipse.ui.console;bundle-version="0.0.0",
  org.eclipse.core.filesystem
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatFileHandler.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdCProjectDescriptionListenerHandler.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdCommandLineValidator.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdFallbackManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdMetadataDefaults.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdPostBuildListenerHandler.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings.xml
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSetter.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdPostBuildCompilationDatabaseSetter.xml
 Bundle-Activator: org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin

@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.Platform;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-public abstract class ClangdConfigurationFileHandlerBase {
+public abstract class ClangdCompilationDatabaseSetterBase {
 	public static final String CLANGD_CONFIG_FILE_NAME = ".clangd"; //$NON-NLS-1$
 	private static final String COMPILE_FLAGS = "CompileFlags"; //$NON-NLS-1$
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$

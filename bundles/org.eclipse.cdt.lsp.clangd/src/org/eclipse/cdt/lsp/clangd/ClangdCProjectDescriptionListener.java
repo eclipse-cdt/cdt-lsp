@@ -14,18 +14,20 @@
 package org.eclipse.cdt.lsp.clangd;
 
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
+import org.eclipse.core.resources.IProject;
 
 /**
  * Vendors may implement this interface as OSGi service
  * with a service.ranking property > 0 to replace the default
- * implementation {@code ClangdCProjectDescriptionListenerHandler}
+ * implementation {@code DefaultClangdCompilationDatabaseSetter}
  *
  * @since 2.0
  */
 public interface ClangdCProjectDescriptionListener {
 
 	/**
-	 * Called when the configuration of a CDT C/C++ project changes.
+	 * Called when the configuration of a managed CDT C/C++ project changes and the setting of the compilation database path in the
+	 * .clangd configuration file has been enabled via {@link ClangdCompilationDatabaseSettings#enableSetCompilationDatabasePath(IProject)}.
 	 * @param event
 	 */
 	void handleEvent(CProjectDescriptionEvent event);

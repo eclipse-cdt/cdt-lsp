@@ -21,7 +21,7 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings;
-import org.eclipse.cdt.lsp.clangd.ClangdPostBuildListener;
+import org.eclipse.cdt.lsp.clangd.ClangdPostBuildCompilationDatabaseSetter;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -38,11 +38,11 @@ public class CProjectChangeMonitor {
 	private final ServiceCaller<ClangdCompilationDatabaseSettings> settings = new ServiceCaller<>(getClass(),
 			ClangdCompilationDatabaseSettings.class);
 
-	private final ServiceCaller<ClangdPostBuildListener> clangdPostBuildListener = new ServiceCaller<>(
-			getClass(), ClangdPostBuildListener.class);
+	private final ServiceCaller<ClangdPostBuildCompilationDatabaseSetter> clangdPostBuildCompilationDatabaseSetter = new ServiceCaller<>(
+			getClass(), ClangdPostBuildCompilationDatabaseSetter.class);
 
-	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdCProjectDescriptionListener = new ServiceCaller<>(getClass(),
-			ClangdCProjectDescriptionListener.class);
+	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdCProjectDescriptionListener = new ServiceCaller<>(
+			getClass(), ClangdCProjectDescriptionListener.class);
 
 	private final IResourceChangeListener postBuildListener = new IResourceChangeListener() {
 
@@ -50,10 +50,10 @@ public class CProjectChangeMonitor {
 		public void resourceChanged(IResourceChangeEvent event) {
 			if (event.getDelta() != null) {
 				for (var project : collectAffectedProjects(event)) {
-					if (isEnabled(project)) {
-						clangdPostBuildListener.call(c -> {
+					if (isSetCompilationDatabaseEnabled(project)) {
+						clangdPostBuildCompilationDatabaseSetter.call(setter -> {
 							try {
-								c.handleEvent(project.getActiveBuildConfig());
+								setter.setCompilationDatabase(project.getActiveBuildConfig());
 							} catch (CoreException e) {
 								Platform.getLog(getClass()).error(e.getMessage(), e);
 							}
@@ -85,7 +85,7 @@ public class CProjectChangeMonitor {
 		@Override
 		public void handleEvent(CProjectDescriptionEvent event) {
 			var project = event.getProject();
-			if (project != null && isEnabled(project)) {
+			if (project != null && isSetCompilationDatabaseEnabled(project)) {
 				clangdCProjectDescriptionListener.call(c -> c.handleEvent(event));
 			}
 		}
@@ -104,7 +104,7 @@ public class CProjectChangeMonitor {
 		CCorePlugin.getDefault().getProjectDescriptionManager().removeCProjectDescriptionListener(descriptionListener);
 	}
 
-	private boolean isEnabled(IProject project) {
+	private boolean isSetCompilationDatabaseEnabled(IProject project) {
 		boolean[] enabled = new boolean[1];
 		settings.call(s -> {
 			enabled[0] = s.enableSetCompilationDatabasePath(project);

@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Reference;
  * This class can be extended by vendors.
  */
 @Component(property = { "service.ranking:Integer=0" })
-public class ClangdCProjectDescriptionListenerHandler extends ClangdConfigurationFileHandlerBase
+public class DefaultClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSetterBase
 		implements ClangdCProjectDescriptionListener {
 
 	@Reference

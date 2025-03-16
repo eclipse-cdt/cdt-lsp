@@ -18,7 +18,7 @@ import java.util.Optional;
 import org.eclipse.cdt.core.build.CBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
-import org.eclipse.cdt.lsp.clangd.ClangdPostBuildListener;
+import org.eclipse.cdt.lsp.clangd.ClangdPostBuildCompilationDatabaseSetter;
 import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -26,18 +26,14 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component(property = { "service.ranking:Integer=0" })
-public class ClangdPostBuildListenerHandler extends ClangdConfigurationFileHandlerBase
-		implements ClangdPostBuildListener {
+public class DefaultClangdPostBuildCompilationDatabaseSetter extends ClangdCompilationDatabaseSetterBase
+		implements ClangdPostBuildCompilationDatabaseSetter {
 
 	@Reference
 	protected ICBuildConfigurationManager build;
 
 	@Override
-	public void handleEvent(IBuildConfiguration configuration) {
-		setCompilationDatabasePath(configuration);
-	}
-
-	protected void setCompilationDatabasePath(IBuildConfiguration configuration) {
+	public void setCompilationDatabase(IBuildConfiguration configuration) {
 		if (configuration != null && configuration.getProject() != null) {
 			getConfiguration(configuration) //
 					.map(bc -> {

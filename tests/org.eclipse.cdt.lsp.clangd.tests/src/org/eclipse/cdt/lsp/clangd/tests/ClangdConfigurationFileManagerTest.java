@@ -33,7 +33,7 @@ import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileHandlerBase;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetterBase;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -91,7 +91,8 @@ final class ClangdConfigurationFileManagerTest {
 	}
 
 	private static File createFile(File parent, String format, String cdbDirectoryPath) throws FileNotFoundException {
-		return createFile(parent, ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME, format, cdbDirectoryPath);
+		return createFile(parent, ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME, format,
+				cdbDirectoryPath);
 	}
 
 	private static File createFile(File parent, String fileName, String format, String cdbDirectoryPath)
@@ -114,7 +115,7 @@ final class ClangdConfigurationFileManagerTest {
 	 */
 	private IFile createConfigFile(String format, String cdbDirectoryPath)
 			throws UnsupportedEncodingException, IOException, CoreException {
-		var file = project.getFile(ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME);
+		var file = project.getFile(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME);
 		try (final var data = new ByteArrayInputStream(
 				String.format(format, cdbDirectoryPath).getBytes(project.getDefaultCharset()))) {
 			if (!file.exists()) {
@@ -136,7 +137,7 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testCreateClangdConfigFileInProject() throws IOException, CoreException {
 		var projectDir = project.getLocation().toPortableString();
-		var configFile = new File(projectDir, ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME);
+		var configFile = new File(projectDir, ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME);
 		var refFile = createFile(TEMP_DIR, DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// The current working directory of the builder in the project is set to RELATIVE_DIR_PATH_BUILD_DEFAULT:
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
@@ -189,7 +190,7 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testUpdateClangdConfigFileInProject() throws IOException, CoreException {
 		var projectDir = project.getLocation().toPortableString();
-		var configFile = new File(projectDir, ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME);
+		var configFile = new File(projectDir, ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME);
 		var refFileDefault = createFile(TEMP_DIR, ".clangdDefault", DEFAULT_CDB_SETTING,
 				RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// Use MODIFIED_DEFAULT_CDB_SETTING here, because the org.yaml.snakeyaml.Yaml.dump appends a '\n' at the last line:
@@ -260,7 +261,7 @@ final class ClangdConfigurationFileManagerTest {
 			beforeSet = new String(inputStream.readAllBytes());
 		}
 		// WHEN the ClangdConfigurationFileHandlerBase.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		((ClangdConfigurationFileHandlerBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
+		((ClangdCompilationDatabaseSetterBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
 				RELATIVE_DIR_PATH_BUILD_DEBUG);
 		// THEN the file has not been changed, because the user shall fix the errors first:
 		try (var inputStream = configFile.getContents()) {
@@ -284,7 +285,7 @@ final class ClangdConfigurationFileManagerTest {
 			beforeSet = new String(inputStream.readAllBytes());
 		}
 		// WHEN the ClangdConfigurationFileHandlerBase.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		((ClangdConfigurationFileHandlerBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
+		((ClangdCompilationDatabaseSetterBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
 				RELATIVE_DIR_PATH_BUILD_DEBUG);
 		// THEN the file has not been changed, because the user shall fix the errors first:
 		try (var inputStream = configFile.getContents()) {
