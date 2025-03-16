@@ -41,7 +41,7 @@ public class CProjectChangeMonitor {
 	private final ServiceCaller<ClangdPostBuildListener> clangdPostBuildListener = new ServiceCaller<>(
 			getClass(), ClangdPostBuildListener.class);
 
-	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdListener = new ServiceCaller<>(getClass(),
+	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdCProjectDescriptionListener = new ServiceCaller<>(getClass(),
 			ClangdCProjectDescriptionListener.class);
 
 	private final IResourceChangeListener postBuildListener = new IResourceChangeListener() {
@@ -80,13 +80,13 @@ public class CProjectChangeMonitor {
 
 	};
 
-	private final ICProjectDescriptionListener listener = new ICProjectDescriptionListener() {
+	private final ICProjectDescriptionListener descriptionListener = new ICProjectDescriptionListener() {
 
 		@Override
 		public void handleEvent(CProjectDescriptionEvent event) {
 			var project = event.getProject();
 			if (project != null && isEnabled(project)) {
-				clangdListener.call(c -> c.handleEvent(event));
+				clangdCProjectDescriptionListener.call(c -> c.handleEvent(event));
 			}
 		}
 
@@ -94,14 +94,14 @@ public class CProjectChangeMonitor {
 
 	public CProjectChangeMonitor start(IWorkspace workspace) {
 		workspace.addResourceChangeListener(postBuildListener, IResourceChangeEvent.POST_BUILD);
-		CCorePlugin.getDefault().getProjectDescriptionManager().addCProjectDescriptionListener(listener,
+		CCorePlugin.getDefault().getProjectDescriptionManager().addCProjectDescriptionListener(descriptionListener,
 				CProjectDescriptionEvent.APPLIED);
 		return this;
 	}
 
 	public void stop(IWorkspace workspace) {
 		workspace.removeResourceChangeListener(postBuildListener);
-		CCorePlugin.getDefault().getProjectDescriptionManager().removeCProjectDescriptionListener(listener);
+		CCorePlugin.getDefault().getProjectDescriptionManager().removeCProjectDescriptionListener(descriptionListener);
 	}
 
 	private boolean isEnabled(IProject project) {
