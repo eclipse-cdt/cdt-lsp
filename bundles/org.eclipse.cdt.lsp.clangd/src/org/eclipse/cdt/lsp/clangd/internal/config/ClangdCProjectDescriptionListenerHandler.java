@@ -13,10 +13,6 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
-import java.util.Optional;
-
-import org.eclipse.cdt.core.build.CBuildConfiguration;
-import org.eclipse.cdt.core.build.ICBuildConfiguration;
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
 import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
@@ -24,8 +20,6 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -95,35 +89,8 @@ public class ClangdCProjectDescriptionListenerHandler extends ClangdConfiguratio
 				} catch (CdtVariableException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
 				}
-			} else {
-				//it is probably a cmake project:
-				return buildConfiguration(project)//
-						.filter(CBuildConfiguration.class::isInstance)//
-						.map(bc -> {
-							try {
-								return ((CBuildConfiguration) bc).getBuildContainer();
-							} catch (CoreException e) {
-								Platform.getLog(getClass()).log(e.getStatus());
-							}
-							return null;
-						})//
-						.map(c -> c.getLocation())//
-						.map(l -> l.toOSString().replace(projectLocation, EMPTY)).orElse(EMPTY);
 			}
 		}
 		return EMPTY;
 	}
-
-	private Optional<ICBuildConfiguration> buildConfiguration(IResource initial) {
-		try {
-			var active = initial.getProject().getActiveBuildConfig();
-			if (active != null && build != null) {
-				return Optional.ofNullable(build.getBuildConfiguration(active));
-			}
-		} catch (CoreException e) {
-			Platform.getLog(getClass()).error(e.getMessage(), e);
-		}
-		return Optional.empty();
-	}
-
 }
