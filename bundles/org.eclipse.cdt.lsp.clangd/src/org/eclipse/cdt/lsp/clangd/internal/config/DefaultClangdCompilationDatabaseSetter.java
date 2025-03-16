@@ -13,6 +13,8 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
+import java.util.Optional;
+
 import org.eclipse.cdt.core.build.ICBuildConfigurationManager;
 import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
@@ -61,12 +63,9 @@ public class DefaultClangdCompilationDatabaseSetter extends ClangdCompilationDat
 	 */
 	protected void setCompilationDatabasePath(IProject project, ICProjectDescription newCProjectDescription) {
 		if (project != null && newCProjectDescription != null) {
-			var relativeDatabasePath = getRelativeDatabasePath(project, newCProjectDescription);
-			if (!relativeDatabasePath.isEmpty()) {
-				setCompilationDatabase(project, relativeDatabasePath);
-			} else {
-				Platform.getLog(getClass()).error("Cannot determine path to compile_commands.json"); //$NON-NLS-1$
-			}
+			getRelativeDatabasePath(project, newCProjectDescription)
+					.ifPresentOrElse((path) -> setCompilationDatabase(project, path), () -> Platform.getLog(getClass())
+							.error("Cannot determine path to compile_commands.json for " + project.getName())); //$NON-NLS-1$
 		}
 	}
 
@@ -77,19 +76,20 @@ public class DefaultClangdCompilationDatabaseSetter extends ClangdCompilationDat
 	 * @param newCProjectDescription
 	 * @return project relative path to active build folder or empty String
 	 */
-	private String getRelativeDatabasePath(IProject project, ICProjectDescription newCProjectDescription) {
+	private Optional<String> getRelativeDatabasePath(IProject project, ICProjectDescription newCProjectDescription) {
 		if (project != null && newCProjectDescription != null) {
 			ICConfigurationDescription config = newCProjectDescription.getDefaultSettingConfiguration();
 			var cwdBuilder = config.getBuildSetting().getBuilderCWD();
 			if (cwdBuilder != null) {
 				try {
 					var cwdString = new MacroResolver().resolveValue(cwdBuilder.toOSString(), EMPTY, null, config);
-					return cwdString.replace(project.getLocation().addTrailingSeparator().toOSString(), EMPTY);
+					return Optional
+							.of(cwdString.replace(project.getLocation().addTrailingSeparator().toOSString(), EMPTY));
 				} catch (CdtVariableException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
 				}
 			}
 		}
-		return EMPTY;
+		return Optional.empty();
 	}
 }
