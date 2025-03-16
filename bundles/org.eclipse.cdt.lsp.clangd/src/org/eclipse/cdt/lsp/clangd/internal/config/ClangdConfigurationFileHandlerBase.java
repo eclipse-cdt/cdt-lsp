@@ -46,7 +46,7 @@ public abstract class ClangdConfigurationFileHandlerBase {
 	 * @throws CoreException
 	 */
 	@SuppressWarnings("unchecked")
-	protected void setCompilationDatabase(IProject project, String databasePath) {
+	public void setCompilationDatabase(IProject project, String databasePath) {
 		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
 		try {
 			if (createClangdConfigFile(configFile, project.getDefaultCharset(), databasePath, false)) {

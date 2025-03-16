@@ -22,7 +22,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileChecker;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileHandlerBase;
 import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -56,7 +56,7 @@ class ClangdConfigFileCheckerTest {
 	}
 
 	private IFile createConfigFile(String content) throws UnsupportedEncodingException, IOException, CoreException {
-		var file = project.getFile(ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME);
+		var file = project.getFile(ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME);
 		try (final var data = new ByteArrayInputStream(content.getBytes(project.getDefaultCharset()))) {
 			if (!file.exists()) {
 				file.create(data, false, new NullProgressMonitor());

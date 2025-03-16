@@ -33,7 +33,7 @@ import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileHandlerBase;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -57,7 +57,7 @@ final class ClangdConfigurationFileManagerTest {
 	private static final String MODIFIED_DEFAULT_CDB_SETTING = DEFAULT_CDB_SETTING + "\n";
 	private static final String INVALID_YAML_SYNTAX_CONTAINS_TAB = "CompileFlags:\n\tCompilationDatabase: %s";
 	private static final String INVALID_YAML_SYNTAX_MISSING_BRACE = "CompileFlags: {CompilationDatabase: Release\r\n";
-	private final ClangdCProjectDescriptionListener clangdConfigurationManager = PlatformUI.getWorkbench()
+	private final ClangdCProjectDescriptionListener clangdCProjectDescriptionListenerHandler = PlatformUI.getWorkbench()
 			.getService(ClangdCProjectDescriptionListener.class);
 	private IProject project;
 
@@ -91,7 +91,7 @@ final class ClangdConfigurationFileManagerTest {
 	}
 
 	private static File createFile(File parent, String format, String cdbDirectoryPath) throws FileNotFoundException {
-		return createFile(parent, ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME, format, cdbDirectoryPath);
+		return createFile(parent, ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME, format, cdbDirectoryPath);
 	}
 
 	private static File createFile(File parent, String fileName, String format, String cdbDirectoryPath)
@@ -114,7 +114,7 @@ final class ClangdConfigurationFileManagerTest {
 	 */
 	private IFile createConfigFile(String format, String cdbDirectoryPath)
 			throws UnsupportedEncodingException, IOException, CoreException {
-		var file = project.getFile(ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME);
+		var file = project.getFile(ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME);
 		try (final var data = new ByteArrayInputStream(
 				String.format(format, cdbDirectoryPath).getBytes(project.getDefaultCharset()))) {
 			if (!file.exists()) {
@@ -136,7 +136,7 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testCreateClangdConfigFileInProject() throws IOException, CoreException {
 		var projectDir = project.getLocation().toPortableString();
-		var configFile = new File(projectDir, ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME);
+		var configFile = new File(projectDir, ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME);
 		var refFile = createFile(TEMP_DIR, DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// The current working directory of the builder in the project is set to RELATIVE_DIR_PATH_BUILD_DEFAULT:
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
@@ -144,8 +144,8 @@ final class ClangdConfigurationFileManagerTest {
 
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
-		// WHEN the ClangdConfigurationManager.handleEvent method gets called:
-		clangdConfigurationManager.handleEvent(event);
+		// WHEN the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called:
+		clangdCProjectDescriptionListenerHandler.handleEvent(event);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
 		// AND the file content is as expected:
@@ -170,8 +170,8 @@ final class ClangdConfigurationFileManagerTest {
 
 		// GIVEN an existing but empty .clangd configuration file in the project:
 		var emptyConfigFile = createConfigFile("%s", "  ");
-		// WHEN the ClangdConfigurationManager.handleEvent method gets called with a new cdb path "build/debug":
-		clangdConfigurationManager.handleEvent(event);
+		// WHEN the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called with a new cdb path "build/debug":
+		clangdCProjectDescriptionListenerHandler.handleEvent(event);
 		// THEN the updated file matches the expected content with the given CompilationDatabase directory "build/debug":
 		assertTrue(Arrays.equals(Files.readAllBytes(emptyConfigFile.getLocation().toFile().toPath()),
 				Files.readAllBytes(refFile.toPath())));
@@ -189,7 +189,7 @@ final class ClangdConfigurationFileManagerTest {
 	@Test
 	void testUpdateClangdConfigFileInProject() throws IOException, CoreException {
 		var projectDir = project.getLocation().toPortableString();
-		var configFile = new File(projectDir, ClangdConfigurationFileManager.CLANGD_CONFIG_FILE_NAME);
+		var configFile = new File(projectDir, ClangdConfigurationFileHandlerBase.CLANGD_CONFIG_FILE_NAME);
 		var refFileDefault = createFile(TEMP_DIR, ".clangdDefault", DEFAULT_CDB_SETTING,
 				RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		// Use MODIFIED_DEFAULT_CDB_SETTING here, because the org.yaml.snakeyaml.Yaml.dump appends a '\n' at the last line:
@@ -201,8 +201,8 @@ final class ClangdConfigurationFileManagerTest {
 
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
-		// AND the ClangdConfigurationManager.handleEvent method gets called:
-		clangdConfigurationManager.handleEvent(event);
+		// AND the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called:
+		clangdCProjectDescriptionListenerHandler.handleEvent(event);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
 		// THEN the created file matches the expected content:
@@ -212,7 +212,7 @@ final class ClangdConfigurationFileManagerTest {
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 		// AND the handleEvent gets called again:
-		clangdConfigurationManager.handleEvent(event);
+		clangdCProjectDescriptionListenerHandler.handleEvent(event);
 		// THEN the updated file matches the expected content:
 		assertTrue(Arrays.equals(Files.readAllBytes(configFile.toPath()), Files.readAllBytes(refFileDebug.toPath())));
 
@@ -233,10 +233,10 @@ final class ClangdConfigurationFileManagerTest {
 
 		// GIVEN an existing expanded .clangd configuration file in the project pointing to "build/default":
 		var configFile = createConfigFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
-		// WHEN the ClangdConfigurationManager.handleEvent method gets called and the builder CWD points to "build/debug":
+		// WHEN the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called and the builder CWD points to "build/debug":
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
-		clangdConfigurationManager.handleEvent(event);
+		clangdCProjectDescriptionListenerHandler.handleEvent(event);
 		// THEN the updated file matches the expected content:
 		assertTrue(Arrays.equals(Files.readAllBytes(configFile.getLocation().toFile().toPath()),
 				Files.readAllBytes(refFile.toPath())));
@@ -259,8 +259,8 @@ final class ClangdConfigurationFileManagerTest {
 		try (var inputStream = configFile.getContents()) {
 			beforeSet = new String(inputStream.readAllBytes());
 		}
-		// WHEN the ClangdConfigurationManager.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		((ClangdConfigurationFileManager) clangdConfigurationManager).setCompilationDatabase(project,
+		// WHEN the ClangdConfigurationFileHandlerBase.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
+		((ClangdConfigurationFileHandlerBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
 				RELATIVE_DIR_PATH_BUILD_DEBUG);
 		// THEN the file has not been changed, because the user shall fix the errors first:
 		try (var inputStream = configFile.getContents()) {
@@ -283,8 +283,8 @@ final class ClangdConfigurationFileManagerTest {
 		try (var inputStream = configFile.getContents()) {
 			beforeSet = new String(inputStream.readAllBytes());
 		}
-		// WHEN the ClangdConfigurationManager.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		((ClangdConfigurationFileManager) clangdConfigurationManager).setCompilationDatabase(project,
+		// WHEN the ClangdConfigurationFileHandlerBase.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
+		((ClangdConfigurationFileHandlerBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
 				RELATIVE_DIR_PATH_BUILD_DEBUG);
 		// THEN the file has not been changed, because the user shall fix the errors first:
 		try (var inputStream = configFile.getContents()) {

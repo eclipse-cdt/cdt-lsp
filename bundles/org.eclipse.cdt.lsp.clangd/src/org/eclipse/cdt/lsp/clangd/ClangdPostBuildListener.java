@@ -18,7 +18,7 @@ import org.eclipse.core.resources.IBuildConfiguration;
 /**
  * @since 3.0
  */
-public interface ClangdResourceChangeListener {
+public interface ClangdPostBuildListener {
 
 	void handleEvent(IBuildConfiguration configuration);
 }

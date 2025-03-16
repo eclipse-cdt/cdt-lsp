@@ -18,7 +18,7 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 /**
  * Vendors may implement this interface as OSGi service
  * with a service.ranking property > 0 to replace the default
- * implementation {@code ClangdConfigurationFileManager}
+ * implementation {@code ClangdCProjectDescriptionListenerHandler}
  *
  * @since 2.0
  */

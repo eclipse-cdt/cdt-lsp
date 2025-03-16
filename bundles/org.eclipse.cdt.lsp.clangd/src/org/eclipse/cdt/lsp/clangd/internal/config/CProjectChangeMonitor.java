@@ -13,19 +13,18 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings;
-import org.eclipse.cdt.lsp.clangd.ClangdResourceChangeListener;
+import org.eclipse.cdt.lsp.clangd.ClangdPostBuildListener;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -39,23 +38,20 @@ public class CProjectChangeMonitor {
 	private final ServiceCaller<ClangdCompilationDatabaseSettings> settings = new ServiceCaller<>(getClass(),
 			ClangdCompilationDatabaseSettings.class);
 
-	private final ServiceCaller<ClangdResourceChangeListener> clangdResourceChangeListener = new ServiceCaller<>(
-			getClass(), ClangdResourceChangeListener.class);
+	private final ServiceCaller<ClangdPostBuildListener> clangdPostBuildListener = new ServiceCaller<>(
+			getClass(), ClangdPostBuildListener.class);
 
 	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdListener = new ServiceCaller<>(getClass(),
 			ClangdCProjectDescriptionListener.class);
 
-	private final IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
-		private List<IProject> projects = new ArrayList<>();
+	private final IResourceChangeListener postBuildListener = new IResourceChangeListener() {
 
 		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
 			if (event.getDelta() != null) {
-				projects.clear();
-				getProjects(event.getDelta());
-				for (IProject project : projects) {
+				for (var project : collectAffectedProjects(event)) {
 					if (isEnabled(project)) {
-						clangdResourceChangeListener.call(c -> {
+						clangdPostBuildListener.call(c -> {
 							try {
 								c.handleEvent(project.getActiveBuildConfig());
 							} catch (CoreException e) {
@@ -67,13 +63,19 @@ public class CProjectChangeMonitor {
 			}
 		}
 
-		private void getProjects(IResourceDelta delta) {
-			if (delta.getResource() instanceof IProject project) {
-				projects.add(project);
+		private Set<IProject> collectAffectedProjects(IResourceChangeEvent event) {
+			Set<IProject> projects = new HashSet<>();
+			try {
+				event.getDelta().accept(delta -> {
+					if (delta.getResource() instanceof IProject project) {
+						projects.add(project);
+					}
+					return true;
+				});
+			} catch (CoreException e) {
+				Platform.getLog(getClass()).error(e.getMessage(), e);
 			}
-			for (var child : delta.getAffectedChildren()) {
-				getProjects(child);
-			}
+			return projects;
 		}
 
 	};
@@ -91,14 +93,14 @@ public class CProjectChangeMonitor {
 	};
 
 	public CProjectChangeMonitor start(IWorkspace workspace) {
-		workspace.addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD);
+		workspace.addResourceChangeListener(postBuildListener, IResourceChangeEvent.POST_BUILD);
 		CCorePlugin.getDefault().getProjectDescriptionManager().addCProjectDescriptionListener(listener,
 				CProjectDescriptionEvent.APPLIED);
 		return this;
 	}
 
 	public void stop(IWorkspace workspace) {
-		workspace.removeResourceChangeListener(resourceChangeListener);
+		workspace.removeResourceChangeListener(postBuildListener);
 		CCorePlugin.getDefault().getProjectDescriptionManager().removeCProjectDescriptionListener(listener);
 	}
 
