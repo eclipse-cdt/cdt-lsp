@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024, 2025 Bachmann electronic GmbH and others.
+ * Copyright (c) 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,8 @@ import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
+import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseProvider;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings;
-import org.eclipse.cdt.lsp.clangd.ClangdPostBuildCompilationDatabaseSetter;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -31,15 +31,15 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 
 /**
- * This monitor listens to C project description changes and post-build resource changes.
+ * The setter listens to C project description changes and post-build resource changes.
  */
-public class CProjectChangeMonitor {
+public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSetterBase {
 
 	private final ServiceCaller<ClangdCompilationDatabaseSettings> settings = new ServiceCaller<>(getClass(),
 			ClangdCompilationDatabaseSettings.class);
 
-	private final ServiceCaller<ClangdPostBuildCompilationDatabaseSetter> clangdPostBuildCompilationDatabaseSetter = new ServiceCaller<>(
-			getClass(), ClangdPostBuildCompilationDatabaseSetter.class);
+	private final ServiceCaller<ClangdCompilationDatabaseProvider> clangdCompilationDatabaseProvider = new ServiceCaller<>(
+			getClass(), ClangdCompilationDatabaseProvider.class);
 
 	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdCProjectDescriptionListener = new ServiceCaller<>(
 			getClass(), ClangdCProjectDescriptionListener.class);
@@ -51,9 +51,10 @@ public class CProjectChangeMonitor {
 			if (event.getDelta() != null) {
 				for (var project : collectAffectedProjects(event)) {
 					if (isSetCompilationDatabaseEnabled(project)) {
-						clangdPostBuildCompilationDatabaseSetter.call(setter -> {
+						clangdCompilationDatabaseProvider.call(provider -> {
 							try {
-								setter.setCompilationDatabase(project.getActiveBuildConfig());
+								provider.getCompilationDatabasePath(project.getActiveBuildConfig())
+										.ifPresent(path -> setCompilationDatabase(project, path));
 							} catch (CoreException e) {
 								Platform.getLog(getClass()).error(e.getMessage(), e);
 							}
@@ -86,13 +87,23 @@ public class CProjectChangeMonitor {
 		public void handleEvent(CProjectDescriptionEvent event) {
 			var project = event.getProject();
 			if (project != null && isSetCompilationDatabaseEnabled(project)) {
-				clangdCProjectDescriptionListener.call(c -> c.handleEvent(event));
+				if (!clangdCProjectDescriptionListener.call(c -> c.handleEvent(event))) {
+					// no OSGi service for deprecated ClangdCProjectDescriptionListener provided, lets use the new one:
+					clangdCompilationDatabaseProvider.call(provider -> {
+						provider.getCompilationDatabasePath(event)
+								.ifPresent(path -> setCompilationDatabase(project, path));
+					});
+				}
 			}
 		}
 
 	};
 
-	public CProjectChangeMonitor start(IWorkspace workspace) {
+	public ICProjectDescriptionListener getCProjectDescriptionListener() {
+		return descriptionListener;
+	}
+
+	public ClangdCompilationDatabaseSetter start(IWorkspace workspace) {
 		workspace.addResourceChangeListener(postBuildListener, IResourceChangeEvent.POST_BUILD);
 		CCorePlugin.getDefault().getProjectDescriptionManager().addCProjectDescriptionListener(descriptionListener,
 				CProjectDescriptionEvent.APPLIED);

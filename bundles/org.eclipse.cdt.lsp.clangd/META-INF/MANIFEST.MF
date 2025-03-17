@@ -36,7 +36,6 @@ Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangForm
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdFallbackManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdMetadataDefaults.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSetter.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdPostBuildCompilationDatabaseSetter.xml
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseProvider.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings.xml
 Bundle-Activator: org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin

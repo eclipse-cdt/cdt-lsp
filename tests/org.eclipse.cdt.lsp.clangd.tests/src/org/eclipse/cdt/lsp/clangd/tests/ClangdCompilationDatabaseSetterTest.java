@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,7 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
-import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetterBase;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -40,7 +40,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.ui.PlatformUI;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
 
-final class ClangdConfigurationFileManagerTest {
+final class ClangdCompilationDatabaseSetterTest {
 
 	private static final String RELATIVE_DIR_PATH_BUILD_DEFAULT = "build" + File.separator + "default";
 	private static final String RELATIVE_DIR_PATH_BUILD_DEBUG = "build" + File.separator + "debug";
@@ -57,8 +56,7 @@ final class ClangdConfigurationFileManagerTest {
 	private static final String MODIFIED_DEFAULT_CDB_SETTING = DEFAULT_CDB_SETTING + "\n";
 	private static final String INVALID_YAML_SYNTAX_CONTAINS_TAB = "CompileFlags:\n\tCompilationDatabase: %s";
 	private static final String INVALID_YAML_SYNTAX_MISSING_BRACE = "CompileFlags: {CompilationDatabase: Release\r\n";
-	private final ClangdCProjectDescriptionListener clangdCProjectDescriptionListenerHandler = PlatformUI.getWorkbench()
-			.getService(ClangdCProjectDescriptionListener.class);
+	private final ClangdCompilationDatabaseSetter clangdCompilationDatabaseSetter = new ClangdCompilationDatabaseSetter();
 	private IProject project;
 
 	private static CProjectDescriptionEvent event = mock(CProjectDescriptionEvent.class);
@@ -146,7 +144,7 @@ final class ClangdConfigurationFileManagerTest {
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
 		// WHEN the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called:
-		clangdCProjectDescriptionListenerHandler.handleEvent(event);
+		clangdCompilationDatabaseSetter.getCProjectDescriptionListener().handleEvent(event);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
 		// AND the file content is as expected:
@@ -172,7 +170,7 @@ final class ClangdConfigurationFileManagerTest {
 		// GIVEN an existing but empty .clangd configuration file in the project:
 		var emptyConfigFile = createConfigFile("%s", "  ");
 		// WHEN the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called with a new cdb path "build/debug":
-		clangdCProjectDescriptionListenerHandler.handleEvent(event);
+		clangdCompilationDatabaseSetter.getCProjectDescriptionListener().handleEvent(event);
 		// THEN the updated file matches the expected content with the given CompilationDatabase directory "build/debug":
 		assertTrue(Arrays.equals(Files.readAllBytes(emptyConfigFile.getLocation().toFile().toPath()),
 				Files.readAllBytes(refFile.toPath())));
@@ -203,7 +201,7 @@ final class ClangdConfigurationFileManagerTest {
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
 		// AND the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called:
-		clangdCProjectDescriptionListenerHandler.handleEvent(event);
+		clangdCompilationDatabaseSetter.getCProjectDescriptionListener().handleEvent(event);
 		// THEN a new file has been created in the project:
 		assertTrue(configFile.length() > 0);
 		// THEN the created file matches the expected content:
@@ -213,7 +211,7 @@ final class ClangdConfigurationFileManagerTest {
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
 		// AND the handleEvent gets called again:
-		clangdCProjectDescriptionListenerHandler.handleEvent(event);
+		clangdCompilationDatabaseSetter.getCProjectDescriptionListener().handleEvent(event);
 		// THEN the updated file matches the expected content:
 		assertTrue(Arrays.equals(Files.readAllBytes(configFile.toPath()), Files.readAllBytes(refFileDebug.toPath())));
 
@@ -237,7 +235,7 @@ final class ClangdConfigurationFileManagerTest {
 		// WHEN the ClangdCProjectDescriptionListenerHandler.handleEvent method gets called and the builder CWD points to "build/debug":
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
-		clangdCProjectDescriptionListenerHandler.handleEvent(event);
+		clangdCompilationDatabaseSetter.getCProjectDescriptionListener().handleEvent(event);
 		// THEN the updated file matches the expected content:
 		assertTrue(Arrays.equals(Files.readAllBytes(configFile.getLocation().toFile().toPath()),
 				Files.readAllBytes(refFile.toPath())));
@@ -261,8 +259,7 @@ final class ClangdConfigurationFileManagerTest {
 			beforeSet = new String(inputStream.readAllBytes());
 		}
 		// WHEN the ClangdConfigurationFileHandlerBase.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		((ClangdCompilationDatabaseSetterBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
-				RELATIVE_DIR_PATH_BUILD_DEBUG);
+		clangdCompilationDatabaseSetter.setCompilationDatabase(project, RELATIVE_DIR_PATH_BUILD_DEBUG);
 		// THEN the file has not been changed, because the user shall fix the errors first:
 		try (var inputStream = configFile.getContents()) {
 			var afterSet = new String(inputStream.readAllBytes());
@@ -285,8 +282,7 @@ final class ClangdConfigurationFileManagerTest {
 			beforeSet = new String(inputStream.readAllBytes());
 		}
 		// WHEN the ClangdConfigurationFileHandlerBase.setCompilationDatabasePath method gets called with a new cdb path "build/debug":
-		((ClangdCompilationDatabaseSetterBase) clangdCProjectDescriptionListenerHandler).setCompilationDatabase(project,
-				RELATIVE_DIR_PATH_BUILD_DEBUG);
+		clangdCompilationDatabaseSetter.setCompilationDatabase(project, RELATIVE_DIR_PATH_BUILD_DEBUG);
 		// THEN the file has not been changed, because the user shall fix the errors first:
 		try (var inputStream = configFile.getContents()) {
 			var afterSet = new String(inputStream.readAllBytes());
