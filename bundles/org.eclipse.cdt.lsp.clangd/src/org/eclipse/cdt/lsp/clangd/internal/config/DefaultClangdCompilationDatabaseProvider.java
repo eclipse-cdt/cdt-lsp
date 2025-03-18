@@ -73,8 +73,9 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 			if (cwdBuilder != null) {
 				try {
 					var cwdString = new MacroResolver().resolveValue(cwdBuilder.toOSString(), EMPTY, null, config);
-					return Optional.of(cwdString
-							.replace(event.getProject().getLocation().addTrailingSeparator().toOSString(), EMPTY));
+					return Optional.ofNullable(event.getProject().getLocation())
+							.map(loc -> loc.addTrailingSeparator().toOSString())
+							.map(projectLoc -> cwdString.replace(projectLoc, EMPTY));
 				} catch (CdtVariableException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
 				}
