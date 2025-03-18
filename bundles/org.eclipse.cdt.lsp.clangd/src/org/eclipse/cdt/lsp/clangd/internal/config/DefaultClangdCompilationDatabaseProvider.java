@@ -22,7 +22,8 @@ import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseProvider;
-import org.eclipse.core.resources.IBuildConfiguration;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.service.component.annotations.Component;
@@ -45,9 +46,9 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 	protected ICBuildConfigurationManager build;
 
 	@Override
-	public Optional<String> getCompilationDatabasePath(IBuildConfiguration configuration) {
-		if (configuration != null && configuration.getProject() != null) {
-			return getConfiguration(configuration) //
+	public Optional<String> getCompilationDatabasePath(IResourceChangeEvent event, IProject project) {
+		if (project != null) {
+			return getConfiguration(project) //
 					.map(bc -> {
 						if (bc instanceof CBuildConfiguration cbc) {
 							try {
@@ -82,9 +83,16 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 		return Optional.empty();
 	}
 
-	private Optional<ICBuildConfiguration> getConfiguration(IBuildConfiguration configuration) {
+	private Optional<ICBuildConfiguration> getConfiguration(IProject project) {
 		try {
-			return Optional.ofNullable(build.getBuildConfiguration(configuration));
+			return Optional.ofNullable(project.getActiveBuildConfig()).map(configuration -> {
+				try {
+					return build.getBuildConfiguration(configuration);
+				} catch (CoreException e) {
+					Platform.getLog(getClass()).error(e.getMessage(), e);
+					return null;
+				}
+			});
 		} catch (CoreException e) {
 			Platform.getLog(getClass()).error(e.getMessage(), e);
 		}

@@ -52,12 +52,8 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 				for (var project : collectAffectedProjects(event)) {
 					if (isSetCompilationDatabaseEnabled(project)) {
 						clangdCompilationDatabaseProvider.call(provider -> {
-							try {
-								provider.getCompilationDatabasePath(project.getActiveBuildConfig())
-										.ifPresent(path -> setCompilationDatabase(project, path));
-							} catch (CoreException e) {
-								Platform.getLog(getClass()).error(e.getMessage(), e);
-							}
+							provider.getCompilationDatabasePath(event, project)
+									.ifPresent(path -> setCompilationDatabase(project, path));
 						});
 					}
 				}
@@ -98,6 +94,10 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 		}
 
 	};
+
+	public IResourceChangeListener getResourceChangeListener() {
+		return postBuildListener;
+	}
 
 	public ICProjectDescriptionListener getCProjectDescriptionListener() {
 		return descriptionListener;
