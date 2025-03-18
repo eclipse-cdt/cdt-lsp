@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.CProjectNature;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
@@ -64,7 +65,8 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 			Set<IProject> projects = new HashSet<>();
 			try {
 				event.getDelta().accept(delta -> {
-					if (delta.getResource() instanceof IProject project) {
+					if (delta.getResource() instanceof IProject project && project.hasNature(CProjectNature.C_NATURE_ID)
+							&& project.isAccessible()) {
 						projects.add(project);
 					}
 					return true;
