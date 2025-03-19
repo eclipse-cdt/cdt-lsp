@@ -23,6 +23,7 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCProjectDescriptionListener;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseProvider;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -46,6 +47,7 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 			getClass(), ClangdCProjectDescriptionListener.class);
 
 	private final IResourceChangeListener postBuildListener = new IResourceChangeListener() {
+		private static final String CLANGD_CONFIG_FILE = ".clangd"; //$NON-NLS-1$
 
 		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
@@ -68,6 +70,13 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 					if (delta.getResource() instanceof IProject project && project.hasNature(CProjectNature.C_NATURE_ID)
 							&& project.isAccessible()) {
 						projects.add(project);
+					} else if (delta.getResource() instanceof IFile file) {
+						if (CLANGD_CONFIG_FILE.contentEquals(file.getName())) {
+							projects.remove(file.getProject()); // Do not add if .clangd file has changed
+						} else if (file.getProject() != null && file.getProject().hasNature(CProjectNature.C_NATURE_ID)
+								&& file.getProject().isAccessible()) {
+							projects.add(file.getProject()); // but add if its another file
+						}
 					}
 					return true;
 				});
