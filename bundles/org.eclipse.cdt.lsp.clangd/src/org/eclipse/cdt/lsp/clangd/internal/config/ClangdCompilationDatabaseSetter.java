@@ -71,12 +71,12 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 					if (delta.getResource() instanceof IProject project && project.hasNature(CProjectNature.C_NATURE_ID)
 							&& project.isAccessible()) {
 						projectsMap.put(project, true);
-					} else if (delta.getResource() instanceof IFile file) {
-						if (COMPILE_COMMANDS_JSON.contentEquals(file.getName()) && file.getProject() != null
-								&& file.getProject().isAccessible()) {
+					} else if (delta.getResource() instanceof IFile file && file.getProject() != null
+							&& file.getProject().hasNature(CProjectNature.C_NATURE_ID)
+							&& file.getProject().isAccessible()) {
+						if (COMPILE_COMMANDS_JSON.contentEquals(file.getName())) {
 							projectsMap.put(file.getProject(), false);
-						} else if (file.getProject() != null && file.getProject().hasNature(CProjectNature.C_NATURE_ID)
-								&& file.getProject().isAccessible()) {
+						} else {
 							// do NOT remove if the compile_commands.json has changed,
 							// do NOT remove if the map don't contain the project (default == false):
 							if (projectsMap.getOrDefault(file.getProject(), false)) {
