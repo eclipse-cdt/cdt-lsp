@@ -13,7 +13,8 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.config;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.cdt.core.CCorePlugin;
@@ -47,7 +48,7 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 			getClass(), ClangdCProjectDescriptionListener.class);
 
 	private final IResourceChangeListener postBuildListener = new IResourceChangeListener() {
-		private static final String CLANGD_CONFIG_FILE = ".clangd"; //$NON-NLS-1$
+		private static final String COMPILE_COMMANDS_JSON = "compile_commands.json"; //$NON-NLS-1$
 
 		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
@@ -64,18 +65,23 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 		}
 
 		private Set<IProject> collectAffectedProjects(IResourceChangeEvent event) {
-			Set<IProject> projects = new HashSet<>();
+			Map<IProject, Boolean> projectsMap = new HashMap<>();
 			try {
 				event.getDelta().accept(delta -> {
 					if (delta.getResource() instanceof IProject project && project.hasNature(CProjectNature.C_NATURE_ID)
 							&& project.isAccessible()) {
-						projects.add(project);
+						projectsMap.put(project, true);
 					} else if (delta.getResource() instanceof IFile file) {
-						if (CLANGD_CONFIG_FILE.contentEquals(file.getName())) {
-							projects.remove(file.getProject()); // Do not add if .clangd file has changed
+						if (COMPILE_COMMANDS_JSON.contentEquals(file.getName())) {
+							projectsMap.put(file.getProject(), false);
 						} else if (file.getProject() != null && file.getProject().hasNature(CProjectNature.C_NATURE_ID)
 								&& file.getProject().isAccessible()) {
-							projects.add(file.getProject()); // but add if its another file
+							// do NOT remove if the compile_commands.json has changed,
+							// do NOT remove if the map don't contain the project (default == false):
+							if (projectsMap.getOrDefault(file.getProject(), false)) {
+								// remove, because we want to detect settings changes only:
+								projectsMap.remove(file.getProject());
+							}
 						}
 					}
 					return true;
@@ -83,7 +89,7 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 			} catch (CoreException e) {
 				Platform.getLog(getClass()).error(e.getMessage(), e);
 			}
-			return projects;
+			return projectsMap.keySet();
 		}
 
 	};
