@@ -43,7 +43,8 @@ public class ClangdConfigFileChecker {
 			try {
 				removeMarkerFromClangdConfig(configFile);
 				//throws ScannerException and ParserException:
-				yaml.load(inputStream);
+				yaml.loadAll(inputStream).forEach(doc -> {
+				});
 			} catch (MarkedYAMLException yamlException) {
 				// re-read the file, because the buffer which comes along with MarkedYAMLException is limited to ~800 bytes.
 				try (var reReadStream = configFile.getContents()) {
