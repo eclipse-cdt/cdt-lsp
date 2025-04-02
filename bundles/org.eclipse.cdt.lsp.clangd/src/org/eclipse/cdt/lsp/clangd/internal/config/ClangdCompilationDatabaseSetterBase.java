@@ -15,8 +15,6 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -24,8 +22,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.scanner.ScannerException;
 
 public abstract class ClangdCompilationDatabaseSetterBase {
 	public static final String CLANGD_CONFIG_FILE_NAME = ".clangd"; //$NON-NLS-1$
@@ -37,56 +33,23 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	/**
 	 * Set the <code>CompilationDatabase</code> entry in the .clangd file in the given project root.
 	 * The file will be created, if it's not existing.
-	 * A ScannerException will be thrown if the configuration file contains invalid yaml syntax.
 	 *
 	 * @param project to write the .clangd file
 	 * @param databasePath project relative path to .clangd file
-	 * @throws IOException
-	 * @throws ScannerException
-	 * @throws CoreException
 	 */
-	@SuppressWarnings("unchecked")
 	public void setCompilationDatabase(IProject project, String databasePath) {
 		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
 		try {
 			if (createClangdConfigFile(configFile, project.getDefaultCharset(), databasePath, false)) {
 				return;
 			}
-			Map<String, Object> data = null;
-			Yaml yaml = new Yaml();
-			try (var inputStream = configFile.getContents()) {
-				//throws ScannerException and ParserException:
-				try {
-					data = yaml.load(inputStream);
-				} catch (Exception e) {
-					Platform.getLog(getClass()).error(e.getMessage(), e);
-					// return, since the file syntax is corrupted. The user has to fix it first:
-					return;
-				}
-			}
-			if (data == null) {
-				//empty file: (re)create .clangd file:
-				createClangdConfigFile(configFile, project.getDefaultCharset(), databasePath, true);
-				return;
-			}
-			Map<String, Object> map = (Map<String, Object>) data.get(COMPILE_FLAGS);
-			if (map != null) {
-				var cdb = map.get(COMPILATTION_DATABASE);
-				if (cdb != null && cdb instanceof String) {
-					if (cdb.equals(databasePath)) {
-						return;
-					}
-				}
-				map.put(COMPILATTION_DATABASE, databasePath);
-				data.put(COMPILE_FLAGS, map);
-				try (var yamlWriter = new PrintWriter(configFile.getLocation().toFile())) {
-					yaml.dump(data, yamlWriter);
-				}
-			}
+			var content = configFile.readString();
+			var result = content.replaceAll(
+					"(?<=CompilationDatabase:)[\\s]*[\\w\\.\\/\\-\\:\\\\]*[\\s]*(?=\\}?\\s*$|\\R)", //$NON-NLS-1$
+					" " + databasePath); //$NON-NLS-1$
+			writeConfigFile(configFile, result);
 		} catch (CoreException e) {
 			Platform.getLog(getClass()).log(e.getStatus());
-		} catch (IOException e) {
-			Platform.getLog(getClass()).error(e.getMessage(), e);
 		}
 	}
 
@@ -108,5 +71,13 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			}
 		}
 		return false;
+	}
+
+	private void writeConfigFile(IFile configFile, String fileData) {
+		try {
+			configFile.setContents(fileData.getBytes(), IResource.KEEP_HISTORY, new NullProgressMonitor());
+		} catch (CoreException e) {
+			Platform.getLog(getClass()).log(e.getStatus());
+		}
 	}
 }
