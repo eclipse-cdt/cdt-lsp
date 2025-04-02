@@ -15,6 +15,7 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.cdt.core.CCorePlugin;
@@ -29,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
@@ -64,18 +66,23 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 			}
 		}
 
+		/**
+		 * Collects a list of accessible C/C++ projects for which the active/selected build configuration or compile_commands.json has been modified.
+		 * @param event
+		 * @return Set of projects with changed settings or compile_commands.json
+		 */
 		private Set<IProject> collectAffectedProjects(IResourceChangeEvent event) {
-			Map<IProject, Boolean> projectsMap = new HashMap<>();
+			Map<IProject, Boolean> projectsMap = new HashMap<>(); // holds information whether the project can be removed from resulting Set: true == project is removable from Set
 			try {
 				event.getDelta().accept(delta -> {
-					if (delta.getResource() instanceof IProject project && project.hasNature(CProjectNature.C_NATURE_ID)
-							&& project.isAccessible()) {
+					if (delta.getResource() instanceof IProject project && project.isAccessible()
+							&& project.hasNature(CProjectNature.C_NATURE_ID)) {
 						projectsMap.put(project, true);
 					} else if (delta.getResource() instanceof IFile file && file.getProject() != null
-							&& file.getProject().hasNature(CProjectNature.C_NATURE_ID)
-							&& file.getProject().isAccessible()) {
+							&& file.getProject().isAccessible()
+							&& file.getProject().hasNature(CProjectNature.C_NATURE_ID)) {
 						if (COMPILE_COMMANDS_JSON.contentEquals(file.getName())) {
-							projectsMap.put(file.getProject(), false);
+							projectsMap.put(file.getProject(), false); // do not remove from resulting map
 						} else {
 							// do NOT remove if the compile_commands.json has changed,
 							// do NOT remove if the map don't contain the project (default == false):
@@ -99,16 +106,7 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 
 		@Override
 		public void handleEvent(CProjectDescriptionEvent event) {
-			var project = event.getProject();
-			if (project != null && isSetCompilationDatabaseEnabled(project)) {
-				if (!clangdCProjectDescriptionListener.call(c -> c.handleEvent(event))) {
-					// no OSGi service for deprecated ClangdCProjectDescriptionListener provided, lets use the new one:
-					clangdCompilationDatabaseProvider.call(provider -> {
-						provider.getCompilationDatabasePath(event)
-								.ifPresent(path -> setCompilationDatabase(project, path));
-					});
-				}
-			}
+			cProjectDescriptionEventExecutor(event);
 		}
 
 	};
@@ -135,10 +133,28 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 
 	private boolean isSetCompilationDatabaseEnabled(IProject project) {
 		boolean[] enabled = new boolean[1];
-		settings.call(s -> {
-			enabled[0] = s.enableSetCompilationDatabasePath(project);
+		settings.call(settings -> {
+			enabled[0] = settings.enableSetCompilationDatabasePath(project);
 		});
 		return enabled[0];
+	}
+
+	@SuppressWarnings("unchecked")
+	public Optional<WorkspaceJob> cProjectDescriptionEventExecutor(CProjectDescriptionEvent event) {
+		Optional<WorkspaceJob>[] jobs = new Optional[1];
+		jobs[0] = Optional.empty();
+		var project = event.getProject();
+		if (project != null && isSetCompilationDatabaseEnabled(project)) {
+			if (!clangdCProjectDescriptionListener.call(c -> c.handleEvent(event))) {
+				// no OSGi service for deprecated ClangdCProjectDescriptionListener provided, lets use the new one:
+				clangdCompilationDatabaseProvider.call(provider -> {
+					jobs[0] = provider.getCompilationDatabasePath(event).map(path -> {
+						return setCompilationDatabase(project, path);
+					});
+				});
+			}
+		}
+		return jobs[0];
 	}
 
 }
