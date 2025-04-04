@@ -36,9 +36,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 
 /**
- * The setter listens to C project description changes and post-build resource changes.
+ * The setter listens to C/C++ project description changes for managed build projects and post-build resource changes for CMake and Meson projects.
  */
 public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSetterBase {
+	private static final String COMPILE_COMMANDS_JSON = "compile_commands.json"; //$NON-NLS-1$
 
 	private final ServiceCaller<ClangdCompilationDatabaseSettings> settings = new ServiceCaller<>(getClass(),
 			ClangdCompilationDatabaseSettings.class);
@@ -49,74 +50,92 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 	private final ServiceCaller<ClangdCProjectDescriptionListener> clangdCProjectDescriptionListener = new ServiceCaller<>(
 			getClass(), ClangdCProjectDescriptionListener.class);
 
-	private final IResourceChangeListener postBuildListener = new IResourceChangeListener() {
-		private static final String COMPILE_COMMANDS_JSON = "compile_commands.json"; //$NON-NLS-1$
-
-		@Override
-		public void resourceChanged(IResourceChangeEvent event) {
-			if (event.getDelta() != null) {
-				for (var project : collectAffectedProjects(event)) {
-					if (isSetCompilationDatabaseEnabled(project)) {
-						clangdCompilationDatabaseProvider.call(provider -> {
-							provider.getCompilationDatabasePath(event, project)
-									.ifPresent(path -> setCompilationDatabase(project, path));
-						});
-					}
-				}
-			}
-		}
-
-		/**
-		 * Collects a list of accessible C/C++ projects for which the active/selected build configuration or compile_commands.json has been modified.
-		 * @param event
-		 * @return Set of projects with changed settings or compile_commands.json
-		 */
-		private Set<IProject> collectAffectedProjects(IResourceChangeEvent event) {
-			Map<IProject, Boolean> projectsMap = new HashMap<>(); // holds information whether the project can be removed from resulting Set: true == project is removable from Set
-			try {
-				event.getDelta().accept(delta -> {
-					if (delta.getResource() instanceof IProject project && project.isAccessible()
-							&& project.hasNature(CProjectNature.C_NATURE_ID)) {
-						projectsMap.put(project, true);
-					} else if (delta.getResource() instanceof IFile file && file.getProject() != null
-							&& file.getProject().isAccessible()
-							&& file.getProject().hasNature(CProjectNature.C_NATURE_ID)) {
-						if (COMPILE_COMMANDS_JSON.contentEquals(file.getName())) {
-							projectsMap.put(file.getProject(), false); // do not remove from resulting map
-						} else {
-							// do NOT remove if the compile_commands.json has changed,
-							// do NOT remove if the map don't contain the project (default == false):
-							if (projectsMap.getOrDefault(file.getProject(), false)) {
-								// remove, because we want to detect settings changes only:
-								projectsMap.remove(file.getProject());
-							}
-						}
-					}
-					return true;
-				});
-			} catch (CoreException e) {
-				Platform.getLog(getClass()).error(e.getMessage(), e);
-			}
-			return projectsMap.keySet();
-		}
-
-	};
-
+	// Handles managed build C/C++ Projects:
 	private final ICProjectDescriptionListener descriptionListener = new ICProjectDescriptionListener() {
 
 		@Override
 		public void handleEvent(CProjectDescriptionEvent event) {
-			cProjectDescriptionEventExecutor(event);
+			cProjectDescriptionEventHandler(event);
 		}
 
 	};
 
-	public IResourceChangeListener getResourceChangeListener() {
-		return postBuildListener;
+	// Handles Cmake and Meson projects:
+	private final IResourceChangeListener postBuildListener = new IResourceChangeListener() {
+
+		@Override
+		public void resourceChanged(IResourceChangeEvent event) {
+			resourceChangedHandler(event);
+		}
+
+	};
+
+	@SuppressWarnings("unchecked")
+	public Optional<WorkspaceJob> cProjectDescriptionEventHandler(CProjectDescriptionEvent event) {
+		Optional<WorkspaceJob>[] jobs = new Optional[1];
+		jobs[0] = Optional.empty();
+		var project = event.getProject();
+		if (project != null && isSetCompilationDatabaseEnabled(project)) {
+			if (!clangdCProjectDescriptionListener.call(c -> c.handleEvent(event))) {
+				// no OSGi service for deprecated ClangdCProjectDescriptionListener provided, lets use the new one:
+				clangdCompilationDatabaseProvider.call(provider -> {
+					jobs[0] = provider.getCompilationDatabasePath(event)
+							.map(path -> setCompilationDatabase(project, path));
+				});
+			}
+		}
+		return jobs[0]; // return job for unit testing to allow tests to wait for the asynchronous job to be finished.
 	}
 
-	public ICProjectDescriptionListener getCProjectDescriptionListener() {
-		return descriptionListener;
+	@SuppressWarnings("unchecked")
+	public Optional<WorkspaceJob> resourceChangedHandler(IResourceChangeEvent event) {
+		Optional<WorkspaceJob>[] jobs = new Optional[1];
+		jobs[0] = Optional.empty();
+		if (event.getDelta() != null) {
+			for (var project : collectAffectedProjects(event)) {
+				if (isSetCompilationDatabaseEnabled(project)) {
+					clangdCompilationDatabaseProvider.call(provider -> {
+						jobs[0] = provider.getCompilationDatabasePath(event, project)
+								.map(path -> setCompilationDatabase(project, path));
+					});
+				}
+			}
+		}
+		return jobs[0]; // return job for unit testing to allow tests to wait for the asynchronous job to be finished.
+	}
+
+	/**
+	 * Collects a list of accessible C/C++ projects for which the active/selected build configuration or compile_commands.json has been modified.
+	 * @param event
+	 * @return Set of projects with changed settings or compile_commands.json
+	 */
+	private Set<IProject> collectAffectedProjects(IResourceChangeEvent event) {
+		Map<IProject, Boolean> projectsMap = new HashMap<>(); // holds information whether the project can be removed from resulting Set: true == project is removable from Set
+		try {
+			event.getDelta().accept(delta -> {
+				if (delta.getResource() instanceof IProject project && project.isAccessible()
+						&& project.hasNature(CProjectNature.C_NATURE_ID)) {
+					projectsMap.put(project, true);
+				} else if (delta.getResource() instanceof IFile file && file.getProject() != null
+						&& file.getProject().isAccessible()
+						&& file.getProject().hasNature(CProjectNature.C_NATURE_ID)) {
+					if (COMPILE_COMMANDS_JSON.contentEquals(file.getName())) {
+						projectsMap.put(file.getProject(), false); // do not remove from resulting map
+					} else {
+						// do NOT remove if the compile_commands.json has changed,
+						// do NOT remove if the map don't contain the project (default == false):
+						if (projectsMap.getOrDefault(file.getProject(), false)) {
+							// remove, because we want to detect settings changes only:
+							projectsMap.remove(file.getProject());
+						}
+					}
+				}
+				return true;
+			});
+		} catch (CoreException e) {
+			Platform.getLog(getClass()).error(e.getMessage(), e);
+		}
+		return projectsMap.keySet();
 	}
 
 	public ClangdCompilationDatabaseSetter start(IWorkspace workspace) {
@@ -137,24 +156,6 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 			enabled[0] = settings.enableSetCompilationDatabasePath(project);
 		});
 		return enabled[0];
-	}
-
-	@SuppressWarnings("unchecked")
-	public Optional<WorkspaceJob> cProjectDescriptionEventExecutor(CProjectDescriptionEvent event) {
-		Optional<WorkspaceJob>[] jobs = new Optional[1];
-		jobs[0] = Optional.empty();
-		var project = event.getProject();
-		if (project != null && isSetCompilationDatabaseEnabled(project)) {
-			if (!clangdCProjectDescriptionListener.call(c -> c.handleEvent(event))) {
-				// no OSGi service for deprecated ClangdCProjectDescriptionListener provided, lets use the new one:
-				clangdCompilationDatabaseProvider.call(provider -> {
-					jobs[0] = provider.getCompilationDatabasePath(event).map(path -> {
-						return setCompilationDatabase(project, path);
-					});
-				});
-			}
-		}
-		return jobs[0];
 	}
 
 }

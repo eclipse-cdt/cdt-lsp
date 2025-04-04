@@ -36,6 +36,7 @@ import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSette
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -51,9 +52,8 @@ final class ClangdCompilationDatabaseSetterTest {
 
 	private static final String RELATIVE_DIR_PATH_BUILD_DEFAULT = "build" + File.separator + "default";
 	private static final String RELATIVE_DIR_PATH_BUILD_DEBUG = "build" + File.separator + "debug";
-	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}\n";
+	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
 	private static final String DEFAULT_CDB_SETTING = "CompileFlags: {CompilationDatabase: %s}";
-	private static final String MODIFIED_DEFAULT_CDB_SETTING = DEFAULT_CDB_SETTING + "\n";
 	private final ClangdCompilationDatabaseSetter clangdCompilationDatabaseSetter = new ClangdCompilationDatabaseSetter();
 	private IProject project;
 
@@ -143,8 +143,8 @@ final class ClangdCompilationDatabaseSetterTest {
 
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
-		// WHEN the ClangdCProjectDescriptionListenerHandler.cProjectDescriptionEventExecutor method gets called:
-		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor(event);
+		// WHEN the ClangdCProjectDescriptionListenerHandler.cProjectDescriptionEventHandler method gets called:
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
 		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
 		// THEN a new file has been created in the project:
@@ -171,8 +171,8 @@ final class ClangdCompilationDatabaseSetterTest {
 
 		// GIVEN an existing but empty .clangd configuration file in the project:
 		var emptyConfigFile = createConfigFile("%s", "  ");
-		// WHEN the ClangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor method gets called:
-		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor(event);
+		// WHEN the ClangdCompilationDatabaseSetter.cProjectDescriptionEventHandler method gets called:
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
 		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
 		// THEN the updated file matches the expected content with the given CompilationDatabase directory "build/debug":
@@ -200,8 +200,8 @@ final class ClangdCompilationDatabaseSetterTest {
 
 		// GIVEN a project without .clangd project configuration file:
 		assertTrue(configFile.length() == 0);
-		// AND the ClangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor method gets called:
-		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor(event);
+		// AND the ClangdCompilationDatabaseSetter.cProjectDescriptionEventHandler method gets called:
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
 		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
 		// THEN a new file has been created in the project:
@@ -214,12 +214,12 @@ final class ClangdCompilationDatabaseSetterTest {
 		// WHEN the CWD in the build configuration changes to build/debug:
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
-		// AND the handleEvent gets called again:
-		optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor(event);
+		// AND the cProjectDescriptionEventHandler method gets called again:
+		optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
 		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		// THEN the updated file matches the expected content (use MODIFIED_DEFAULT_CDB_SETTING, because the File.write methods appends \n on every written line):
-		expected = String.format(MODIFIED_DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEBUG);
+		// THEN the updated file matches the expected content:
+		expected = String.format(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEBUG);
 		actual = Files.readString(configFile.toPath());
 		assertEquals(expected.replaceAll("\\R", "\n"), actual.replaceAll("\\R", "\n"));
 	}
@@ -237,10 +237,10 @@ final class ClangdCompilationDatabaseSetterTest {
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		// GIVEN an existing expanded .clangd configuration file in the project pointing to "build/default":
 		var configFile = createConfigFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
-		// WHEN the ClangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor method gets called and the builder CWD points to "build/debug":
+		// WHEN the ClangdCompilationDatabaseSetter.cProjectDescriptionEventHandler method gets called and the builder CWD points to "build/debug":
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
 		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
-		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventExecutor(event);
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
 		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
 		// THEN the updated file matches the expected content:

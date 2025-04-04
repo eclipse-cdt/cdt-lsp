@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
@@ -38,7 +39,6 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private static final String COMPILE_FLAGS = "CompileFlags"; //$NON-NLS-1$
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	protected static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
-	protected static final String EMPTY = ""; //$NON-NLS-1$
 	// matches the value of CompilationDatabase if the value is followed by either end-of-string, newline sequence or ','
 	private final Pattern pattern = Pattern
 			.compile("(?<=CompilationDatabase:)[^},\n]*(?=}?\\s*$|(?=}?\\s*\\R)|(?=\\s*,.*))"); //$NON-NLS-1$
@@ -66,7 +66,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 					if (createClangdConfigFile(configFile, project.getDefaultCharset(), databaseDirectoryPath, false)) {
 						return Status.OK_STATUS;
 					}
-					updateClangdConfigFile(configFile, project, databaseDirectoryPath, monitor);
+					updateClangdConfigFile(configFile, project.getDefaultCharset(), databaseDirectoryPath, monitor);
 				} catch (CoreException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
 				} catch (IOException | IllegalArgumentException e) {
@@ -81,7 +81,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		return updateClangdJob;
 	}
 
-	private void updateClangdConfigFile(IFile configFile, IProject project, String databaseDirectoryPath,
+	private void updateClangdConfigFile(IFile configFile, String charset, String databaseDirectoryPath,
 			IProgressMonitor monitor) throws CoreException, IOException {
 		if (configFile.getLocation() != null) {
 			var lines = readClangdConfigFile(configFile);
@@ -91,12 +91,12 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				var matcher = pattern.matcher(lines.get(i));
 				if (matcher.find()) {
 					lines.set(i, matcher.replaceAll(" " + databaseDirectoryPath.replaceAll("\\\\", "\\\\\\\\"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					writeClangdConfigFile(configFile, project.getDefaultCharset(), lines, monitor);
+					writeClangdConfigFile(configFile, charset, lines, monitor);
 					break;
 				}
 			}
 			if (isBlank) {
-				createClangdConfigFile(configFile, project.getDefaultCharset(), databaseDirectoryPath, true);
+				createClangdConfigFile(configFile, charset, databaseDirectoryPath, true);
 			}
 		}
 	}
@@ -115,8 +115,16 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private void writeClangdConfigFile(IFile configFile, String charset, List<String> lines, IProgressMonitor monitor)
 			throws UnsupportedEncodingException, CoreException {
 		var stringBuilder = new StringBuilder();
+		var counter = new AtomicInteger(0);
+		int size = lines.size();
 		String lineSeparator = System.lineSeparator();
-		lines.stream().forEach(line -> stringBuilder.append(line).append(lineSeparator));
+		lines.stream().forEach(line -> {
+			if (counter.incrementAndGet() == size) {
+				stringBuilder.append(line);
+			} else {
+				stringBuilder.append(line).append(lineSeparator);
+			}
+		});
 		configFile.setContents(stringBuilder.toString().getBytes(charset), IResource.KEEP_HISTORY, monitor);
 	}
 
