@@ -12,7 +12,7 @@
  *     Alexander Fedorov (ArSysOp) - extract headless part
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.clangd.tests;
+package org.eclipse.cdt.lsp.clangd.tests.internal.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,6 +33,7 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetterBase;
+import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;

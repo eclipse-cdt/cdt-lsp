@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Bachmann electronic GmbH and others.
+ * Copyright (c) 2024, 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  *     Gesa Hentschke (Bachmann electronic GmbH) - initial implementation
  *******************************************************************************/
 
-package org.eclipse.cdt.lsp.internal.clangd.tests;
+package org.eclipse.cdt.lsp.clangd.tests.internal.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
