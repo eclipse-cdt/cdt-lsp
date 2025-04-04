@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Bachmann electronic GmbH and others.
+ * Copyright (c) 2024, 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,13 +21,17 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
  * implementation {@code ClangdConfigurationFileManager}
  *
  * @since 2.0
+ * @deprecated use {@link ClangdCompilationDatabaseProvider} instead
  */
+@Deprecated
 public interface ClangdCProjectDescriptionListener {
 
 	/**
 	 * Called when the configuration of a CDT C/C++ project changes.
 	 * @param event
+	 * @deprecated use {@link ClangdCompilationDatabaseProvider#getCompilationDatabasePath(CProjectDescriptionEvent)}
 	 */
+	@Deprecated
 	void handleEvent(CProjectDescriptionEvent event);
 
 }
