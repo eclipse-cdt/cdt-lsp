@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
@@ -40,8 +41,8 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	protected static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
 	// matches the value of CompilationDatabase if the value is followed by either end-of-string, newline sequence or ','
-	private final Pattern pattern = Pattern
-			.compile("(?<=CompilationDatabase:)[^},\n]*(?=}?\\s*$|(?=}?\\s*\\R)|(?=\\s*,.*))"); //$NON-NLS-1$
+	private final Pattern pathMatchPattern = Pattern.compile("(?<=CompilationDatabase:)[^,}\\r\\n\\x0b\\f\\x85]*"); //$NON-NLS-1$
+	private final Pattern pathGroupPattern = Pattern.compile(".*CompilationDatabase:\\s*([^,}\\r\\n\\x0b\\f\\x85]*).*"); //$NON-NLS-1$
 
 	/**
 	 * Set the <code>CompilationDatabase</code> entry in the .clangd file in the given project root.
@@ -87,10 +88,13 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			var lines = readClangdConfigFile(configFile);
 			var isBlank = true;
 			for (int i = 0; i < lines.size(); i++) {
-				isBlank &= lines.get(i).isBlank();
-				var matcher = pattern.matcher(lines.get(i));
-				if (matcher.find()) {
-					lines.set(i, matcher.replaceAll(" " + databaseDirectoryPath.replaceAll("\\\\", "\\\\\\\\"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				var line = lines.get(i);
+				isBlank &= line.isBlank();
+				Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
+				if (pathGroupMatcher.matches()
+						&& !databaseDirectoryPath.contentEquals(pathGroupMatcher.replaceAll("$1").trim())) { //$NON-NLS-1$
+					lines.set(i, pathMatchPattern.matcher(line)
+							.replaceAll(" " + databaseDirectoryPath.replaceAll("\\\\", "\\\\\\\\"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					writeClangdConfigFile(configFile, charset, lines, monitor);
 					break;
 				}
