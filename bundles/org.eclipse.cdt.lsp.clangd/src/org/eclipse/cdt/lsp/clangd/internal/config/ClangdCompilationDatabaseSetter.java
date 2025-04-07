@@ -119,11 +119,12 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 				} else if (delta.getResource() instanceof IFile file && file.getProject() != null
 						&& file.getProject().isAccessible()
 						&& file.getProject().hasNature(CProjectNature.C_NATURE_ID)) {
-					if (COMPILE_COMMANDS_JSON.contentEquals(file.getName())) {
+					if (COMPILE_COMMANDS_JSON.contentEquals(file.getName())
+							|| (file.getFileExtension() != null && "prefs".contentEquals(file.getFileExtension()))) { //$NON-NLS-1$
 						projectsMap.put(file.getProject(), false); // do not remove from resulting map
 					} else {
-						// do NOT remove if the compile_commands.json has changed,
-						// do NOT remove if the map don't contain the project (default == false):
+						// do NOT remove if the compile_commands.json or .prefs file has changed,
+						// do NOT remove if the map don't contain the project:
 						if (projectsMap.getOrDefault(file.getProject(), false)) {
 							// remove, because we want to detect settings changes only:
 							projectsMap.remove(file.getProject());
