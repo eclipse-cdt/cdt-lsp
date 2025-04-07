@@ -34,8 +34,8 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatFileHandler.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdCommandLineValidator.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess.xml,
- OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationFileManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdFallbackManager.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdMetadataDefaults.xml,
+ OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseProvider.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings.xml
 Bundle-Activator: org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin
