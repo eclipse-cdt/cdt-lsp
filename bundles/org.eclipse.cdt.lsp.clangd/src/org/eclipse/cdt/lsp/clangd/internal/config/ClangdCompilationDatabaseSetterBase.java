@@ -40,9 +40,11 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private static final String COMPILE_FLAGS = "CompileFlags"; //$NON-NLS-1$
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	protected static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String BACKSLASH_REGEX = "\\\\"; //$NON-NLS-1$
+	private static final String BACKSLASH_ESCAPE = "\\\\\\\\"; //$NON-NLS-1$
 	// matches the value of CompilationDatabase if the value is followed by either end-of-string, newline sequence or ','
-	private final Pattern pathMatchPattern = Pattern.compile("(?<=CompilationDatabase:)[^,}\\r\\n\\x0b\\f\\x85]*"); //$NON-NLS-1$
-	private final Pattern pathGroupPattern = Pattern.compile(".*CompilationDatabase:\\s*([^,}\\r\\n\\x0b\\f\\x85]*).*"); //$NON-NLS-1$
+	private final Pattern pathMatchPattern = Pattern.compile("(?<=CompilationDatabase:)[^,}]*"); //$NON-NLS-1$
+	private final Pattern pathGroupPattern = Pattern.compile(".*CompilationDatabase:\\s*([^,}]*).*"); //$NON-NLS-1$
 
 	/**
 	 * Set the <code>CompilationDatabase</code> entry in the .clangd file in the given project root.
@@ -94,7 +96,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				if (pathGroupMatcher.matches()
 						&& !databaseDirectoryPath.contentEquals(pathGroupMatcher.replaceAll("$1").trim())) { //$NON-NLS-1$
 					lines.set(i, pathMatchPattern.matcher(line)
-							.replaceAll(" " + databaseDirectoryPath.replaceAll("\\\\", "\\\\\\\\"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							.replaceAll(" " + databaseDirectoryPath.replaceAll(BACKSLASH_REGEX, BACKSLASH_ESCAPE))); //$NON-NLS-1$
 					writeClangdConfigFile(configFile, charset, lines, monitor);
 					break;
 				}
