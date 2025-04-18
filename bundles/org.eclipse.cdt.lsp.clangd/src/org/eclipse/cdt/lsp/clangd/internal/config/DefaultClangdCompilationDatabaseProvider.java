@@ -22,6 +22,8 @@ import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseProvider;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.CoreException;
@@ -47,7 +49,7 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 
 	@Override
 	public Optional<String> getCompilationDatabasePath(IResourceChangeEvent event, IProject project) {
-		if (project != null) {
+		if (project != null && !isClangdFileInParentFolders(project)) {
 			return getConfiguration(project) //
 					.map(bc -> {
 						if (bc instanceof CBuildConfiguration cbc) {
@@ -67,7 +69,8 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 
 	@Override
 	public Optional<String> getCompilationDatabasePath(CProjectDescriptionEvent event) {
-		if (event.getProject() != null && event.getNewCProjectDescription() != null) {
+		if (event.getProject() != null && !isClangdFileInParentFolders(event.getProject())
+				&& event.getNewCProjectDescription() != null) {
 			ICConfigurationDescription config = event.getNewCProjectDescription().getDefaultSettingConfiguration();
 			var cwdBuilder = config.getBuildSetting().getBuilderCWD();
 			if (cwdBuilder != null) {
@@ -98,5 +101,37 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 			Platform.getLog(getClass()).error(e.getMessage(), e);
 		}
 		return Optional.empty();
+	}
+
+	/**
+	 * Check if .clangd file is not in the project root but in one of its parent folders.
+	 * All parent folders until the root directory of the file system are being searched.
+	 * This covers the use case that the compile_commands.json is located in a projects parent folder as well as the .clangd file.
+	 * @param project
+	 * @return true if .clangd is not in project root directory and in one of its parent folders.
+	 */
+	private boolean isClangdFileInParentFolders(IProject project) {
+		if (project.getFile(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME).exists()) {
+			return false;
+		}
+		//Okay, lets start in parent folder, if it exists, to look for .clangd:
+		IFileStore currentDirStore = EFS.getLocalFileSystem().getStore(project.getLocation()).getParent();
+		if (currentDirStore == null) {
+			return false;
+		}
+		IFileStore clangdFileStore = currentDirStore
+				.getChild(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME);
+
+		while (!clangdFileStore.fetchInfo().exists() && currentDirStore.getParent() != null
+				&& currentDirStore.getParent().fetchInfo().exists()) {
+			// move up one level to the parent directory and check again
+			currentDirStore = currentDirStore.getParent();
+			clangdFileStore = currentDirStore.getChild(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME);
+		}
+
+		if (clangdFileStore.fetchInfo().exists()) {
+			return true;
+		}
+		return false;
 	}
 }
