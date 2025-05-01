@@ -21,6 +21,12 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 
 @SuppressWarnings("restriction")
 public class CLspEditor extends ExtensionBasedTextEditor {
+	private static final String CONTEXT_ID = "org.eclipse.cdt.lsp.cEditorContext"; //$NON-NLS-1$
+
+	@Override
+	protected void initializeKeyBindingScopes() {
+		setKeyBindingScopes(new String[] { CONTEXT_ID });
+	}
 
 	@Override
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
