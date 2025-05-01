@@ -99,6 +99,12 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="Ctrl+7">
       </key>
+      <key
+            commandId="org.eclipse.ui.edit.text.open.hyperlink"
+            contextId="org.eclipse.cdt.lsp.cEditorContext"
+            schemeId="org.eclipse.cdt.ui.visualstudio"
+            sequence="F12">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.ide.editorAssociationOverride">
@@ -426,6 +432,15 @@
                type="org.eclipse.cdt.debug.internal.ui.actions.IMoveToLineTarget">
          </adapter>
       </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            description="%CEditor.description"
+            id="org.eclipse.cdt.lsp.cEditorContext"
+            name="%CEditor.name"
+            parentId="org.eclipse.ui.genericeditor.genericEditorContext">
+      </context>
    </extension>  
 </plugin>
 
