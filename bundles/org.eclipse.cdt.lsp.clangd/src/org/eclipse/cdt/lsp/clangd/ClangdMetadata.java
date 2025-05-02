@@ -119,7 +119,7 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 		 */
 		PreferenceMetadata<String> additionalOptions = new PreferenceMetadata<>(String.class, //
 				"additional_options", //$NON-NLS-1$
-				List.of("").stream().collect(Collectors.joining(System.lineSeparator())), //$NON-NLS-1$
+				List.of("--log=error").stream().collect(Collectors.joining(System.lineSeparator())), //$NON-NLS-1$
 				LspEditorUiMessages.LspEditorPreferencePage_additional, //
 				LspEditorUiMessages.LspEditorPreferencePage_additional_description);
 
