@@ -37,7 +37,6 @@ import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -122,6 +121,13 @@ final class ClangdCompilationDatabaseSetterTest {
 			}
 		}
 		return file;
+	}
+
+	private File createFileInProjectsParentFolder(IProject project) throws IOException {
+		var path = project.getLocation().toPath().getParent().resolve(".clangd");
+		File configFile = new File(path.toUri());
+		configFile.createNewFile();
+		return configFile;
 	}
 
 	/**
@@ -248,6 +254,35 @@ final class ClangdCompilationDatabaseSetterTest {
 		var expectedContent = String.format(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEBUG);
 		var modifiedContent = Files.readString(configFile.getLocation().toFile().toPath());
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
+	}
+
+	/**
+	 * Test whether the .clangd won't be created nor updated if its in one of its parent folders when cProjectDescriptionEventHandler gets called.
+	 *
+	 * @throws IOException
+	 * @throws CoreException
+	 * @throws InterruptedException
+	 * @throws OperationCanceledException
+	 */
+	@Test
+	void testClangdConfigFileInProjectParent()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		File configFile = null;
+		try {
+			// GIVEN an existing .clangd configuration file in the projects parent folder:
+			configFile = createFileInProjectsParentFolder(project);
+			assertTrue(configFile.exists(), ".clangd file has not been created");
+			// WHEN the ClangdCompilationDatabaseSetter.cProjectDescriptionEventHandler method gets called and the builder CWD points to "build/debug":
+			cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
+			when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
+			var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
+			// THEN no update job has been created:
+			assertTrue(optJob.isEmpty(), "'Update .clangd' job has been created!");
+		} finally {
+			if (configFile != null) {
+				configFile.delete();
+			}
+		}
 	}
 
 }
