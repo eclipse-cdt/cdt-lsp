@@ -97,13 +97,13 @@
             commandId="org.eclipse.tm4e.languageconfiguration.toggleLineCommentCommand"
             contextId="org.eclipse.cdt.lsp.cEditorContext"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="Ctrl+7">
+            sequence="M1+7">
       </key>
       <key
             commandId="org.eclipse.tm4e.languageconfiguration.toggleLineCommentCommand"
             contextId="org.eclipse.cdt.lsp.cEditorContext"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="Ctrl+/">
+            sequence="M1+/">
       </key>
       <key
             commandId="org.eclipse.ui.edit.text.open.hyperlink"
