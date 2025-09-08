@@ -48,6 +48,8 @@ public final class ClangdLanguageServerProvider
 	private final ServiceCaller<EditorConfiguration> editorConfiguration = new ServiceCaller<>(getClass(),
 			EditorConfiguration.class);
 
+	private URI cachedRootUri = null;
+
 	@Override
 	public Object getInitializationOptions(URI rootUri) {
 		List<Object> result = new ArrayList<>();
@@ -58,6 +60,7 @@ public final class ClangdLanguageServerProvider
 
 	@Override
 	public List<String> getCommands(URI rootUri) {
+		cachedRootUri = rootUri;
 		List<String> result = new ArrayList<>();
 		configuration.call(c -> result.addAll(c.commands(rootUri).stream()
 				.map(ClangdLanguageServerProvider::resolveVariables).collect(Collectors.toList())));
@@ -91,7 +94,7 @@ public final class ClangdLanguageServerProvider
 	public IStatus validateCommandLineOptions() {
 		IStatus[] status = { Status.OK_STATUS };
 		if (isCommandLineValidationEnabled()) {
-			final var cmd = getCommands(null); // null, because we have no initial URI here => workspace context => use commands from workspace preferences
+			final var cmd = getCommands(cachedRootUri);
 			validator.call(v -> status[0] = v.validateCommandLineOptions(cmd));
 		}
 		return status[0];
