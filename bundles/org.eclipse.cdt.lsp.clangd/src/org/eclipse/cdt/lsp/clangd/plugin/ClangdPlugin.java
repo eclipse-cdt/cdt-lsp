@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Bachmann electronic GmbH and others.
+ * Copyright (c) 2023, 2024, 2025 Bachmann electronic GmbH and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,10 @@
 
 package org.eclipse.cdt.lsp.clangd.plugin;
 
+import org.eclipse.cdt.lsp.clangd.format.CLanguageServerCheckEnabledProvider;
 import org.eclipse.cdt.lsp.clangd.format.ClangFormatFileMonitor;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatMonitor;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigFileMonitor;
 import org.eclipse.cdt.lsp.clangd.internal.config.CompileCommandsMonitor;
 import org.eclipse.core.resources.IWorkspace;
@@ -58,7 +59,7 @@ public class ClangdPlugin extends AbstractUIPlugin {
 		compileCommandsMonitor = new CompileCommandsMonitor(workspace).start();
 		cProjectChangeMonitor = new ClangdCompilationDatabaseSetter().start(workspace);
 		configFileMonitor = new ClangdConfigFileMonitor(workspace).start();
-		clangFormatMonitor = new ClangFormatFileMonitor(workspace).start();
+		clangFormatMonitor = new ClangFormatFileMonitor(workspace, new CLanguageServerCheckEnabledProvider()).start();
 		formatMonitor = new ClangFormatMonitor().start();
 	}
 

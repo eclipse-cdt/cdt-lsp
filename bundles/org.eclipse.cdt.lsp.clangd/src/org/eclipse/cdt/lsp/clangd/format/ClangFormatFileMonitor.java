@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
+import org.eclipse.cdt.core.CProjectNature;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -49,6 +50,8 @@ public class ClangFormatFileMonitor {
 	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
 			ClangdConfiguration.class);
 
+	private final CLanguageServerCheckEnabledProvider provider;
+
 	private final IResourceChangeListener listener = new IResourceChangeListener() {
 		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
@@ -58,7 +61,7 @@ public class ClangFormatFileMonitor {
 						if ((delta.getKind() == IResourceDelta.ADDED
 								|| (delta.getFlags() & IResourceDelta.CONTENT) != 0)
 								&& CLANG_FORMAT_FILE.equals(delta.getResource().getName())) {
-							if (delta.getResource() instanceof IFile file) {
+							if (delta.getResource() instanceof IFile file && lsIsEnabledFor(file)) {
 								pendingFiles.add(file);
 								checkJob.schedule(100);
 							}
@@ -72,8 +75,28 @@ public class ClangFormatFileMonitor {
 		}
 	};
 
-	public ClangFormatFileMonitor(IWorkspace workspace) {
+	public ClangFormatFileMonitor(IWorkspace workspace, CLanguageServerCheckEnabledProvider provider) {
 		this.workspace = workspace;
+		this.provider = provider;
+	}
+
+	/**
+	 * Checks if the project has C nature and the language server is enabled for the project.
+	 *
+	 * @param file the file to check
+	 * @return true if the language server is enabled for the project
+	 */
+	private boolean lsIsEnabledFor(IFile file) {
+		var project = file.getProject();
+		if (project == null) {
+			return false;
+		}
+		try {
+			return project.hasNature(CProjectNature.C_NATURE_ID) && provider.isEnabledFor(project);
+		} catch (CoreException e) {
+			Platform.getLog(getClass()).log(e.getStatus());
+			return false;
+		}
 	}
 
 	private final WorkspaceJob checkJob = new WorkspaceJob("Check " + CLANG_FORMAT_FILE + " file") { //$NON-NLS-1$ //$NON-NLS-2$
