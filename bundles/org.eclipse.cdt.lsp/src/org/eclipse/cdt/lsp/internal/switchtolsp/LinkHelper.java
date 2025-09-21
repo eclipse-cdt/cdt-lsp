@@ -63,6 +63,16 @@ public class LinkHelper {
 			preferenceDialogOn.open();
 		} else if (event.text != null && event.text.equals(Messages.SwitchToLsp_GiveFeedbackLink)) {
 			Program.launch(SwitchToLspWizard.FEEDBACK_URL);
+		} else if (event.text != null && event.text.equals(Messages.SwitchToLsp_InstallClangdLink)) {
+			Program.launch(SwitchToLspWizard.INSTALLING_CLANGD_URL);
+		} else if (event.text != null && event.text.equals(Messages.SwitchToLsp_WhatIsClangdLink)) {
+			Program.launch(SwitchToLspWizard.CLANGD_LLVM_ORG_URL);
+		} else if (event.text != null && event.text.equals(Messages.SwitchToLsp_OpenClangdPreferencesLink)) {
+			PreferenceDialog preferenceDialogOn = PreferencesUtil.createPreferenceDialogOn(parentShell,
+					"org.eclipse.cdt.lsp.clangd.editor.preferencePage", null /* display all pages */, //$NON-NLS-1$
+					null);
+			preferenceDialogOn.setBlockOnOpen(false);
+			preferenceDialogOn.open();
 		} else {
 			// Did not detect a link - do nothing
 			return false;

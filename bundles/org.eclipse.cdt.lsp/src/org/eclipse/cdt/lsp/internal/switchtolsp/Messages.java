@@ -31,6 +31,15 @@ public class Messages extends NLS {
 	public static String SwitchToLsp_UseClassicExperience;
 	public static String SwitchToLsp_UseNewExperience;
 	public static String SwitchToLsp_TryNewExperienceBannerLink;
+	public static String SwitchToLsp_ClangdNotFoundTitle;
+	public static String SwitchToLsp_ClangdNotFoundMessage;
+	public static String SwitchToLsp_ClangdOutdatedTitle;
+	public static String SwitchToLsp_ClangdOutdatedMessage;
+	public static String SwitchToLsp_WhatIsClangdLink;
+	public static String SwitchToLsp_InstallClangdLink;
+	public static String SwitchToLsp_OpenClangdPreferencesLink;
+	public static String SwitchToLsp_OK;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

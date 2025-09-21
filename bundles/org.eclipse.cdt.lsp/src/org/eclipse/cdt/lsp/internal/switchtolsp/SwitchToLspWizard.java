@@ -10,8 +10,15 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.internal.switchtolsp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.cdt.lsp.ResolveProjectScope;
 import org.eclipse.cdt.lsp.editor.ConfigurationVisibility;
@@ -23,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -30,6 +38,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.notifications.NotificationPopup;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -49,6 +58,8 @@ public class SwitchToLspWizard {
 	public static final String TRY_LSP_HELP_PATH = //
 			"/org.eclipse.cdt.lsp.doc/html/lsp_cpp_editor.html"; //$NON-NLS-1$
 	public static final String FEEDBACK_URL = "https://github.com/eclipse-cdt/cdt-lsp/issues/new/choose"; //$NON-NLS-1$
+	public static final String INSTALLING_CLANGD_URL = "https://clangd.llvm.org/installation#installing-clangd"; //$NON-NLS-1$
+	public static final String CLANGD_LLVM_ORG_URL = "https://clangd.llvm.org/"; //$NON-NLS-1$
 
 	public void startSwitch(ITextEditor editor, boolean newExperience) {
 
@@ -72,7 +83,7 @@ public class SwitchToLspWizard {
 			return;
 		}
 
-		if (openConfirmation(shell, newExperience)) {
+		if (openConfirmation(shell, newExperience) && clangdFound(shell, newExperience)) {
 			boolean saveAllEditors = IDE.saveAllEditors(new IResource[] { ResourcesPlugin.getWorkspace().getRoot() },
 					true);
 			if (saveAllEditors) {
@@ -113,6 +124,82 @@ public class SwitchToLspWizard {
 				.map(p -> p.getNode(configuration.qualifier())) //
 				.map(n -> n.get(EditorMetadata.Predefined.preferLspEditor.identifer(), null)) //
 				.isPresent();
+	}
+
+	/**
+	 * Check if clangd is found and of a recent enough version.
+	 *
+	 * @param shell to parent any dialogs on
+	 * @param newExperience whether the info is for new experience, or back to traditional editor
+	 * @return true if clangd is found or not needed
+	 */
+	private boolean clangdFound(Shell shell, boolean newExperience) {
+		if (newExperience) {
+			int major = getClangdMajorVersion();
+			if (major >= 0 && major < 13) { // require at least clangd 13
+				var version = major == 0 ? "undefined" : Integer.toString(major); //$NON-NLS-1$
+				createClangdDialog(shell, Messages.SwitchToLsp_ClangdOutdatedTitle,
+						NLS.bind(Messages.SwitchToLsp_ClangdOutdatedMessage, 13, version), MessageDialog.WARNING)
+								.open();
+				return true;
+			} else if (major < 0) {
+				createClangdDialog(shell, Messages.SwitchToLsp_ClangdNotFoundTitle,
+						Messages.SwitchToLsp_ClangdNotFoundMessage, MessageDialog.ERROR).open();
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Get the version of clangd installed.
+	 *
+	 * @return major version, 0 if version cannot be determined or -1 for error/clangd not found
+	 */
+	private int getClangdMajorVersion() {
+		try {
+			Process process = new ProcessBuilder("clangd", "--version") //$NON-NLS-1$ //$NON-NLS-2$
+					.redirectErrorStream(true).start();
+			String version = getVersionString(process.getInputStream());
+			if (process.waitFor(5000, TimeUnit.MILLISECONDS)) {
+				if (version.isBlank()) {
+					return 0; // cannot determine version string
+				}
+				String[] parts = version.split("\\."); //$NON-NLS-1$
+				if (parts.length >= 2) {
+					try {
+						return Integer.parseInt(parts[0]); // major version
+					} catch (NumberFormatException e) {
+						Platform.getLog(getClass()).error(e.getMessage(), e);
+					}
+				}
+				return 0; // cannot determine version number
+			} else {
+				process.destroyForcibly();
+			}
+			return -1;
+		} catch (IOException e) {
+			return -1; // error/clangd not found
+		} catch (InterruptedException e) {
+			Platform.getLog(getClass()).error(e.getMessage(), e);
+			return -1;
+		}
+	}
+
+	private String getVersionString(InputStream input) {
+		String version = ""; //$NON-NLS-1$
+		Pattern pattern = Pattern.compile("clangd version ([\\d\\.]+)"); //$NON-NLS-1$
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+				Matcher matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					version = matcher.group(1); // version will be "<major>.<minor>.<patch>"
+				}
+			}
+		} catch (IOException e) {
+			Platform.getLog(getClass()).error(e.getMessage(), e);
+		}
+		return version;
 	}
 
 	private void doIt(ITextEditor editor, boolean newExperience) {
@@ -316,6 +403,46 @@ public class SwitchToLspWizard {
 		}
 
 		link.setText(message);
+		link.setFont(composite.getFont());
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(link);
+		link.addListener(SWT.Selection, (event) -> LinkHelper.handleLinkClick(parentShell, event));
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(link);
+
+		return link;
+	}
+
+	private MessageDialog createClangdDialog(Shell shell, String title, String msg, int dialogImageType) {
+		return new MessageDialog(shell, //
+				title, //
+				null /* no custom title image */, //
+				null /* dialog message is in the link below */, //
+				dialogImageType, 0, new String[] { Messages.SwitchToLsp_OK }) {
+			@Override
+			protected Control createMessageArea(Composite parent) {
+				// use super to create image...
+				Control result = super.createMessageArea(parent);
+				// ... but use a custom message that allows link to clangd documentation and preferences:
+				createMessageWithClangdLink(parent, parent.getShell(), msg);
+				return result;
+			}
+		};
+	}
+
+	/**
+	 * Creates a control to show user key information about clangd.
+	 * Contains links to the clangd documentation pages and cdt-lsp clangd preferences page.
+	 *
+	 * @param composite the composite to place the control in
+	 * @param parentShell the shell that any dialogs that are opened should use as the parent
+	 * @return the created control
+	 */
+	private Control createMessageWithClangdLink(Composite parent, Shell parentShell, String message) {
+		Composite composite = new Composite(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults().applyTo(composite);
+		Link link = new Link(composite, SWT.NONE);
+		link.setText(message + LinkHelper.A(Messages.SwitchToLsp_WhatIsClangdLink) + LinkHelper.LINK_SPACER
+				+ LinkHelper.A(Messages.SwitchToLsp_InstallClangdLink) + LinkHelper.LINK_SPACER
+				+ LinkHelper.A(Messages.SwitchToLsp_OpenClangdPreferencesLink));
 		link.setFont(composite.getFont());
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(link);
 		link.addListener(SWT.Selection, (event) -> LinkHelper.handleLinkClick(parentShell, event));
