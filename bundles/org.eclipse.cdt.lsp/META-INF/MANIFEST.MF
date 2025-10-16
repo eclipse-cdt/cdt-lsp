@@ -6,7 +6,7 @@ Bundle-Version: 3.0.400.qualifier
 Export-Package: org.eclipse.cdt.lsp,
  org.eclipse.cdt.lsp.config,
  org.eclipse.cdt.lsp.editor,
- org.eclipse.cdt.lsp.internal.switchtolsp;x-internal:=true,
+ org.eclipse.cdt.lsp.internal.switchtolsp;x-friends:="org.eclipse.cdt.lsp.clangd",
  org.eclipse.cdt.lsp.plugin;x-friends:="org.eclipse.cdt.lsp.clangd",
  org.eclipse.cdt.lsp.server,
  org.eclipse.cdt.lsp.services,

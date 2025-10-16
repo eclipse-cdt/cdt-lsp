@@ -67,7 +67,7 @@ public final class ClangdLanguageServerProvider
 		return result;
 	}
 
-	private static String resolveVariables(String cmd) {
+	static String resolveVariables(String cmd) {
 		try {
 			return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(cmd);
 		} catch (CoreException e) {

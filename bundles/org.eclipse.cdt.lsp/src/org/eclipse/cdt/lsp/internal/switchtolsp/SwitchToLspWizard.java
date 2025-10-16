@@ -16,20 +16,24 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.cdt.internal.core.MinGW;
 import org.eclipse.cdt.lsp.ResolveProjectScope;
 import org.eclipse.cdt.lsp.editor.ConfigurationVisibility;
 import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.plugin.LspPlugin;
 import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
+import org.eclipse.cdt.utils.PathUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.ServiceCaller;
@@ -61,6 +65,8 @@ public class SwitchToLspWizard {
 	public static final String INSTALLING_CLANGD_URL = "https://clangd.llvm.org/installation#installing-clangd"; //$NON-NLS-1$
 	public static final String CLANGD_LLVM_ORG_URL = "https://clangd.llvm.org/"; //$NON-NLS-1$
 
+	private final ServiceCaller<ILsProvider> lsProvider = new ServiceCaller<>(getClass(), ILsProvider.class);
+
 	public void startSwitch(ITextEditor editor, boolean newExperience) {
 
 		boolean hasProjectSpecificSetting = false;
@@ -83,7 +89,7 @@ public class SwitchToLspWizard {
 			return;
 		}
 
-		if (openConfirmation(shell, newExperience) && clangdFound(shell, newExperience)) {
+		if (openConfirmation(shell, newExperience) && clangdFound(shell, newExperience, project)) {
 			boolean saveAllEditors = IDE.saveAllEditors(new IResource[] { ResourcesPlugin.getWorkspace().getRoot() },
 					true);
 			if (saveAllEditors) {
@@ -133,9 +139,9 @@ public class SwitchToLspWizard {
 	 * @param newExperience whether the info is for new experience, or back to traditional editor
 	 * @return true if clangd is found or not needed
 	 */
-	private boolean clangdFound(Shell shell, boolean newExperience) {
+	private boolean clangdFound(Shell shell, boolean newExperience, IProject project) {
 		if (newExperience) {
-			int major = getClangdMajorVersion();
+			int major = getClangdMajorVersion(project);
 			if (major >= 0 && major < 13) { // require at least clangd 13
 				var version = major == 0 ? "undefined" : Integer.toString(major); //$NON-NLS-1$
 				createClangdDialog(shell, Messages.SwitchToLsp_ClangdOutdatedTitle,
@@ -152,13 +158,26 @@ public class SwitchToLspWizard {
 	}
 
 	/**
-	 * Get the version of clangd installed.
+	 * Get the version of clangd installed. Tries to find clangd first via ILsProvider service.
+	 * If that fails, searching in the PATH variable.
 	 *
 	 * @return major version, 0 if version cannot be determined or -1 for error/clangd not found
 	 */
-	private int getClangdMajorVersion() {
+	private int getClangdMajorVersion(IProject project) {
 		try {
-			Process process = new ProcessBuilder("clangd", "--version") //$NON-NLS-1$ //$NON-NLS-2$
+			String[] clangdPathArray = new String[] { "" }; //$NON-NLS-1$
+			lsProvider.call(c -> clangdPathArray[0] = c.getLsPath(project));
+			String clangdPath = clangdPathArray[0];
+			if (clangdPath.isBlank()) {
+				clangdPath = Optional.ofNullable(PathUtil.findProgramLocation("clangd", null)) //$NON-NLS-1$
+						.or(() -> Optional.ofNullable(MinGW.getMinGWHome())
+								.map(mingw -> PathUtil.findProgramLocation("clangd", mingw + "\\bin"))) //$NON-NLS-1$ //$NON-NLS-2$
+						.map(IPath::toOSString).orElse(""); //$NON-NLS-1$
+				if (clangdPath.isBlank()) {
+					return -1; // clangd not found
+				}
+			}
+			Process process = new ProcessBuilder(clangdPath, "--version") //$NON-NLS-1$
 					.redirectErrorStream(true).start();
 			String version = getVersionString(process.getInputStream());
 			if (process.waitFor(5000, TimeUnit.MILLISECONDS)) {
