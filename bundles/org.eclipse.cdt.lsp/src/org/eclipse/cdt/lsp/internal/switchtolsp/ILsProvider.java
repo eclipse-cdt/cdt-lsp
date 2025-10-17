@@ -18,7 +18,7 @@ public interface ILsProvider {
 	 * Get the language server executable path.
 	 *
 	 * @param context the file/project to get the path for, or {@code null} for the default
-	 * @return the language server executable path
+	 * @return the language server executable path or an empty string
 	 */
 	String getLsPath(Object context);
 

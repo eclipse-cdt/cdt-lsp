@@ -14,23 +14,24 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.internal.switchtolsp.ILsProvider;
-import org.eclipse.core.runtime.ServiceCaller;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 @Component
 public class ClangdLsProvider implements ILsProvider {
 
-	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
-			ClangdConfiguration.class);
+	@Reference
+	ClangdConfiguration configuration;
 
 	@Override
 	public String getLsPath(Object context) {
 		List<String> result = new ArrayList<>();
-		configuration.call(c -> result.addAll(c.commands(context).stream()
+		Optional.ofNullable(configuration).map(c -> result.addAll(c.commands(context).stream()
 				.map(ClangdLanguageServerProvider::resolveVariables).collect(Collectors.toList())));
 		return result.isEmpty() ? "" : result.get(0); //$NON-NLS-1$
 	}

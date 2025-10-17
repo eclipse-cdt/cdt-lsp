@@ -65,8 +65,6 @@ public class SwitchToLspWizard {
 	public static final String INSTALLING_CLANGD_URL = "https://clangd.llvm.org/installation#installing-clangd"; //$NON-NLS-1$
 	public static final String CLANGD_LLVM_ORG_URL = "https://clangd.llvm.org/"; //$NON-NLS-1$
 
-	private final ServiceCaller<ILsProvider> lsProvider = new ServiceCaller<>(getClass(), ILsProvider.class);
-
 	public void startSwitch(ITextEditor editor, boolean newExperience) {
 
 		boolean hasProjectSpecificSetting = false;
@@ -165,10 +163,12 @@ public class SwitchToLspWizard {
 	 */
 	private int getClangdMajorVersion(IProject project) {
 		try {
-			String[] clangdPathArray = new String[] { "" }; //$NON-NLS-1$
-			lsProvider.call(c -> clangdPathArray[0] = c.getLsPath(project));
-			String clangdPath = clangdPathArray[0];
-			if (clangdPath.isBlank()) {
+			String clangdPath = ""; //$NON-NLS-1$
+			var lsProvider = PlatformUI.getWorkbench().getService(ILsProvider.class);
+			if (lsProvider != null) {
+				clangdPath = lsProvider.getLsPath(project);
+			}
+			if (clangdPath == null || clangdPath.isBlank()) {
 				clangdPath = Optional.ofNullable(PathUtil.findProgramLocation("clangd", null)) //$NON-NLS-1$
 						.or(() -> Optional.ofNullable(MinGW.getMinGWHome())
 								.map(mingw -> PathUtil.findProgramLocation("clangd", mingw + "\\bin"))) //$NON-NLS-1$ //$NON-NLS-2$
