@@ -55,6 +55,19 @@ public interface EditorMetadata extends ConfigurationMetadata {
 				LspUiMessages.LspEditorConfigurationPage_showTryLspBanner_description);
 
 		/**
+		 * The predefined metadata for the "Smart caret positioning in identifiers" option
+		 *
+		 * @see EditorOptions#enableSubWordNavigation()
+		 *
+		 * @since 4.0
+		 */
+		PreferenceMetadata<Boolean> enableSubWordNavigation = new PreferenceMetadata<>(Boolean.class, //
+				"sub_word_navigation", //$NON-NLS-1$
+				true, //
+				LspUiMessages.LspEditorConfigurationPage_enableSubWordNavigation,
+				LspUiMessages.LspEditorConfigurationPage_enableSubWordNavigation_description);
+
+		/**
 		 * The predefined metadata for the "Format source code" option
 		 *
 		 * @see EditorOptions#formatOnSave()
@@ -93,6 +106,7 @@ public interface EditorMetadata extends ConfigurationMetadata {
 		List<PreferenceMetadata<?>> defaults = List.of(//
 				preferLspEditor, //
 				showTryLspBanner, //
+				enableSubWordNavigation, //
 				formatOnSave, //
 				formatAllLines, //
 				formatEditedLines//

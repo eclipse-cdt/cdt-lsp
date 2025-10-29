@@ -39,6 +39,11 @@ public final class EditorPreferredOptions extends PreferredOptions implements Ed
 	}
 
 	@Override
+	public boolean enableSubWordNavigation() {
+		return booleanValue(EditorMetadata.Predefined.enableSubWordNavigation);
+	}
+
+	@Override
 	public boolean formatOnSave() {
 		return booleanValue(EditorMetadata.Predefined.formatOnSave);
 	}

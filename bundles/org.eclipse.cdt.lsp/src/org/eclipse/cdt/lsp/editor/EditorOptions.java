@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -28,6 +28,14 @@ public interface EditorOptions {
 	 * @since 3.0
 	 */
 	boolean showTryLspBanner();
+
+	/**
+	 * Enable sub-word navigation in the editor
+	 *
+	 * @return if sub-word navigation should be enabled
+	 * @since 4.0
+	 */
+	boolean enableSubWordNavigation();
 
 	/**
 	 * Format source code on file save action

@@ -18,8 +18,10 @@ import java.util.List;
 import org.eclipse.cdt.lsp.editor.ConfigurationVisibility;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.cdt.lsp.editor.EditorOptions;
+import org.eclipse.cdt.lsp.internal.messages.LspUiMessages;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.EditorConfigurationPage;
+import org.eclipse.cdt.utils.ui.controls.ControlFactory;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -33,6 +35,7 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 
 	private final Button prefer;
 	private final Button showBanner;
+	private final Button enableSubWordNavigation;
 	private ConfigurationVisibility visibility;
 
 	public EditorConfigurationArea(Composite parent, boolean isProjectScope) {
@@ -52,6 +55,13 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 			this.prefer = null;
 			this.showBanner = null;
 		}
+		this.enableSubWordNavigation = isProjectScope ? null : createSubWordNavigationButton(composite);
+	}
+
+	private Button createSubWordNavigationButton(Composite parent) {
+		Composite behaviorComposite = ControlFactory.createGroup(parent,
+				LspUiMessages.LspEditorConfigurationPage_gneral_behavior_group, 1);
+		return createButton(EditorMetadata.Predefined.enableSubWordNavigation, behaviorComposite, SWT.CHECK, 0);
 	}
 
 	@Override
@@ -69,6 +79,9 @@ public final class EditorConfigurationArea extends ConfigurationArea<EditorOptio
 		if (showBanner != null) {
 			showBanner.setSelection(options.showTryLspBanner());
 			showBanner.setEnabled(enable);
+		}
+		if (enableSubWordNavigation != null) {
+			enableSubWordNavigation.setSelection(options.enableSubWordNavigation());
 		}
 	}
 
