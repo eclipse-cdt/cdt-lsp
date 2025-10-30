@@ -59,7 +59,7 @@ public interface EditorMetadata extends ConfigurationMetadata {
 		 *
 		 * @see EditorOptions#enableSubWordNavigation()
 		 *
-		 * @since 4.0
+		 * @since 3.0
 		 */
 		PreferenceMetadata<Boolean> enableSubWordNavigation = new PreferenceMetadata<>(Boolean.class, //
 				"sub_word_navigation", //$NON-NLS-1$

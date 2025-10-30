@@ -45,7 +45,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected abstract class NextSubWordAction extends TextNavigationAction {
 		protected CWordIterator fIterator = new CWordIterator();
@@ -54,7 +54,6 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 		 * Creates a new next sub-word action.
 		 *
 		 * @param code Action code for the default operation. Must be an action code from @see org.eclipse.swt.custom.ST.
-		 * @since 4.0
 		 */
 		protected NextSubWordAction(int code) {
 			super(getSourceViewer().getTextWidget(), code);
@@ -120,7 +119,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected class NavigateNextSubWordAction extends NextSubWordAction {
 		/**
@@ -141,7 +140,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected class DeleteNextSubWordAction extends NextSubWordAction implements IUpdate {
 		/**
@@ -204,7 +203,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected class SelectNextSubWordAction extends NextSubWordAction {
 		/**
@@ -238,7 +237,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected abstract class PreviousSubWordAction extends TextNavigationAction {
 		protected CWordIterator fIterator = new CWordIterator();
@@ -312,7 +311,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected class NavigatePreviousSubWordAction extends PreviousSubWordAction {
 
@@ -334,7 +333,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected class DeletePreviousSubWordAction extends PreviousSubWordAction implements IUpdate {
 		/**
@@ -395,7 +394,7 @@ public class CLspEditor extends ExtensionBasedTextEditor {
 	 *
 	 * copied from org.eclipse.cdt.internal.ui.editor.CEditor
 	 *
-	 * @since 4.0
+	 * @since 3.0
 	 */
 	protected class SelectPreviousSubWordAction extends PreviousSubWordAction {
 		/**

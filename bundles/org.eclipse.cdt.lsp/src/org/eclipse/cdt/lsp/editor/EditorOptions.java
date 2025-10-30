@@ -33,9 +33,11 @@ public interface EditorOptions {
 	 * Enable sub-word navigation in the editor
 	 *
 	 * @return if sub-word navigation should be enabled
-	 * @since 4.0
+	 * @since 3.0
 	 */
-	boolean enableSubWordNavigation();
+	default boolean enableSubWordNavigation() {
+		return true;
+	}
 
 	/**
 	 * Format source code on file save action
