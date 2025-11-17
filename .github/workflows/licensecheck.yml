@@ -1,19 +1,20 @@
 # This workflow will check for Maven projects if the licenses of all (transitive) dependencies are vetted.
 
-name: License vetting status check
+name: License check
 
 on:
   push:
-    branches: 
-      - 'main'
   pull_request:
-    branches: 
-     - 'main'
+    paths:
+    - '**/pom.xml'
+    - '**/*.target'
+    - '.github/workflows/licensecheck.yml'
   issue_comment:
     types: [created]
 
 jobs:
-  call-license-check:
+  call:
+    if: github.event_name == 'pull_request' || github.event_name == 'issue_comment' || github.repository_owner == 'eclipse-cdt'
     uses: eclipse-dash/dash-licenses/.github/workflows/mavenLicenseCheck.yml@master
     with:
       projectId: tools.cdt
