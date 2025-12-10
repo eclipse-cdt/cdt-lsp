@@ -183,6 +183,7 @@ For plug-in dependencies the MANIFEST.MF's dependency information will provide t
 
 | CDT LSP Version | clangd | cmake* | Eclipse IDE Release |
 |:-:|:-:|:-:|:-:|
+| 3.4.x | 17.0.x | 3.x | 2025-12 |
 | 3.x.x | 17.0.x | 3.x | 2025-03 |
 | 2.x.x | 17.0.x | 3.x | 2024-06 |
 | 1.1.x | 17.0.x | 3.x | 2023-12 |

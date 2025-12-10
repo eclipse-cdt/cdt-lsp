@@ -28,7 +28,7 @@ Items in the days ahead of Release day:
     - [ ] the planned release and which versions of main dependencies are supported in the version support table
     - [ ] screenshots are up to date and consistent
     - [ ] try it out steps are correct and where suitable versions are up to date
-- [ ] Check all closed PRs and Issues to make sure their milestone is set. [This search may be useful to identify such closed issues](https://github.com/eclipse-cdt/cdt-lsp/issues?q=is%3Aclosed)
+- [ ] Check all closed PRs and Issues to make sure their milestone is set. [This search may be useful to identify such closed issues](https://github.com/eclipse-cdt/cdt-lsp/pulls?q=is%3Apr+is%3Aclosed+sort%3Aupdated-desc+no%3Amilestone)
 - [ ] Create a branch for the release
 - [ ] Create the endgame for the next scheduled release right away and update the versions on the main branch
 

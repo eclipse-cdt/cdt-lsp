@@ -31,6 +31,7 @@ Require-Bundle: org.eclipse.cdt.lsp;bundle-version="0.0.0",
  org.eclipse.tm4e.language_pack;bundle-version="0.0.0",
  org.eclipse.ui.console;bundle-version="0.0.0",
  org.eclipse.core.filesystem
+Bundle-Activator: org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin
 Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangFormatFileHandler.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdCommandLineValidator.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdConfigurationAccess.xml,
@@ -39,4 +40,3 @@ Service-Component: OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangForm
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.ClangdMetadataDefaults.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseProvider.xml,
  OSGI-INF/org.eclipse.cdt.lsp.clangd.internal.config.DefaultClangdCompilationDatabaseSettings.xml
-Bundle-Activator: org.eclipse.cdt.lsp.clangd.plugin.ClangdPlugin
