@@ -168,6 +168,8 @@ public abstract class ConfigurationPage<C extends Configuration, O> extends Prop
 					LspUiMessages.LspEditorConfigurationPage_spelling_link_tooltip);
 			createLink(composite, LspUiMessages.LspEditorConfigurationPage_content_assist_link,
 					LspUiMessages.LspEditorConfigurationPage_content_assist_link_tooltip);
+			createLink(composite, LspUiMessages.LspEditorConfigurationPage_task_tags_link,
+					LspUiMessages.LspEditorConfigurationPage_task_tags_link_tooltip);
 			Label line = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			line.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
 		}
