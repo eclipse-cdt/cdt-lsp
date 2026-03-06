@@ -1,5 +1,11 @@
 ## CDT LSP Change Log
 
+### v3.5.0 (Mar 2026)
+
+- Support for custom code templates has been added to TM4E [tm4e#988](https://github.com/eclipse-tm4e/tm4e/pull/988) which resolves [cdt-lsp#333](https://github.com/eclipse-cdt/cdt-lsp/issues/333#issuecomment-3991790099)
+
+Fixed issues: <https://github.com/eclipse-cdt/cdt-lsp/milestone/9?closed=1>
+
 ### v3.4.0 (Dec 2024)
 
 Fixed issues: <https://github.com/eclipse-cdt/cdt-lsp/milestone/8?closed=1>
