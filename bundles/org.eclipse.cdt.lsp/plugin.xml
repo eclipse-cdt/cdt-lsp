@@ -191,9 +191,6 @@
             class="org.eclipse.cdt.lsp.internal.ui.navigator.CSymbolIconProvider"
             id="org.eclipse.cdt.lsp.symbolIconProvider">
          <contentType
-               contentTypeId="org.eclipse.cdt.core.cSource">
-         </contentType>
-         <contentType
                contentTypeId="org.eclipse.cdt.core.cxxSource">
          </contentType>
          <contentType
