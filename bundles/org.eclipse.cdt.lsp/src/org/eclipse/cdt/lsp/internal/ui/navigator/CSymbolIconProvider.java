@@ -21,6 +21,15 @@ import org.eclipse.lsp4j.SymbolTag;
 
 public class CSymbolIconProvider extends SymbolIconProvider {
 
+	private static ImageDescriptor IMG_DESTRUCTOR_OVERLAY = null;
+
+	private ImageDescriptor getDestructorOverlay() {
+		if (IMG_DESTRUCTOR_OVERLAY == null) {
+			IMG_DESTRUCTOR_OVERLAY = LspPlugin.getDefault().getImageDescriptor(LspPlugin.IMG_OVR_DESTRUCTOR);
+		}
+		return IMG_DESTRUCTOR_OVERLAY;
+	}
+
 	@Override
 	protected Overlays getOverlaysFor(final SymbolKind symbolKind, final List<SymbolTag> symbolTags, int severity,
 			Object symbol) {
@@ -32,8 +41,7 @@ public class CSymbolIconProvider extends SymbolIconProvider {
 			// if the symbol's name represents a destructor, e.g. is named MyType::~MyType
 			if (name != null && name.contains("~")) { //$NON-NLS-1$
 				// then replace the constructor overlay with a destructor overlay
-				ImageDescriptor destructorOverlayDescriptor = LspPlugin.getDefault()
-						.getImageDescriptor(LspPlugin.IMG_OVR_DESTRUCTOR);
+				ImageDescriptor destructorOverlayDescriptor = getDestructorOverlay();
 				return new Overlays(overlays.topLeft, destructorOverlayDescriptor, overlays.bottomLeft,
 						overlays.bottomRight, overlays.underlay);
 			}
