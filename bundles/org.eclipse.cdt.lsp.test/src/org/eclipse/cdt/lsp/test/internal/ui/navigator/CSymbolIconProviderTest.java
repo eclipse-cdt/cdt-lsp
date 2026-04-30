@@ -40,6 +40,7 @@ public class CSymbolIconProviderTest {
 	// @formatter:on
 	})
 	public void testCustomDestructorOverlayIconUsed(String symbolName, boolean isDestructor) {
+		// GIVEN a document symbol representing a public destructor or constructor
 		DocumentSymbol documentSymbol = new DocumentSymbol();
 
 		// LSP doesn't know destructors, they are modelled as constructors with a ~ in their name
@@ -49,8 +50,13 @@ public class CSymbolIconProviderTest {
 		documentSymbol.setTags(List.of(SymbolTag.Public));
 		DocumentSymbolWithURI symbol = new DocumentSymbolWithURI(documentSymbol,
 				URI.create("file:///home/username/some/path/SomeType.cpp"));
-		SymbolsLabelProvider labelProvider = new SymbolsLabelProvider();
 
+		// WHEN we get an image with overlay icons from the label provider for our destructor/constructor symbol
+		SymbolsLabelProvider labelProvider = new SymbolsLabelProvider();
+		Image actualImage = labelProvider.getImage(symbol);
+
+		// THEN we expect the image to represent a public method (base image)
+		// with a destructor/constructor overlay icon in the top-right corner
 		ImageDescriptor topRightOverlay;
 		if (isDestructor) {
 			topRightOverlay = LspPlugin.getDefault().getImageDescriptor(LspPlugin.IMG_OVR_DESTRUCTOR);
@@ -62,8 +68,6 @@ public class CSymbolIconProviderTest {
 				LSPImages.IMG_METHOD_VIS_PUBLIC,
 				// no overlay icons except of our destructor overlay in the top right corner
 				null, topRightOverlay, null, null, null);
-
-		Image actualImage = labelProvider.getImage(symbol);
 
 		assertEquals(expectedImage, actualImage);
 	}
