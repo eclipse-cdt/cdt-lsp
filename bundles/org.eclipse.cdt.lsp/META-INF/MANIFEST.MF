@@ -18,7 +18,7 @@ Bundle-Activator: org.eclipse.cdt.lsp.plugin.LspPlugin
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.lsp4e;bundle-version="0.19.10",
+ org.eclipse.lsp4e;bundle-version="0.19.11",
  org.eclipse.tm4e.ui,
  org.eclipse.tm4e.languageconfiguration,
  org.eclipse.ui.genericeditor,
