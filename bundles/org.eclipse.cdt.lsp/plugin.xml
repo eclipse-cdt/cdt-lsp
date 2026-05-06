@@ -84,8 +84,8 @@
    </extension>
    <extension
          point="org.eclipse.tm4e.registry.grammars">
-      <!-- This content type binding is needed because the cpp content type from TM4E (source.cpp) 
-      does not cover C++ standard library header without file extension -->         
+      <!-- This content type binding is needed because the cpp content type from TM4E (source.cpp)
+      does not cover C++ standard library header without file extension -->
       <scopeNameContentTypeBinding
             contentTypeId="org.eclipse.cdt.core.cxxHeader"
             scopeName="source.cpp">
@@ -166,7 +166,7 @@
                 value="org.eclipse.lsp4e.outline.SymbolsModel$DocumentSymbolWithURI">
           </instanceof>
 			</or>
-         </enablement>			
+         </enablement>
        </actionProvider>
     <commonSorter
           class="org.eclipse.lsp4e.outline.OutlineSorter"
@@ -184,6 +184,19 @@
             </contentExtension>
          </includes>
       </viewerContentBinding>
+   </extension>
+   <extension
+         point="org.eclipse.lsp4e.symbolIconsProvider">
+      <iconProvider
+            class="org.eclipse.cdt.lsp.internal.ui.navigator.CSymbolIconProvider"
+            id="org.eclipse.cdt.lsp.symbolIconProvider">
+         <contentType
+               contentTypeId="org.eclipse.cdt.core.cxxSource">
+         </contentType>
+         <contentType
+               contentTypeId="org.eclipse.cdt.core.cxxHeader">
+         </contentType>
+      </iconProvider>
    </extension>
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
@@ -220,7 +233,7 @@
 	                property="org.eclipse.cdt.lsp.server.enable.hasLanguageServer"
 	                value="true">
 		            </test>
-	            </with>        
+	            </with>
       </definition>
    </extension>
    <extension
@@ -328,7 +341,7 @@
          </action>
       </viewerContribution>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.genericeditor.hoverProviders">
       <hoverProvider
@@ -360,7 +373,7 @@
 	      <keywordReference id="org.eclipse.cdt.ui.saveactions"/>
 	      <keywordReference id="org.eclipse.cdt.ui.common"/>
 	      <keywordReference id="org.eclipse.cdt.ui.ceditor"/>
-      </page>      
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
@@ -396,7 +409,7 @@
                 type="org.eclipse.core.resources.IProject">
           </adapt>
        </enabledWhen>
-      </page>      
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.genericeditor.reconcilers">
@@ -447,6 +460,6 @@
             name="%CEditor.name"
             parentId="org.eclipse.ui.genericeditor.genericEditorContext">
       </context>
-   </extension>  
+   </extension>
 </plugin>
 

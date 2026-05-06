@@ -13,13 +13,20 @@
 
 package org.eclipse.cdt.lsp.plugin;
 
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.cdt.lsp.internal.server.CLanguageServerEnableCache;
 import org.eclipse.cdt.lsp.internal.server.CLanguageServerRegistry;
 import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -31,6 +38,11 @@ public class LspPlugin extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.eclipse.cdt.lsp"; //$NON-NLS-1$
 	public static final String LSP_C_EDITOR_ID = "org.eclipse.cdt.lsp.CEditor"; //$NON-NLS-1$
 	public static final String C_EDITOR_ID = "org.eclipse.cdt.ui.editor.CEditor"; //$NON-NLS-1$
+
+	private static final String ICONS_PATH = "$nl$/icons/"; //$NON-NLS-1$
+	private static final String OVERLAY = ICONS_PATH + "ovr16/"; // overlay icons, size 7x8 //$NON-NLS-1$
+
+	public static final String IMG_OVR_DESTRUCTOR = "IMG_OVR_DESTRUCTOR"; //$NON-NLS-1$
 
 	// The shared instance
 	private static LspPlugin plugin;
@@ -75,6 +87,27 @@ public class LspPlugin extends AbstractUIPlugin {
 
 	public ICLanguageServerProvider getCLanguageServerProvider() {
 		return cLanguageServerProvider;
+	}
+
+	@Override
+	protected void initializeImageRegistry(ImageRegistry registry) {
+		Bundle bundle = Platform.getBundle(PLUGIN_ID);
+
+		if (bundle != null) {
+			registerImage(bundle, registry, IMG_OVR_DESTRUCTOR, OVERLAY + "destr_ovr.svg"); //$NON-NLS-1$
+		}
+	}
+
+	private static void registerImage(Bundle bundle, ImageRegistry registry, String imageKey, String imagePath) {
+		URL url = FileLocator.find(bundle, new Path(imagePath), null);
+		if (url != null) {
+			ImageDescriptor imageDescriptor = ImageDescriptor.createFromURL(url);
+			registry.put(imageKey, imageDescriptor);
+		}
+	}
+
+	public ImageDescriptor getImageDescriptor(String key) {
+		return getImageRegistry().getDescriptor(key);
 	}
 
 }
