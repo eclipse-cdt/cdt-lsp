@@ -78,6 +78,7 @@ pipeline {
                   fi
                   $SSH mkdir -p ${DOWNLOAD_MOUNT}-new
                   $SCP -rp releng/org.eclipse.cdt.lsp.repository/target/repository/* "${SSHUSER}:"${DOWNLOAD_MOUNT}-new
+                  $SCP -rp releng/org.eclipse.cdt.lsp.repository/target/org.eclipse.cdt.lsp.repository.zip "${SSHUSER}:"${DOWNLOAD_MOUNT}-new
                   if $SSH test -e ${DOWNLOAD_MOUNT}; then
                       $SSH mv ${DOWNLOAD_MOUNT} ${DOWNLOAD_MOUNT}-last
                   fi
