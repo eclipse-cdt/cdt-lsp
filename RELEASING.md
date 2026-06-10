@@ -36,7 +36,7 @@ Items on Release day:
 
 - [ ] Run [the CI build](https://ci.eclipse.org/cdt/job/cdt-lsp/) for the branch
 - [ ] Mark the build as Keep Forever and add the version to the description
-- [ ] Tag the release. Example: `git tag -a CDT_LSP_1_0_0 HEAD -m"CDT LSP 1.0.0" && git push origin CDT_LSP_1_0_0`
+- [ ] Tag the release. Example: `git tag -a CDT_LSP_3_6_0 sha1ofpromotedbuild -m"CDT LSP 3.6.0" && git push origin CDT_LSP_3_6_0`
 - [ ] [Promote a cdt build from jenkins](https://ci.eclipse.org/cdt/job/promote-a-build/) to releases
 - [ ] Add description to the promote-a-build job and the job it promoted.
 - [ ] Update or create [composites](https://github.com/eclipse-cdt/cdt/tree/main/releng/download/releases) in preparation for going public on release day
