@@ -1,5 +1,9 @@
 ## CDT LSP Change Log
 
+### v3.7.0 (Sep 2026)
+
+Fixed issues: <https://github.com/eclipse-cdt/cdt-lsp/milestone/11?closed=1>
+
 ### v3.6.0 (Jun 2026)
 
 Fixed issues: <https://github.com/eclipse-cdt/cdt-lsp/milestone/10?closed=1>
