@@ -22,6 +22,7 @@ import org.eclipse.cdt.core.CProjectNature;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -42,7 +43,7 @@ import org.eclipse.core.variables.VariablesPlugin;
  */
 public class ClangFormatFileMonitor {
 	public static final String CLANG_FORMAT_FILE = ".clang-format"; //$NON-NLS-1$
-	public static final String CLANG_FORMAT_CHECK_FILE = "clang-format-check"; //$NON-NLS-1$
+	public static final String CLANG_FORMAT_CHECK_FILE = ".clang-format-check"; //$NON-NLS-1$
 	private final ConcurrentLinkedQueue<IFile> pendingFiles = new ConcurrentLinkedQueue<>();
 	private final IWorkspace workspace;
 	private final ClangFormatValidator validator = new ClangFormatValidator();
@@ -137,7 +138,7 @@ public class ClangFormatFileMonitor {
 			try {
 				var file = folder.getFile(new Path(CLANG_FORMAT_CHECK_FILE));
 				if (!file.exists()) {
-					file.create(new byte[0], true, false, null);
+					file.create(new byte[0], IResource.FORCE | IResource.HIDDEN, null);
 				}
 				return file;
 			} catch (CoreException e) {
