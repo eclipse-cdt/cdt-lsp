@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorPart;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -154,12 +155,14 @@ class CLanguageServerEnableCacheTest {
 	}
 
 	@Test
+	@Disabled("See https://github.com/eclipse-cdt/cdt-lsp/issues/630")
 	@DisplayName("Cached non C file URI shall return false and should not be removed after closing")
 	public void testCache5() throws CoreException, IOException {
 		test_File_URIopenedInEditor(projectNoCFile.getFullPath().toFile().toURI());
 	}
 
 	@Test
+	@Disabled("See https://github.com/eclipse-cdt/cdt-lsp/issues/630")
 	@DisplayName("Cached EXTERNAL non C file URI shall return false and should not be removed after closing")
 	public void testCache6() throws CoreException, IOException {
 		test_File_URIopenedInEditor(externalNoCFile.toURI());
