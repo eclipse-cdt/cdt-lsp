@@ -175,17 +175,28 @@ public final class CLanguageServerEnableCache implements IContentTypeChangeListe
 
 	@Override
 	public void partOpened(IWorkbenchPart part) {
-		if (part instanceof ExtensionBasedTextEditor editor && LspUtils.checkForCContentType(editor.getEditorInput())) {
-			Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
-				var hash = part.hashCode();
-				var data = cache.get(uri);
-				if (data != null) {
-					data.enable = true;
-					data.addEditor(hash);
-				} else {
-					cache.put(uri, new Data(true, hash));
-				}
-			});
+		if (part instanceof ExtensionBasedTextEditor editor) {
+			if (LspUtils.checkForCContentType(editor.getEditorInput())) {
+				Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
+					var hash = part.hashCode();
+					var data = cache.get(uri);
+					if (data != null) {
+						data.enable = true;
+						data.addEditor(hash);
+					} else {
+						cache.put(uri, new Data(true, hash));
+					}
+				});
+			} else {
+				Optional.ofNullable(LSPEclipseUtils.toUri(editor.getEditorInput())).ifPresent(uri -> {
+					var data = cache.get(uri);
+					if (data != null) {
+						data.enable = false;
+					} else {
+						cache.put(uri, new Data(false));
+					}
+				});
+			}
 		}
 	}
 
