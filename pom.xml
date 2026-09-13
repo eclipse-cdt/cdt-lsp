@@ -143,7 +143,7 @@
     <version>${tycho.version}</version>
     <configuration>
      <!-- Optional set the Java version you are using-->
-    <executionEnvironment>JavaSE-21</executionEnvironment>
+    <executionEnvironment>JavaSE-25</executionEnvironment>
         <target>
             <artifact>
                 <groupId>${project.parent.groupId}</groupId>
