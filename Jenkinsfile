@@ -36,18 +36,39 @@ pipeline {
             withEnv(['MAVEN_OPTS=-XX:MaxRAMPercentage=60.0']) {
               withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
                 sh '''
-                  export PATH=$PWD/clangd_15.0.6/bin:$PATH
-                  which clangd
-                  clangd --version
-                  /jipp/tools/apache-maven/latest/bin/mvn \
-                      clean verify -B -V -e \
-                      -Dmaven.test.failure.ignore=true \
-                      -Dgpg.passphrase="${KEYRING_PASSPHRASE}"  \
-                      -P baseline-compare-and-replace \
-                      -P api-baseline-check \
-                      -P production \
-                      -Dmaven.repo.local=/home/jenkins/.m2/repository \
-                      --settings /home/jenkins/.m2/settings.xml \
+				    JDK25=/jipp/tools/java/temurin/jdk-25/latest
+				
+				    if [ ! -x "$JDK25/bin/java" ]; then
+				        echo "ERROR: JDK 25 nicht unter $JDK25 gefunden"
+				        echo "Verfügbare JDKs:"
+				        find /jipp/tools/java -maxdepth 5 -type f -name java -print 2>/dev/null || true
+				        exit 1
+				    fi
+				
+				    export JAVA_HOME="$JDK25"
+				    export PATH="$JAVA_HOME/bin:$PWD/clangd_15.0.6/bin:$PATH"
+				
+				    echo "JAVA_HOME=$JAVA_HOME"
+				    echo "java:"
+				    which java
+				    java -version
+				
+				    echo "clangd:"
+				    which clangd
+				    clangd --version
+				
+				    echo "Maven:"
+				    /jipp/tools/apache-maven/latest/bin/mvn -version
+				
+				    /jipp/tools/apache-maven/latest/bin/mvn \
+				        clean verify -B -V -e \
+				        -Dmaven.test.failure.ignore=true \
+				        -Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
+				        -P baseline-compare-and-replace \
+				        -P api-baseline-check \
+				        -P production \
+				        -Dmaven.repo.local=/home/jenkins/.m2/repository \
+				        --settings /home/jenkins/.m2/settings.xml
                 '''
                 sh '''
                   echo "TIMESTAMP: $(date)" > releng/org.eclipse.cdt.lsp.repository/target/repository/ci-and-git-info.txt
