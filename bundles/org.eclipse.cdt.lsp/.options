@@ -1,0 +1,2 @@
+# Enables sticky lines provider debugging
+org.eclipse.cdt.lsp/debug/editor/stickyLines=false
