@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Advantest Europe GmbH and others.
+ * Copyright (c) 2024, 2026 Advantest Europe GmbH and others.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -8,6 +8,7 @@
  *
  * Contributors:
  * Dietrich Travkin (Solunar GmbH) - Initial implementation
+ * John Dallaway - Allow range parameter to be omitted (#632)
  *******************************************************************************/
 package org.eclipse.cdt.lsp.services.ast;
 
@@ -31,15 +32,19 @@ public class AstParams {
 	@NonNull
 	private TextDocumentIdentifier textDocument;
 
-	@NonNull
 	private Range range;
 
 	public AstParams() {
 	}
 
-	public AstParams(@NonNull final TextDocumentIdentifier textDocument, @NonNull final Range range) {
+	/** @since 3.2 */
+	public AstParams(@NonNull final TextDocumentIdentifier textDocument) {
 		this.textDocument = Preconditions.<TextDocumentIdentifier>checkNotNull(textDocument, "textDocument"); //$NON-NLS-1$
-		this.range = Preconditions.<Range>checkNotNull(range, "range"); //$NON-NLS-1$
+	}
+
+	public AstParams(@NonNull final TextDocumentIdentifier textDocument, final Range range) {
+		this(textDocument);
+		this.range = range;
 	}
 
 	@NonNull
@@ -51,13 +56,12 @@ public class AstParams {
 		this.textDocument = Preconditions.<TextDocumentIdentifier>checkNotNull(textDocument, "textDocument"); //$NON-NLS-1$
 	}
 
-	@NonNull
 	public Range getRange() {
 		return range;
 	}
 
-	public void setRange(@NonNull Range range) {
-		this.range = Preconditions.<Range>checkNotNull(range, "range"); //$NON-NLS-1$
+	public void setRange(Range range) {
+		this.range = range;
 	}
 
 	@Override
