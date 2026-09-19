@@ -183,23 +183,15 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private boolean removeCompilationDatabase(List<String> lines) {
 		for (int i = 0; i < lines.size(); i++) {
 			String line = lines.get(i);
-			Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
-			if (pathGroupMatcher.matches()) {
-				String updated = line
-						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*\\s*,\\s*", "") //$NON-NLS-1$ //$NON-NLS-2$
-						.replaceFirst(",\\s*" + Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", "") //$NON-NLS-1$ //$NON-NLS-2$
-						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				updated = updated.replace("{,", "{").replace(", }", " }"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				if (updated.trim().equals(COMPILE_FLAGS_PREFIX + " {}") || updated.trim().equals(COMPILE_FLAGS_PREFIX + " { }")) { //$NON-NLS-1$ //$NON-NLS-2$
-					lines.remove(i);
-				} else {
-					lines.set(i, updated);
-				}
-				return true;
-			}
-			if (line.trim().startsWith(COMPILATION_DATABASE_PREFIX)) {
+			String trimmed = line.trim();
+			if (trimmed.startsWith(COMPILATION_DATABASE_PREFIX)) {
 				lines.remove(i);
 				removeEmptyCompileFlagsHeader(lines, i - 1);
+				return true;
+			}
+			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{\\s*" //$NON-NLS-1$ //$NON-NLS-2$
+					+ Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*\\s*\\}\\s*$")) {
+				lines.remove(i);
 				return true;
 			}
 		}

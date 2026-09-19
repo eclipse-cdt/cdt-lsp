@@ -361,6 +361,30 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertEquals("", Files.readString(configFile.getLocation().toFile().toPath())); //$NON-NLS-1$
 	}
 
+	@Test
+	void testSupportSynchronizeClearsManagedCompilationDatabaseFromCompileFlagsBlock()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		var configFile = createConfigFile(BLOCK_CDB_SETTING_WITH_DATABASE, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var support = new ClangdCompilationDatabaseSupport();
+		var optJob = support.synchronize(project, java.util.Optional.empty());
+		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		assertEquals(BLOCK_CDB_SETTING_WITHOUT_DATABASE.replaceAll("\\R", "\n"),
+				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
+	}
+
+	@Test
+	void testSupportSynchronizeKeepsInlineCompilationDatabaseWithOtherSettings()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		var configFile = createConfigFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var support = new ClangdCompilationDatabaseSupport();
+		var optJob = support.synchronize(project, java.util.Optional.empty());
+		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		assertEquals(String.format(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT).replaceAll("\\R", "\n"),
+				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
+	}
+
 	/**
 	 * Test whether the .clangd won't be created nor updated if its in one of its parent folders when cProjectDescriptionEventHandler gets called.
 	 *
