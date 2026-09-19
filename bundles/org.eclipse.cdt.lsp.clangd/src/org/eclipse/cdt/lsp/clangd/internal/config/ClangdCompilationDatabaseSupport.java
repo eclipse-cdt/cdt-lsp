@@ -51,10 +51,14 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	}
 
 	Optional<WorkspaceJob> synchronize(IProject project, Supplier<Optional<String>> automaticDirectorySupplier) {
-		if (project == null || !isAutomaticManagementEnabled(project)) {
+		if (project == null) {
 			return Optional.empty();
 		}
-		return configuredDirectory(project, automaticDirectorySupplier).map(path -> setCompilationDatabase(project, path));
+		if (!isAutomaticManagementEnabled(project)) {
+			return clearCompilationDatabase(project);
+		}
+		return configuredDirectory(project, automaticDirectorySupplier).map(path -> setCompilationDatabase(project, path))
+				.or(() -> clearCompilationDatabase(project));
 	}
 
 	public ClangdCompilationDatabaseStatus status(IProject project) {
@@ -133,15 +137,17 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_disabled;
 		}
 		if (manualDirectory.isPresent() && !compileCommandsExists) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_manual_missing
-					+ compileCommandsPath;
+			return org.eclipse.osgi.util.NLS.bind(
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_manual_missing,
+					compileCommandsPath);
 		}
 		if (manualDirectory.isPresent()) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_manual;
 		}
 		if (automaticDirectory.isPresent() && !compileCommandsExists) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_automatic_missing
-					+ compileCommandsPath;
+			return org.eclipse.osgi.util.NLS.bind(
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_automatic_missing,
+					compileCommandsPath);
 		}
 		if (automaticDirectory.isPresent()) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_automatic;

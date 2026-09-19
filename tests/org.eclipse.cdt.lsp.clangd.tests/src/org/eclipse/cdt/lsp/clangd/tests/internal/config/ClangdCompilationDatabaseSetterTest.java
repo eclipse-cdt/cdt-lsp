@@ -334,6 +334,17 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	@Test
+	void testSupportSynchronizeClearsStaleCompilationDatabase()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		var configFile = createConfigFile(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var support = new ClangdCompilationDatabaseSupport();
+		var optJob = support.synchronize(project, java.util.Optional.empty());
+		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		assertEquals("", Files.readString(configFile.getLocation().toFile().toPath())); //$NON-NLS-1$
+	}
+
 	/**
 	 * Test whether the .clangd won't be created nor updated if its in one of its parent folders when cProjectDescriptionEventHandler gets called.
 	 *

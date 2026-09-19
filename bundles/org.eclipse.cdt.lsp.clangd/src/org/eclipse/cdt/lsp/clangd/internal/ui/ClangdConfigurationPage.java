@@ -63,7 +63,7 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
 		var done = super.performOk();
 		IProject project = getElement().getAdapter(IProject.class);
-		if (done && project != null && useProjectSettings() && (configSettingsChanged || projectSpecificSettingsChanged)) {
+		if (done && project != null && (configSettingsChanged || projectSpecificSettingsChanged)) {
 			new ClangdCompilationDatabaseSupport().synchronize(project);
 		}
 		if (done && LspUtils.isLsActive()
