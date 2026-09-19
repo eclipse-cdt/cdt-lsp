@@ -59,6 +59,8 @@ final class ClangdCompilationDatabaseSetterTest {
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
 	private static final String INLINE_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags:{Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String INLINE_CDB_SETTING_WITH_DATABASE = "CompileFlags:{Add: -ferror-limit=500, CompilationDatabase: %s}\nDiagnostics:\n  ClangTidy: modernize*";
+	private static final String INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION = "CompileFlags: {CompilationDatabase: %s, Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
+	private static final String INLINE_TRAILING_OPTION_ONLY = "CompileFlags: {Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String DEFAULT_CDB_SETTING = "CompileFlags: {CompilationDatabase: %s}";
 	private static final String BLOCK_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags:\n  Add: -ferror-limit=500\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String BLOCK_CDB_SETTING_WITH_DATABASE = "CompileFlags:\n  CompilationDatabase: %s\n  Add: -ferror-limit=500\nDiagnostics:\n  ClangTidy: modernize*";
@@ -382,6 +384,19 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertTrue(optJob.isPresent(), "No clear job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
 		assertEquals(String.format(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT).replaceAll("\\R", "\n"),
+				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
+	}
+
+	@Test
+	void testSupportSynchronizeClearsManagedInlineCompilationDatabaseAndKeepsTrailingSettings()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		var configFile = createConfigFile(INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION,
+				RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var support = new ClangdCompilationDatabaseSupport();
+		var optJob = support.synchronize(project, java.util.Optional.empty());
+		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		assertEquals(INLINE_TRAILING_OPTION_ONLY.replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 

@@ -190,8 +190,17 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				return true;
 			}
 			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{\\s*" //$NON-NLS-1$ //$NON-NLS-2$
-					+ Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*\\s*\\}\\s*$")) {
-				lines.remove(i);
+					+ Pattern.quote(COMPILATTION_DATABASE) + ":.*\\}\\s*$")) {
+				String updated = line.replaceFirst(
+						"^(" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{)\\s*" + Pattern.quote(COMPILATTION_DATABASE) //$NON-NLS-1$ //$NON-NLS-2$
+								+ ":\\s*[^,}]*\\s*(,\\s*)?(.*\\})\\s*$", //$NON-NLS-1$
+						"$1$3"); //$NON-NLS-1$
+				if (updated.trim().equals(COMPILE_FLAGS_PREFIX + " {}") || updated.trim().equals(COMPILE_FLAGS_PREFIX + " { }") //$NON-NLS-1$ //$NON-NLS-2$
+						|| updated.trim().equals(COMPILE_FLAGS_PREFIX + "{}")) { //$NON-NLS-1$
+					lines.remove(i);
+				} else {
+					lines.set(i, updated);
+				}
 				return true;
 			}
 		}
