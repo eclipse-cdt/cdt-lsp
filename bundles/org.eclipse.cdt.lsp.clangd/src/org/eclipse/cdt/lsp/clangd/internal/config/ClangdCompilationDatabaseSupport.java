@@ -15,6 +15,7 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
 
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseProvider;
@@ -92,9 +93,9 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	}
 
 	private Optional<String> automaticDirectory(IProject project) {
-		Optional<String>[] detected = new Optional[] { Optional.empty() };
-		provider.call(p -> detected[0] = p.getCompilationDatabasePath(project));
-		return detected[0];
+		var detected = new AtomicReference<>(Optional.<String>empty());
+		provider.call(p -> detected.set(p.getCompilationDatabasePath(project)));
+		return detected.get();
 	}
 
 	private boolean isAutomaticManagementEnabled(IProject project) {

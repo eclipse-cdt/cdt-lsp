@@ -291,15 +291,15 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 
 	private String sourceLabel(ClangdCompilationDatabaseStatus status) {
 		if (!status.automaticManagementEnabled()) {
-			return "Disabled"; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_disabled;
 		}
 		if (status.source() == Source.MANUAL) {
-			return "Manual override"; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_manual;
 		}
 		if (status.source() == Source.AUTOMATIC) {
-			return "Active build configuration"; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_automatic;
 		}
-		return "Not detected"; //$NON-NLS-1$
+		return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_not_detected;
 	}
 
 	@Override

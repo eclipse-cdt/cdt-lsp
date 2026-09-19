@@ -131,7 +131,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 						return true;
 					}
 				}
-				lines.add(i + 1, INDENT + COMPILATION_DATABASE_PREFIX + " " + databaseDirectoryPath); //$NON-NLS-1$
+				lines.add(i + 1, INDENT + COMPILATION_DATABASE_PREFIX + " " + escaped(databaseDirectoryPath)); //$NON-NLS-1$
 				return true;
 			}
 		}
@@ -139,7 +139,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			lines.add(""); //$NON-NLS-1$
 		}
 		lines.add(COMPILE_FLAGS_PREFIX);
-		lines.add(INDENT + COMPILATION_DATABASE_PREFIX + " " + databaseDirectoryPath); //$NON-NLS-1$
+		lines.add(INDENT + COMPILATION_DATABASE_PREFIX + " " + escaped(databaseDirectoryPath)); //$NON-NLS-1$
 		return true;
 	}
 

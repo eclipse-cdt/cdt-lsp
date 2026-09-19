@@ -23,7 +23,6 @@ import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 
@@ -65,14 +64,7 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 		var done = super.performOk();
 		IProject project = getElement().getAdapter(IProject.class);
 		if (done && project != null && useProjectSettings() && (configSettingsChanged || projectSpecificSettingsChanged)) {
-			new ClangdCompilationDatabaseSupport().synchronize(project).ifPresent(job -> {
-				try {
-					job.join();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					Platform.getLog(getClass()).error(e.getMessage(), e);
-				}
-			});
+			new ClangdCompilationDatabaseSupport().synchronize(project);
 		}
 		if (done && LspUtils.isLsActive()
 				&& (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
