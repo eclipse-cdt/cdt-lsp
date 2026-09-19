@@ -17,9 +17,11 @@ package org.eclipse.cdt.lsp.clangd.internal.ui;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
@@ -45,7 +47,8 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 
 	@Override
 	protected ConfigurationArea<ClangdOptions> getConfigurationArea(Composite composite, boolean isProjectScope) {
-		return new ClangdConfigurationArea(composite, isProjectScope);
+		IProject project = isProjectScope ? getElement().getAdapter(IProject.class) : null;
+		return new ClangdConfigurationArea(composite, isProjectScope, project);
 	}
 
 	@Override
@@ -56,8 +59,13 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	@Override
 	public boolean performOk() {
 		var configSettingsChanged = configurationSettingsChanged();
+		var projectSpecificSettingsChanged = hasProjectSpecificOptions() != useProjectSettings();
 		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
 		var done = super.performOk();
+		IProject project = projectScope().isPresent() ? getElement().getAdapter(IProject.class) : null;
+		if (done && project != null && (configSettingsChanged || projectSpecificSettingsChanged)) {
+			new ClangdCompilationDatabaseSupport().synchronize(project);
+		}
 		if (done && LspUtils.isLsActive()
 				&& (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
 						|| projectOptionsDifferFromWorkspace)) {
@@ -87,7 +95,9 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(ClangdMetadata.Predefined.clangdPath.identifer(), null))//
+				.map(n -> n.get(ClangdMetadata.Predefined.clangdPath.identifer(),
+						n.get(ClangdMetadata.Predefined.setCompilationDatabase.identifer(),
+								n.get(ClangdMetadata.Predefined.compilationDatabaseOverride.identifer(), null))))//
 				.isPresent();
 	}
 

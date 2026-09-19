@@ -15,6 +15,8 @@
 
 package org.eclipse.cdt.lsp.clangd.tests;
 
+import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.editor.EditorConfiguration;
 import org.eclipse.cdt.lsp.editor.EditorMetadata;
 import org.eclipse.core.resources.IProject;
@@ -30,6 +32,11 @@ public final class TestUtils {
 	public static void setLspPreferred(IProject project, boolean value) {
 		ServiceCaller.callOnce(TestUtils.class, EditorConfiguration.class, //
 				cc -> cc.storage(project).save(value, EditorMetadata.Predefined.preferLspEditor));
+	}
+
+	public static void setCompilationDatabaseOverride(IProject project, String value) {
+		ServiceCaller.callOnce(TestUtils.class, ClangdConfiguration.class,
+				cc -> cc.storage(project).save(value, ClangdMetadata.Predefined.compilationDatabaseOverride));
 	}
 
 	public static IProject createCProject(String projectName) throws CoreException {

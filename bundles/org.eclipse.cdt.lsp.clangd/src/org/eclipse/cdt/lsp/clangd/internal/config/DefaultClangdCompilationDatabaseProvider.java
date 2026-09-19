@@ -49,6 +49,11 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 
 	@Override
 	public Optional<String> getCompilationDatabasePath(IResourceChangeEvent event, IProject project) {
+		return getCompilationDatabasePath(project);
+	}
+
+	@Override
+	public Optional<String> getCompilationDatabasePath(IProject project) {
 		if (project != null && !isClangdFileInParentFolders(project)) {
 			return getConfiguration(project) //
 					.map(bc -> {
@@ -111,6 +116,10 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 	 * @return true if .clangd is not in project root directory and in one of its parent folders.
 	 */
 	private boolean isClangdFileInParentFolders(IProject project) {
+		return hasClangdFileInParentFolders(project);
+	}
+
+	static boolean hasClangdFileInParentFolders(IProject project) {
 		if (project.getFile(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME).exists()) {
 			return false;
 		}

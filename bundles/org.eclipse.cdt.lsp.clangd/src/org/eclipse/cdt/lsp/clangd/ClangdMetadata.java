@@ -169,6 +169,19 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 				LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database_description);
 
 		/**
+		 * Returns the metadata for the manual compilation database directory override.
+		 *
+		 * @see ClangdOptions#compilationDatabaseOverride()
+		 *
+		 * @since 4.0
+		 */
+		PreferenceMetadata<String> compilationDatabaseOverride = new PreferenceMetadata<>(String.class, //
+				"compilation_database_override", //$NON-NLS-1$
+				"", //$NON-NLS-1$
+				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_override,
+				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_override_description);
+
+		/**
 		 * Returns the default {@link List} of {@link PreferenceMetadata}
 		 */
 		List<PreferenceMetadata<?>> defaults = List.of(//
@@ -182,7 +195,8 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 				logToConsole, //
 				validateClangdOptions, //
 				fillFunctionArguments, //
-				setCompilationDatabase //
+				setCompilationDatabase, //
+				compilationDatabaseOverride //
 		);
 
 	}
