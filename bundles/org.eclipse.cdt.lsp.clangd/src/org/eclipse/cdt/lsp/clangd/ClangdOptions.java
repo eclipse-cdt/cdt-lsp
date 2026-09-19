@@ -118,7 +118,7 @@ public interface ClangdOptions {
 	 *
 	 * @return manual override directory or empty string when automatic detection should be used
 	 *
-	 * @since 3.8
+	 * @since 4.0
 	 */
 	default String compilationDatabaseOverride() {
 		return ""; //$NON-NLS-1$

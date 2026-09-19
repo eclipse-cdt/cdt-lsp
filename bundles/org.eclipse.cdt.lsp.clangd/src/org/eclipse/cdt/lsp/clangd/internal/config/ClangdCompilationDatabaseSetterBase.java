@@ -147,15 +147,13 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			String trimmed = line.trim();
 			String indent = line.substring(0, line.indexOf(trimmed));
 			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{.*\\}\\s*$")) { //$NON-NLS-1$ //$NON-NLS-2$
-				if (trimmed.startsWith(COMPILE_FLAGS_PREFIX + " {") && trimmed.contains("}")) { //$NON-NLS-1$
-					int closingBracket = line.lastIndexOf('}');
-					if (closingBracket >= 0) {
-						String prefix = line.substring(0, closingBracket).stripTrailing();
-						String suffix = line.substring(closingBracket);
-						String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$
-						lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " + escaped(databaseDirectoryPath) + suffix); //$NON-NLS-1$ //$NON-NLS-2$
-						return true;
-					}
+				int closingBracket = line.lastIndexOf('}');
+				if (closingBracket >= 0) {
+					String prefix = line.substring(0, closingBracket).stripTrailing();
+					String suffix = line.substring(closingBracket);
+					String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$
+					lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " + escaped(databaseDirectoryPath) + suffix); //$NON-NLS-1$ //$NON-NLS-2$
+					return true;
 				}
 			} else if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*$")) { //$NON-NLS-1$ //$NON-NLS-2$
 				lines.add(i + 1, indent + INDENT + COMPILATION_DATABASE_PREFIX + " " + escaped(databaseDirectoryPath)); //$NON-NLS-1$
@@ -189,7 +187,8 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			if (pathGroupMatcher.matches()) {
 				String updated = line
 						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*\\s*,\\s*", "") //$NON-NLS-1$ //$NON-NLS-2$
-						.replaceFirst(",\\s*" + Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", ""); //$NON-NLS-1$ //$NON-NLS-2$
+						.replaceFirst(",\\s*" + Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", "") //$NON-NLS-1$ //$NON-NLS-2$
+						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				updated = updated.replace("{,", "{").replace(", }", " }"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				if (updated.trim().equals(COMPILE_FLAGS_PREFIX + " {}") || updated.trim().equals(COMPILE_FLAGS_PREFIX + " { }")) { //$NON-NLS-1$ //$NON-NLS-2$
 					lines.remove(i);

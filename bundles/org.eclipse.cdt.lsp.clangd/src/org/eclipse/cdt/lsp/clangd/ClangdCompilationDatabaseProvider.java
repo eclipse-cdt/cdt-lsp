@@ -51,7 +51,7 @@ public interface ClangdCompilationDatabaseProvider {
 	 * @param project
 	 * @return project relative path to compilation database (compile_commands.json) or empty optional
 	 *
-	 * @since 3.8
+	 * @since 4.0
 	 */
 	default Optional<String> getCompilationDatabasePath(IProject project) {
 		return Optional.empty();

@@ -57,6 +57,8 @@ final class ClangdCompilationDatabaseSetterTest {
 	private static final String WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\debug"; //$NON-NLS-1$
 	private static final String WINDOWS_ESCAPED_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\\\debug"; //$NON-NLS-1$
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
+	private static final String INLINE_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags:{Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
+	private static final String INLINE_CDB_SETTING_WITH_DATABASE = "CompileFlags:{Add: -ferror-limit=500, CompilationDatabase: %s}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String DEFAULT_CDB_SETTING = "CompileFlags: {CompilationDatabase: %s}";
 	private static final String BLOCK_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags:\n  Add: -ferror-limit=500\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String BLOCK_CDB_SETTING_WITH_DATABASE = "CompileFlags:\n  CompilationDatabase: %s\n  Add: -ferror-limit=500\nDiagnostics:\n  ClangTidy: modernize*";
@@ -274,6 +276,20 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
 		var expectedContent = String.format(BLOCK_CDB_SETTING_WITH_DATABASE, RELATIVE_DIR_PATH_BUILD_DEBUG);
+		var modifiedContent = Files.readString(configFile.getLocation().toFile().toPath());
+		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
+	}
+
+	@Test
+	void testInsertCompilationDatabaseIntoInlineCompileFlagsBlockWithoutSpace()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		var configFile = createConfigFile(INLINE_CDB_SETTING_WITHOUT_DATABASE, ""); //$NON-NLS-1$
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
+		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		var expectedContent = String.format(INLINE_CDB_SETTING_WITH_DATABASE, RELATIVE_DIR_PATH_BUILD_DEBUG);
 		var modifiedContent = Files.readString(configFile.getLocation().toFile().toPath());
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
 	}

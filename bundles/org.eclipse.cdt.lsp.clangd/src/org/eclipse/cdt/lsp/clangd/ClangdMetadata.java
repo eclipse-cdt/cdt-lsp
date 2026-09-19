@@ -172,6 +172,8 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 		 * Returns the metadata for the manual compilation database directory override.
 		 *
 		 * @see ClangdOptions#compilationDatabaseOverride()
+		 *
+		 * @since 4.0
 		 */
 		PreferenceMetadata<String> compilationDatabaseOverride = new PreferenceMetadata<>(String.class, //
 				"compilation_database_override", //$NON-NLS-1$
