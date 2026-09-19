@@ -189,12 +189,13 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				removeEmptyCompileFlagsHeader(lines, i - 1);
 				return true;
 			}
-			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{\\s*" //$NON-NLS-1$ //$NON-NLS-2$
+			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{.*" //$NON-NLS-1$ //$NON-NLS-2$
 					+ Pattern.quote(COMPILATTION_DATABASE) + ":.*\\}\\s*$")) {
-				String updated = line.replaceFirst(
-						"^(" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{)\\s*" + Pattern.quote(COMPILATTION_DATABASE) //$NON-NLS-1$ //$NON-NLS-2$
-								+ ":\\s*[^,}]*\\s*(,\\s*)?(.*\\})\\s*$", //$NON-NLS-1$
-						"$1$3"); //$NON-NLS-1$
+				String updated = line
+						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*\\s*,\\s*", "") //$NON-NLS-1$ //$NON-NLS-2$
+						.replaceFirst(",\\s*" + Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", "") //$NON-NLS-1$ //$NON-NLS-2$
+						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				updated = updated.replace("{,", "{").replace(", }", " }"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				if (updated.trim().equals(COMPILE_FLAGS_PREFIX + " {}") || updated.trim().equals(COMPILE_FLAGS_PREFIX + " { }") //$NON-NLS-1$ //$NON-NLS-2$
 						|| updated.trim().equals(COMPILE_FLAGS_PREFIX + "{}")) { //$NON-NLS-1$
 					lines.remove(i);
