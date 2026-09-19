@@ -127,6 +127,17 @@ CompileFlags:
   CompilationDatabase: build/default
 ```
 
+#### Troubleshooting compilation database setup
+
+If includes, defines, or diagnostics look wrong in the LSP editor, first verify the active compilation database setup in the project properties at *C/C++ General > Editor (LSP) > clangd*:
+
+1. Check the *Compilation database* status section for the currently used source and the resolved `compile_commands.json` location.
+2. Make sure the displayed `compile_commands.json` file exists and belongs to the active build configuration.
+3. If your build writes `compile_commands.json` outside the project root or uses a non-standard folder layout, set a *Manual compilation database directory override* for the project.
+4. If the project inherits a `.clangd` file from a parent folder, CDT LSP will not rewrite the project-local `.clangd` file automatically.
+
+For CMake and Meson projects, switching the active build configuration updates the managed `CompilationDatabase` entry in `.clangd`. For imported Makefile, cross-toolchain, or externally generated builds, use the manual override when automatic detection cannot resolve the correct directory.
+
 ### Create an example CMake project
 
 

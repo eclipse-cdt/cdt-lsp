@@ -42,4 +42,18 @@ public interface ClangdCompilationDatabaseProvider {
 	 * @return project relative path to compilation database (compile_commands.json) or empty optional
 	 */
 	Optional<String> getCompilationDatabasePath(CProjectDescriptionEvent event);
+
+	/**
+	 * Gets the current project relative path to the folder which contains the compilation database (compile_commands.json).
+	 * It may be used by UI code to display the currently detected path and by configuration workflows that need to
+	 * synchronize the .clangd file outside resource or project description change events.
+	 *
+	 * @param project
+	 * @return project relative path to compilation database (compile_commands.json) or empty optional
+	 *
+	 * @since 3.8
+	 */
+	default Optional<String> getCompilationDatabasePath(IProject project) {
+		return Optional.empty();
+	}
 }

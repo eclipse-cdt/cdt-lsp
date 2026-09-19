@@ -44,6 +44,8 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 	private final ServiceCaller<ClangdCompilationDatabaseSettings> settings = new ServiceCaller<>(getClass(),
 			ClangdCompilationDatabaseSettings.class);
 
+	private final ClangdCompilationDatabaseSupport support = new ClangdCompilationDatabaseSupport();
+
 	private final ServiceCaller<ClangdCompilationDatabaseProvider> clangdCompilationDatabaseProvider = new ServiceCaller<>(
 			getClass(), ClangdCompilationDatabaseProvider.class);
 
@@ -78,10 +80,8 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 		if (project != null && isSetCompilationDatabaseEnabled(project)) {
 			if (!clangdCProjectDescriptionListener.call(c -> c.handleEvent(event))) {
 				// no OSGi service for deprecated ClangdCProjectDescriptionListener provided, lets use the new one:
-				clangdCompilationDatabaseProvider.call(provider -> {
-					jobs[0] = provider.getCompilationDatabasePath(event)
-							.map(path -> setCompilationDatabase(project, path));
-				});
+				clangdCompilationDatabaseProvider.call(
+						provider -> jobs[0] = support.synchronize(project, () -> provider.getCompilationDatabasePath(event)));
 			}
 		}
 		return jobs[0]; // return job for unit testing to allow tests to wait for the asynchronous job to be finished.
@@ -94,10 +94,8 @@ public class ClangdCompilationDatabaseSetter extends ClangdCompilationDatabaseSe
 		if (event.getDelta() != null) {
 			for (var project : collectAffectedProjects(event)) {
 				if (isSetCompilationDatabaseEnabled(project)) {
-					clangdCompilationDatabaseProvider.call(provider -> {
-						jobs[0] = provider.getCompilationDatabasePath(event, project)
-								.map(path -> setCompilationDatabase(project, path));
-					});
+					clangdCompilationDatabaseProvider.call(provider -> jobs[0] = support.synchronize(project,
+							() -> provider.getCompilationDatabasePath(event, project)));
 				}
 			}
 		}

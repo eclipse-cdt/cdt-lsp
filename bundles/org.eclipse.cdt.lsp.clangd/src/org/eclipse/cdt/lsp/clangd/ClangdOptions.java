@@ -111,4 +111,16 @@ public interface ClangdOptions {
 	default boolean setCompilationDatabase() {
 		return false;
 	}
+
+	/**
+	 * Optional manual override for the directory containing the compilation database.
+	 * When configured for a project, it takes precedence over automatic detection.
+	 *
+	 * @return manual override directory or empty string when automatic detection should be used
+	 *
+	 * @since 3.8
+	 */
+	default String compilationDatabaseOverride() {
+		return ""; //$NON-NLS-1$
+	}
 }

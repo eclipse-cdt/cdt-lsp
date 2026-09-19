@@ -39,6 +39,9 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	public static final String CLANGD_CONFIG_FILE_NAME = ".clangd"; //$NON-NLS-1$
 	private static final String COMPILE_FLAGS = "CompileFlags"; //$NON-NLS-1$
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
+	private static final String COMPILE_FLAGS_PREFIX = COMPILE_FLAGS + ":"; //$NON-NLS-1$
+	private static final String COMPILATION_DATABASE_PREFIX = COMPILATTION_DATABASE + ":"; //$NON-NLS-1$
+	private static final String INDENT = "  "; //$NON-NLS-1$
 	protected static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String BACKSLASH_REGEX = "\\\\"; //$NON-NLS-1$
 	private static final String BACKSLASH_ESCAPE = "\\\\\\\\"; //$NON-NLS-1$
@@ -52,9 +55,6 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	 * <p>
 	 * The value of the <code>CompilationDatabase</code> entry in the .clangd file will be replaced with <code>databaseDirectoryPath</code>, if
 	 * the <code>CompilationDatabase</code> entry can be found in the .clangd file. It changes only the first occurrence.
-	 * </p>
-	 * <p>
-	 * NOTE: The file won't be updated if the file is not empty and the <code>CompilationDatabase</code> entry is missing.
 	 * </p>
 	 * @param project to update its .clangd file
 	 * @param databaseDirectoryPath project relative path to the folder which contains the compile_commands.json.
@@ -89,22 +89,62 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		if (configFile.getLocation() != null) {
 			var lines = readClangdConfigFile(configFile);
 			var isBlank = true;
+			var changed = false;
+			var hasCompilationDatabase = false;
 			for (int i = 0; i < lines.size(); i++) {
 				var line = lines.get(i);
 				isBlank &= line.isBlank();
 				Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
-				if (pathGroupMatcher.matches()
-						&& !databaseDirectoryPath.contentEquals(pathGroupMatcher.replaceAll("$1").trim())) { //$NON-NLS-1$
-					lines.set(i, pathMatchPattern.matcher(line)
-							.replaceAll(" " + databaseDirectoryPath.replaceAll(BACKSLASH_REGEX, BACKSLASH_ESCAPE))); //$NON-NLS-1$
-					writeClangdConfigFile(configFile, charset, lines, monitor);
+				if (pathGroupMatcher.matches()) {
+					hasCompilationDatabase = true;
+					if (!databaseDirectoryPath.contentEquals(pathGroupMatcher.replaceAll("$1").trim())) { //$NON-NLS-1$
+						lines.set(i, pathMatchPattern.matcher(line)
+								.replaceAll(" " + escaped(databaseDirectoryPath))); //$NON-NLS-1$
+						changed = true;
+					}
 					break;
 				}
 			}
+			if (!changed && !hasCompilationDatabase && !isBlank) {
+				changed = insertCompilationDatabase(lines, databaseDirectoryPath);
+			}
 			if (isBlank) {
 				createClangdConfigFile(configFile, charset, databaseDirectoryPath, true);
+			} else if (changed) {
+				writeClangdConfigFile(configFile, charset, lines, monitor);
 			}
 		}
+	}
+
+	private boolean insertCompilationDatabase(List<String> lines, String databaseDirectoryPath) {
+		for (int i = 0; i < lines.size(); i++) {
+			String line = lines.get(i);
+			String trimmed = line.trim();
+			if (trimmed.startsWith(COMPILE_FLAGS_PREFIX)) {
+				if (trimmed.contains("{") && trimmed.contains("}")) {
+					int closingBracket = line.lastIndexOf('}');
+					if (closingBracket >= 0) {
+						String prefix = line.substring(0, closingBracket).stripTrailing();
+						String suffix = line.substring(closingBracket);
+						String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$
+						lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " + escaped(databaseDirectoryPath) + suffix); //$NON-NLS-1$ //$NON-NLS-2$
+						return true;
+					}
+				}
+				lines.add(i + 1, INDENT + COMPILATION_DATABASE_PREFIX + " " + databaseDirectoryPath); //$NON-NLS-1$
+				return true;
+			}
+		}
+		if (!lines.isEmpty() && !lines.get(lines.size() - 1).isBlank()) {
+			lines.add(""); //$NON-NLS-1$
+		}
+		lines.add(COMPILE_FLAGS_PREFIX);
+		lines.add(INDENT + COMPILATION_DATABASE_PREFIX + " " + databaseDirectoryPath); //$NON-NLS-1$
+		return true;
+	}
+
+	private String escaped(String databaseDirectoryPath) {
+		return databaseDirectoryPath.replaceAll(BACKSLASH_REGEX, BACKSLASH_ESCAPE);
 	}
 
 	private List<String> readClangdConfigFile(IFile configFile) throws IOException, CoreException {
