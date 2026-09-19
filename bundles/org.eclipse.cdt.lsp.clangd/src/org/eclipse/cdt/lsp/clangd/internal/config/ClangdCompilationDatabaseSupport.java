@@ -22,6 +22,7 @@ import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseProvider;
 import org.eclipse.cdt.lsp.clangd.ClangdCompilationDatabaseSettings;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus.Source;
+import org.eclipse.cdt.lsp.clangd.internal.ui.LspEditorUiMessages;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -43,6 +44,10 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 
 	public Optional<WorkspaceJob> synchronize(IProject project) {
 		return synchronize(project, () -> automaticDirectory(project));
+	}
+
+	public Optional<WorkspaceJob> synchronize(IProject project, Optional<String> automaticDirectory) {
+		return synchronize(project, () -> automaticDirectory);
 	}
 
 	Optional<WorkspaceJob> synchronize(IProject project, Supplier<Optional<String>> automaticDirectorySupplier) {
@@ -125,24 +130,25 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	private String message(IProject project, boolean automaticManagementEnabled, Optional<String> manualDirectory,
 			Optional<String> automaticDirectory, boolean compileCommandsExists, String compileCommandsPath) {
 		if (!automaticManagementEnabled) {
-			return "Automatic .clangd compilation database updates are disabled."; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_disabled;
 		}
 		if (manualDirectory.isPresent() && !compileCommandsExists) {
-			return "Manual override is configured, but compile_commands.json was not found at " + compileCommandsPath; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_manual_missing
+					+ compileCommandsPath;
 		}
 		if (manualDirectory.isPresent()) {
-			return "Using the manual compilation database directory override."; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_manual;
 		}
 		if (automaticDirectory.isPresent() && !compileCommandsExists) {
-			return "Detected compilation database directory, but compile_commands.json was not found at "
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_automatic_missing
 					+ compileCommandsPath;
 		}
 		if (automaticDirectory.isPresent()) {
-			return "Using the active build configuration to manage CompilationDatabase in .clangd."; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_automatic;
 		}
 		if (project.getLocation() != null && DefaultClangdCompilationDatabaseProvider.hasClangdFileInParentFolders(project)) {
-			return "A parent .clangd file was found. Project-level CompilationDatabase updates are skipped."; //$NON-NLS-1$
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_parent_clangd;
 		}
-		return "No compilation database directory could be detected for the active build configuration."; //$NON-NLS-1$
+		return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_not_detected;
 	}
 }

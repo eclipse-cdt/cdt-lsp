@@ -121,7 +121,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			String line = lines.get(i);
 			String trimmed = line.trim();
 			if (trimmed.startsWith(COMPILE_FLAGS_PREFIX)) {
-				if (trimmed.contains("{") && trimmed.contains("}")) {
+				if (trimmed.startsWith(COMPILE_FLAGS_PREFIX + " {") && trimmed.contains("}")) { //$NON-NLS-1$
 					int closingBracket = line.lastIndexOf('}');
 					if (closingBracket >= 0) {
 						String prefix = line.substring(0, closingBracket).stripTrailing();

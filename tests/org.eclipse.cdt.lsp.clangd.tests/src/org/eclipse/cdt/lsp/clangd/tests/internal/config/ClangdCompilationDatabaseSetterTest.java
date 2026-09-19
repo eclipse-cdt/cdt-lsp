@@ -31,6 +31,7 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetterBase;
 import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
@@ -318,6 +319,19 @@ final class ClangdCompilationDatabaseSetterTest {
 		var expectedContent = String.format(BLOCK_CDB_SETTING_WITH_DATABASE, WINDOWS_ESCAPED_RELATIVE_DIR_PATH_BUILD_DEBUG);
 		var modifiedContent = Files.readString(configFile.getLocation().toFile().toPath());
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
+	}
+
+	@Test
+	void testSupportSynchronizePrefersManualOverride()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		TestUtils.setCompilationDatabaseOverride(project, RELATIVE_DIR_PATH_BUILD_CUSTOM);
+		var support = new ClangdCompilationDatabaseSupport();
+		var optJob = support.synchronize(project, java.util.Optional.of(RELATIVE_DIR_PATH_BUILD_DEFAULT));
+		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		var configFile = project.getFile(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME);
+		assertEquals(String.format(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_CUSTOM).replaceAll("\\R", "\n"),
+				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	/**
