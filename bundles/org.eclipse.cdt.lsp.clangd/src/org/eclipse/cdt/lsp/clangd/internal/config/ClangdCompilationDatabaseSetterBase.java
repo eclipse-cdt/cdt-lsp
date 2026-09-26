@@ -36,29 +36,42 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
+/**
+ * Shared helper for reading, writing, inserting, updating, and removing the managed
+ * {@value #CLANGD_CONFIG_FILE_NAME} {@code CompilationDatabase} entry.
+ * <p>
+ * The listener-driven setter and the project-status support use this base class whenever automatic
+ * synchronization needs to create or adjust managed clangd configuration content.
+ * </p>
+ */
 public abstract class ClangdCompilationDatabaseSetterBase {
 	public static final String CLANGD_CONFIG_FILE_NAME = ".clangd"; //$NON-NLS-1$
 	private static final String COMPILE_FLAGS = "CompileFlags"; //$NON-NLS-1$
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	private static final String COMPILE_FLAGS_PREFIX = COMPILE_FLAGS + ":"; //$NON-NLS-1$
 	private static final String COMPILATION_DATABASE_PREFIX = COMPILATTION_DATABASE + ":"; //$NON-NLS-1$
+	private static final String COMPILATION_DATABASE_VALUE_PATTERN = "(?:\\{[^}]*\\}|[^,}]*)"; //$NON-NLS-1$
 	private static final String INDENT = "  "; //$NON-NLS-1$
 	protected static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String BACKSLASH_REGEX = "\\\\"; //$NON-NLS-1$
 	private static final String BACKSLASH_ESCAPE = "\\\\\\\\"; //$NON-NLS-1$
-	// matches the value of CompilationDatabase if the value is followed by either end-of-string, newline sequence or ','
-	private final Pattern pathMatchPattern = Pattern.compile("(?<=CompilationDatabase:)[^,}]*"); //$NON-NLS-1$
-	private final Pattern pathGroupPattern = Pattern.compile(".*CompilationDatabase:\\s*([^,}]*).*"); //$NON-NLS-1$
+	private final Pattern pathMatchPattern = Pattern.compile(//
+			"(CompilationDatabase:\\s*)(" + COMPILATION_DATABASE_VALUE_PATTERN + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+	private final Pattern pathGroupPattern = Pattern.compile(//
+			".*CompilationDatabase:\\s*(" + COMPILATION_DATABASE_VALUE_PATTERN + ").*"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
-	 * Set the <code>CompilationDatabase</code> entry in the .clangd file in the given project root.
-	 * The file will be created, if it's not existing.
+	 * Schedules an update that writes the managed {@code CompilationDatabase} entry to the project's
+	 * {@value #CLANGD_CONFIG_FILE_NAME} file.
+	 * The file is created when it does not exist yet.
 	 * <p>
-	 * The value of the <code>CompilationDatabase</code> entry in the .clangd file will be replaced with <code>databaseDirectoryPath</code>, if
-	 * the <code>CompilationDatabase</code> entry can be found in the .clangd file. It changes only the first occurrence.
+	 * Existing managed content is updated in place when a {@code CompilationDatabase} entry is already present.
+	 * Otherwise the entry is inserted into an existing {@code CompileFlags} section or appended as a new section.
 	 * </p>
-	 * @param project to update its .clangd file
-	 * @param databaseDirectoryPath project relative path to the folder which contains the compile_commands.json.
+	 *
+	 * @param project project whose {@value #CLANGD_CONFIG_FILE_NAME} file should be updated
+	 * @param databaseDirectoryPath project-relative path to the directory that contains
+	 *            {@code compile_commands.json}
 	 * @return the scheduled WorkspaceJob
 	 */
 	public WorkspaceJob setCompilationDatabase(IProject project, String databaseDirectoryPath) {
@@ -85,6 +98,14 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		return updateClangdJob;
 	}
 
+	/**
+	 * Schedules removal of the managed {@code CompilationDatabase} entry from the project's
+	 * {@value #CLANGD_CONFIG_FILE_NAME} file.
+	 *
+	 * @param project project whose managed compilation database entry should be removed
+	 * @return the scheduled workspace job, or an empty optional when the project has no
+	 *         {@value #CLANGD_CONFIG_FILE_NAME} file
+	 */
 	public Optional<WorkspaceJob> clearCompilationDatabase(IProject project) {
 		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
 		if (!configFile.exists()) {
@@ -109,6 +130,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		return Optional.of(clearClangdJob);
 	}
 
+	/**
+	 * Loads the current {@value #CLANGD_CONFIG_FILE_NAME} content and updates the first matching
+	 * {@code CompilationDatabase} entry or inserts a new one when no entry exists yet.
+	 */
 	private void updateClangdConfigFile(IFile configFile, String charset, String databaseDirectoryPath,
 			IProgressMonitor monitor) throws CoreException, IOException {
 		if (configFile.getLocation() != null) {
@@ -122,9 +147,8 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
 				if (pathGroupMatcher.matches()) {
 					hasCompilationDatabase = true;
-					if (!databaseDirectoryPath.contentEquals(pathGroupMatcher.replaceAll("$1").trim())) { //$NON-NLS-1$
-						lines.set(i, pathMatchPattern.matcher(line)
-								.replaceAll(" " + escaped(databaseDirectoryPath))); //$NON-NLS-1$
+					if (!databaseDirectoryPath.contentEquals(normalizedCompilationDatabasePath(pathGroupMatcher.group(1)))) {
+						lines.set(i, replaceCompilationDatabasePath(line, databaseDirectoryPath));
 						changed = true;
 					}
 					break;
@@ -141,6 +165,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		}
 	}
 
+	/**
+	 * Inserts a managed {@code CompilationDatabase} entry into an existing {@code CompileFlags}
+	 * section or appends a new section when the file does not contain one yet.
+	 */
 	private boolean insertCompilationDatabase(List<String> lines, String databaseDirectoryPath) {
 		for (int i = 0; i < lines.size(); i++) {
 			String line = lines.get(i);
@@ -168,10 +196,50 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		return true;
 	}
 
+	/**
+	 * Replaces the first matching {@code CompilationDatabase} value while preserving whether the
+	 * original value was wrapped in braces.
+	 */
+	private String replaceCompilationDatabasePath(String line, String databaseDirectoryPath) {
+		Matcher matcher = pathMatchPattern.matcher(line);
+		if (!matcher.find()) {
+			return line;
+		}
+		String currentValue = matcher.group(2).trim();
+		String replacement = isBraceWrapped(currentValue) ? "{" + escaped(databaseDirectoryPath) + "}" //$NON-NLS-1$ //$NON-NLS-2$
+				: escaped(databaseDirectoryPath);
+		return matcher.replaceFirst(Matcher.quoteReplacement(matcher.group(1) + replacement));
+	}
+
+	/**
+	 * Normalizes the extracted {@code CompilationDatabase} value for comparisons.
+	 */
+	private String normalizedCompilationDatabasePath(String path) {
+		String normalized = path.trim();
+		if (isBraceWrapped(normalized)) {
+			return normalized.substring(1, normalized.length() - 1).trim();
+		}
+		return normalized;
+	}
+
+	/**
+	 * Returns whether the value is wrapped in a single pair of braces.
+	 */
+	private boolean isBraceWrapped(String value) {
+		return value.startsWith("{") && value.endsWith("}"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * Escapes backslashes so Windows-style paths remain valid in YAML.
+	 */
 	private String escaped(String databaseDirectoryPath) {
 		return databaseDirectoryPath.replaceAll(BACKSLASH_REGEX, BACKSLASH_ESCAPE);
 	}
 
+	/**
+	 * Removes the managed {@code CompilationDatabase} entry from the current
+	 * {@value #CLANGD_CONFIG_FILE_NAME} content and persists the change when needed.
+	 */
 	private void clearCompilationDatabase(IFile configFile, String charset, IProgressMonitor monitor)
 			throws CoreException, IOException {
 		var lines = readClangdConfigFile(configFile);
@@ -180,6 +248,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		}
 	}
 
+	/**
+	 * Removes the first managed {@code CompilationDatabase} entry from either block-style or inline
+	 * {@code CompileFlags} content.
+	 */
 	private boolean removeCompilationDatabase(List<String> lines) {
 		for (int i = 0; i < lines.size(); i++) {
 			String line = lines.get(i);
@@ -192,9 +264,12 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{.*" //$NON-NLS-1$ //$NON-NLS-2$
 					+ Pattern.quote(COMPILATTION_DATABASE) + ":.*\\}\\s*$")) {
 				String updated = line
-						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*\\s*,\\s*", "") //$NON-NLS-1$ //$NON-NLS-2$
-						.replaceFirst(",\\s*" + Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", "") //$NON-NLS-1$ //$NON-NLS-2$
-						.replaceFirst(Pattern.quote(COMPILATTION_DATABASE) + ":\\s*[^,}]*", ""); //$NON-NLS-1$ //$NON-NLS-2$
+						.replaceFirst(
+								Pattern.quote(COMPILATTION_DATABASE) + ":\\s*" + COMPILATION_DATABASE_VALUE_PATTERN + "\\s*,\\s*", "") //$NON-NLS-1$ //$NON-NLS-2$
+						.replaceFirst(
+								",\\s*" + Pattern.quote(COMPILATTION_DATABASE) + ":\\s*" + COMPILATION_DATABASE_VALUE_PATTERN, "") //$NON-NLS-1$ //$NON-NLS-2$
+						.replaceFirst(
+								Pattern.quote(COMPILATTION_DATABASE) + ":\\s*" + COMPILATION_DATABASE_VALUE_PATTERN, ""); //$NON-NLS-1$ //$NON-NLS-2$
 				updated = updated.replace("{,", "{").replace(", }", " }"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				if (updated.trim().equals(COMPILE_FLAGS_PREFIX + " {}") || updated.trim().equals(COMPILE_FLAGS_PREFIX + " { }") //$NON-NLS-1$ //$NON-NLS-2$
 						|| updated.trim().equals(COMPILE_FLAGS_PREFIX + "{}")) { //$NON-NLS-1$
@@ -208,6 +283,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		return false;
 	}
 
+	/**
+	 * Removes a now-empty block-style {@code CompileFlags:} header after its managed
+	 * {@code CompilationDatabase} child entry was deleted.
+	 */
 	private void removeEmptyCompileFlagsHeader(List<String> lines, int headerIndex) {
 		if (headerIndex < 0 || headerIndex >= lines.size()) {
 			return;
@@ -228,6 +307,9 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		lines.remove(headerIndex);
 	}
 
+	/**
+	 * Reads the {@value #CLANGD_CONFIG_FILE_NAME} file line by line.
+	 */
 	private List<String> readClangdConfigFile(IFile configFile) throws IOException, CoreException {
 		List<String> lines = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(configFile.getContents()))) {
@@ -239,6 +321,9 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		return lines;
 	}
 
+	/**
+	 * Writes the updated {@value #CLANGD_CONFIG_FILE_NAME} content back to the workspace file.
+	 */
 	private void writeClangdConfigFile(IFile configFile, String charset, List<String> lines, IProgressMonitor monitor)
 			throws UnsupportedEncodingException, CoreException {
 		var stringBuilder = new StringBuilder();
@@ -255,6 +340,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		configFile.setContents(stringBuilder.toString().getBytes(charset), IResource.KEEP_HISTORY, monitor);
 	}
 
+	/**
+	 * Creates the {@value #CLANGD_CONFIG_FILE_NAME} file or overwrites blank content with the
+	 * managed default structure.
+	 */
 	private boolean createClangdConfigFile(IFile configFile, String charset, String databasePath,
 			boolean overwriteContent) {
 		if (!configFile.exists() || overwriteContent) {

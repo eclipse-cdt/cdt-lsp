@@ -31,6 +31,8 @@ import org.eclipse.cdt.core.settings.model.CProjectDescriptionEvent;
 import org.eclipse.cdt.core.settings.model.ICBuildSetting;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
+import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetterBase;
@@ -42,6 +44,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +59,7 @@ final class ClangdCompilationDatabaseSetterTest {
 	private static final String RELATIVE_DIR_PATH_BUILD_CUSTOM = "build" + File.separator + "custom";
 	private static final String WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\debug"; //$NON-NLS-1$
 	private static final String WINDOWS_ESCAPED_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\\\debug"; //$NON-NLS-1$
+	private static final String BRACED_CDB_SETTING = "CompileFlags: {CompilationDatabase: {%s}}";
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
 	private static final String EXPANDED_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags: {Add: -ferror-limit=500, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
 	private static final String INLINE_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags:{Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
@@ -141,6 +145,11 @@ final class ClangdCompilationDatabaseSetterTest {
 		File configFile = new File(path.toUri());
 		configFile.createNewFile();
 		return configFile;
+	}
+
+	private void setAutomaticCompilationDatabaseManagement(IProject project, boolean value) {
+		ServiceCaller.callOnce(getClass(), ClangdConfiguration.class,
+				cc -> cc.storage(project).save(value, ClangdMetadata.Predefined.setCompilationDatabase));
 	}
 
 	/**
@@ -270,6 +279,20 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	@Test
+	void testUpdateBraceWrappedCompilationDatabaseInProject()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		var configFile = createConfigFile(BRACED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEBUG).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
+		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		var expectedContent = String.format(BRACED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEBUG);
+		var modifiedContent = Files.readString(configFile.getLocation().toFile().toPath());
+		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
+	}
+
+	@Test
 	void testInsertCompilationDatabaseIntoExistingCompileFlagsBlock()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(BLOCK_CDB_SETTING_WITHOUT_DATABASE, ""); //$NON-NLS-1$
@@ -362,6 +385,18 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertTrue(optJob.isPresent(), "No clear job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
 		assertEquals("", Files.readString(configFile.getLocation().toFile().toPath())); //$NON-NLS-1$
+	}
+
+	@Test
+	void testSupportSynchronizeDoesNotAlterClangdWhenAutomaticManagementIsDisabled()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		setAutomaticCompilationDatabaseManagement(project, false);
+		var configFile = createConfigFile(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		var support = new ClangdCompilationDatabaseSupport();
+		var optJob = support.synchronize(project, java.util.Optional.empty());
+		assertTrue(optJob.isEmpty(), "No automatic update should be scheduled when management is disabled!");
+		assertEquals(String.format(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT).replaceAll("\\R", "\n"),
+				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	@Test

@@ -130,7 +130,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 			this.compilationDatabaseBuildConfiguration = createStatusValue(compilationDatabaseGroup,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_build_configuration);
 			this.compilationDatabaseOverride = createText(ClangdMetadata.Predefined.compilationDatabaseOverride,
-					compilationDatabaseGroup, false);
+					compilationDatabaseGroup, false, 1);
 			this.compilationDatabaseOverride.addKeyListener(KeyListener.keyReleasedAdapter(e -> {
 				refreshCompilationDatabaseStatus();
 				changed(e);
@@ -195,13 +195,17 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	}
 
 	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine) {
+		return createText(meta, composite, multiLine, columns - 1);
+	}
+
+	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine, int horizontalSpan) {
 		Label label = new Label(composite, SWT.NONE);
 		label.setText(meta.name());
 		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
 		Text text = new Text(composite, multiLine ? SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL : SWT.BORDER);
 		text.setToolTipText(meta.description());
 		text.setData(meta);
-		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1)
+		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(horizontalSpan, 1)
 				.hint(SWT.DEFAULT, multiLine ? 3 * text.getLineHeight() : SWT.DEFAULT).create());
 		texts.put(meta, text);
 		text.addKeyListener(KeyListener.keyReleasedAdapter(this::changed));

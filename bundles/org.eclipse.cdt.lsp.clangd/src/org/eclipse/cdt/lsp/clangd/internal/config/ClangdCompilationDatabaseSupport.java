@@ -29,7 +29,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
+import org.osgi.service.component.annotations.Component;
 
+/**
+ * Centralizes the effective compilation database state for a project.
+ * <p>
+ * This service resolves the active directory from project settings and provider detection, exposes
+ * the status shown in the UI, and performs managed {@value #CLANGD_CONFIG_FILE_NAME} updates only
+ * when automatic management is enabled.
+ * </p>
+ */
+@Component(service = ClangdCompilationDatabaseSupport.class)
 public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDatabaseSetterBase {
 	private static final String COMPILE_COMMANDS_JSON = "compile_commands.json"; //$NON-NLS-1$
 
@@ -42,25 +52,49 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	private final ServiceCaller<ClangdCompilationDatabaseSettings> settings = new ServiceCaller<>(getClass(),
 			ClangdCompilationDatabaseSettings.class);
 
+	/**
+	 * Synchronizes the managed {@value #CLANGD_CONFIG_FILE_NAME} content with the currently detected
+	 * compilation database directory.
+	 *
+	 * @param project project whose managed configuration should be synchronized
+	 * @return scheduled update job or an empty optional when no automatic update should happen
+	 */
 	public Optional<WorkspaceJob> synchronize(IProject project) {
 		return synchronize(project, () -> automaticDirectory(project));
 	}
 
+	/**
+	 * Synchronizes the managed {@value #CLANGD_CONFIG_FILE_NAME} content using a caller-provided
+	 * automatically detected directory.
+	 *
+	 * @param project project whose managed configuration should be synchronized
+	 * @param automaticDirectory precomputed automatic directory candidate
+	 * @return scheduled update job or an empty optional when no automatic update should happen
+	 */
 	public Optional<WorkspaceJob> synchronize(IProject project, Optional<String> automaticDirectory) {
 		return synchronize(project, () -> automaticDirectory);
 	}
 
+	/**
+	 * Performs the synchronization decision after all inputs were supplied by the caller.
+	 */
 	Optional<WorkspaceJob> synchronize(IProject project, Supplier<Optional<String>> automaticDirectorySupplier) {
 		if (project == null) {
 			return Optional.empty();
 		}
 		if (!isAutomaticManagementEnabled(project)) {
-			return clearCompilationDatabase(project);
+			return Optional.empty();
 		}
 		return configuredDirectory(project, automaticDirectorySupplier).map(path -> setCompilationDatabase(project, path))
 				.or(() -> clearCompilationDatabase(project));
 	}
 
+	/**
+	 * Returns the current compilation database status for the persisted project settings.
+	 *
+	 * @param project project whose status should be reported
+	 * @return immutable status snapshot used by the UI
+	 */
 	public ClangdCompilationDatabaseStatus status(IProject project) {
 		if (project == null) {
 			return new ClangdCompilationDatabaseStatus(Source.NONE, "", "", "", false, false, ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -68,6 +102,14 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		return status(project, isAutomaticManagementEnabled(project), manualOverride(project).orElse("")); //$NON-NLS-1$
 	}
 
+	/**
+	 * Returns the compilation database status for explicit UI state that may not be stored yet.
+	 *
+	 * @param project project whose status should be reported
+	 * @param automaticManagementEnabled whether automatic management is currently enabled in the UI
+	 * @param manualOverridePath manual override path currently shown in the UI
+	 * @return immutable status snapshot used by the UI
+	 */
 	public ClangdCompilationDatabaseStatus status(IProject project, boolean automaticManagementEnabled,
 			String manualOverridePath) {
 		if (project == null) {
@@ -91,28 +133,45 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 				automaticManagementEnabled, exists, message);
 	}
 
+	/**
+	 * Resolves the effective directory that should drive managed {@value #CLANGD_CONFIG_FILE_NAME}
+	 * updates. Manual overrides take precedence over automatic detection.
+	 */
 	private Optional<String> configuredDirectory(IProject project, Supplier<Optional<String>> automaticDirectorySupplier) {
 		return manualOverride(project).or(automaticDirectorySupplier).map(String::trim).filter(path -> !path.isBlank());
 	}
 
+	/**
+	 * Reads the project-scoped manual override from preferences.
+	 */
 	private Optional<String> manualOverride(IProject project) {
 		String[] path = { "" }; //$NON-NLS-1$
 		configuration.call(c -> path[0] = c.options(project).compilationDatabaseOverride());
 		return Optional.ofNullable(path[0]).map(String::trim).filter(value -> !value.isBlank());
 	}
 
+	/**
+	 * Delegates compilation database detection to the registered provider service.
+	 */
 	private Optional<String> automaticDirectory(IProject project) {
 		var detected = new AtomicReference<>(Optional.<String>empty());
 		provider.call(p -> detected.set(p.getCompilationDatabasePath(project)));
 		return detected.get();
 	}
 
+	/**
+	 * Reads whether automatic {@value #CLANGD_CONFIG_FILE_NAME} management is enabled for the
+	 * project.
+	 */
 	private boolean isAutomaticManagementEnabled(IProject project) {
 		boolean[] enabled = new boolean[1];
 		settings.call(s -> enabled[0] = s.enableSetCompilationDatabasePath(project));
 		return enabled[0];
 	}
 
+	/**
+	 * Resolves the absolute {@code compile_commands.json} path for the effective directory.
+	 */
 	private Optional<String> compileCommandsPath(IProject project, String configuredDirectory) {
 		if (configuredDirectory == null || configuredDirectory.isBlank() || project.getLocation() == null) {
 			return Optional.empty();
@@ -122,6 +181,9 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		return Optional.of(absolute.append(COMPILE_COMMANDS_JSON).toOSString());
 	}
 
+	/**
+	 * Returns the active workspace build configuration name for display in the UI.
+	 */
 	private String activeBuildConfiguration(IProject project) {
 		try {
 			return Optional.ofNullable(project.getActiveBuildConfig()).map(config -> config.getName()).orElse(""); //$NON-NLS-1$
@@ -131,6 +193,9 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		}
 	}
 
+	/**
+	 * Builds the user-facing status message shown in the project properties page.
+	 */
 	private String message(IProject project, boolean automaticManagementEnabled, Optional<String> manualDirectory,
 			Optional<String> automaticDirectory, boolean compileCommandsExists, String compileCommandsPath) {
 		if (!automaticManagementEnabled) {
