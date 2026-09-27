@@ -41,6 +41,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(service = ClangdCompilationDatabaseSupport.class)
 public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDatabaseSetterBase {
+	private static final String COMPILATION_DATABASE_ANCESTORS = "Ancestors"; //$NON-NLS-1$
 	private static final String COMPILE_COMMANDS_JSON = "compile_commands.json"; //$NON-NLS-1$
 
 	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
@@ -85,8 +86,14 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (!isAutomaticManagementEnabled(project)) {
 			return Optional.empty();
 		}
-		return configuredDirectory(project, automaticDirectorySupplier).map(path -> setCompilationDatabase(project, path))
-				.or(() -> clearCompilationDatabase(project));
+		Optional<String> customDirectory = customOverride(project);
+		Optional<String> automaticDirectory = customDirectory.isPresent() ? Optional.empty()
+				: automaticDirectorySupplier.get();
+		if (customDirectory.isEmpty() && automaticDirectory.isEmpty() && hasParentClangdConfiguration(project)) {
+			return Optional.empty();
+		}
+		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElse(COMPILATION_DATABASE_ANCESTORS);
+		return Optional.of(setCompilationDatabase(project, configuredDirectory));
 	}
 
 	/**
@@ -99,7 +106,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (project == null) {
 			return new ClangdCompilationDatabaseStatus(Source.NONE, "", "", "", false, false, ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		return status(project, isAutomaticManagementEnabled(project), manualOverride(project).orElse("")); //$NON-NLS-1$
+		return status(project, isAutomaticManagementEnabled(project), customOverride(project).orElse("")); //$NON-NLS-1$
 	}
 
 	/**
@@ -107,44 +114,39 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	 *
 	 * @param project project whose status should be reported
 	 * @param automaticManagementEnabled whether automatic management is currently enabled in the UI
-	 * @param manualOverridePath manual override path currently shown in the UI
+	 * @param customOverridePath custom override path currently shown in the UI
 	 * @return immutable status snapshot used by the UI
 	 */
 	public ClangdCompilationDatabaseStatus status(IProject project, boolean automaticManagementEnabled,
-			String manualOverridePath) {
+			String customOverridePath) {
 		if (project == null) {
 			return new ClangdCompilationDatabaseStatus(Source.NONE, "", "", "", false, false, ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		Optional<String> manualDirectory = Optional.ofNullable(manualOverridePath).map(String::trim)
+		Optional<String> customDirectory = Optional.ofNullable(customOverridePath).map(String::trim)
 				.filter(value -> !value.isBlank());
-		Optional<String> automaticDirectory = automaticManagementEnabled && manualDirectory.isEmpty()
+		Optional<String> automaticDirectory = automaticManagementEnabled && customDirectory.isEmpty()
 				? automaticDirectory(project)
 				: Optional.empty();
-		Source source = manualDirectory.isPresent() ? Source.MANUAL
-				: automaticDirectory.isPresent() ? Source.AUTOMATIC : Source.NONE;
-		String configuredDirectory = manualDirectory.or(() -> automaticDirectory).orElse(""); //$NON-NLS-1$
+		boolean parentClangd = customDirectory.isEmpty() && automaticDirectory.isEmpty() && hasParentClangdConfiguration(project);
+		Source source = customDirectory.isPresent() ? Source.CUSTOM
+				: automaticDirectory.isPresent() ? Source.AUTOMATIC
+						: automaticManagementEnabled && !parentClangd ? Source.ANCESTORS : Source.NONE;
+		String configuredDirectory = customDirectory.or(() -> automaticDirectory)
+				.orElse(source == Source.ANCESTORS ? COMPILATION_DATABASE_ANCESTORS : ""); //$NON-NLS-1$
 		String compileCommandsPath = compileCommandsPath(project, configuredDirectory).orElse(""); //$NON-NLS-1$
 		boolean exists = !compileCommandsPath.isBlank()
 				&& Files.isRegularFile(Path.fromOSString(compileCommandsPath).toFile().toPath());
 		String buildConfiguration = activeBuildConfiguration(project);
-		String message = message(project, automaticManagementEnabled, manualDirectory, automaticDirectory, exists,
-				compileCommandsPath);
+		String message = message(project, automaticManagementEnabled, customDirectory, automaticDirectory, source, exists,
+				compileCommandsPath, parentClangd);
 		return new ClangdCompilationDatabaseStatus(source, configuredDirectory, compileCommandsPath, buildConfiguration,
 				automaticManagementEnabled, exists, message);
 	}
 
 	/**
-	 * Resolves the effective directory that should drive managed {@value #CLANGD_CONFIG_FILE_NAME}
-	 * updates. Manual overrides take precedence over automatic detection.
+	 * Reads the project-scoped custom override from preferences.
 	 */
-	private Optional<String> configuredDirectory(IProject project, Supplier<Optional<String>> automaticDirectorySupplier) {
-		return manualOverride(project).or(automaticDirectorySupplier).map(String::trim).filter(path -> !path.isBlank());
-	}
-
-	/**
-	 * Reads the project-scoped manual override from preferences.
-	 */
-	private Optional<String> manualOverride(IProject project) {
+	private Optional<String> customOverride(IProject project) {
 		String[] path = { "" }; //$NON-NLS-1$
 		configuration.call(c -> path[0] = c.options(project).compilationDatabaseOverride());
 		return Optional.ofNullable(path[0]).map(String::trim).filter(value -> !value.isBlank());
@@ -173,7 +175,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	 * Resolves the absolute {@code compile_commands.json} path for the effective directory.
 	 */
 	private Optional<String> compileCommandsPath(IProject project, String configuredDirectory) {
-		if (configuredDirectory == null || configuredDirectory.isBlank() || project.getLocation() == null) {
+		if (configuredDirectory == null || configuredDirectory.isBlank()
+				|| COMPILATION_DATABASE_ANCESTORS.equals(configuredDirectory) || project.getLocation() == null) {
 			return Optional.empty();
 		}
 		var directory = Path.fromOSString(configuredDirectory);
@@ -196,18 +199,19 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	/**
 	 * Builds the user-facing status message shown in the project properties page.
 	 */
-	private String message(IProject project, boolean automaticManagementEnabled, Optional<String> manualDirectory,
-			Optional<String> automaticDirectory, boolean compileCommandsExists, String compileCommandsPath) {
+	private String message(IProject project, boolean automaticManagementEnabled, Optional<String> customDirectory,
+			Optional<String> automaticDirectory, Source source, boolean compileCommandsExists, String compileCommandsPath,
+			boolean parentClangd) {
 		if (!automaticManagementEnabled) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_disabled;
 		}
-		if (manualDirectory.isPresent() && !compileCommandsExists) {
+		if (customDirectory.isPresent() && !compileCommandsExists) {
 			return org.eclipse.osgi.util.NLS.bind(
-					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_manual_missing,
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_custom_missing,
 					compileCommandsPath);
 		}
-		if (manualDirectory.isPresent()) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_manual;
+		if (customDirectory.isPresent()) {
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_custom;
 		}
 		if (automaticDirectory.isPresent() && !compileCommandsExists) {
 			return org.eclipse.osgi.util.NLS.bind(
@@ -217,9 +221,16 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (automaticDirectory.isPresent()) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_automatic;
 		}
-		if (project.getLocation() != null && DefaultClangdCompilationDatabaseProvider.hasClangdFileInParentFolders(project)) {
+		if (source == Source.ANCESTORS) {
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_ancestors;
+		}
+		if (parentClangd || hasParentClangdConfiguration(project)) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_parent_clangd;
 		}
 		return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_not_detected;
+	}
+
+	private boolean hasParentClangdConfiguration(IProject project) {
+		return project.getLocation() != null && DefaultClangdCompilationDatabaseProvider.hasClangdFileInParentFolders(project);
 	}
 }

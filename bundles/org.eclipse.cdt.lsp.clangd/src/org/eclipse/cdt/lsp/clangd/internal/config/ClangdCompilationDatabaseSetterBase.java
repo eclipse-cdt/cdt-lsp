@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2025, 2026 Contributors to the Eclipse Foundation.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +36,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 /**
- * Shared helper for reading, writing, inserting, updating, and removing the managed
+ * Shared helper for reading, writing, inserting, and updating the managed
  * {@value #CLANGD_CONFIG_FILE_NAME} {@code CompilationDatabase} entry.
  * <p>
  * The listener-driven setter and the project-status support use this base class whenever automatic
@@ -50,15 +49,13 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private static final String COMPILATTION_DATABASE = "CompilationDatabase"; //$NON-NLS-1$
 	private static final String COMPILE_FLAGS_PREFIX = COMPILE_FLAGS + ":"; //$NON-NLS-1$
 	private static final String COMPILATION_DATABASE_PREFIX = COMPILATTION_DATABASE + ":"; //$NON-NLS-1$
-	private static final String COMPILATION_DATABASE_VALUE_PATTERN = "(?:\\{[^}]*\\}|[^,}]*)"; //$NON-NLS-1$
 	private static final String INDENT = "  "; //$NON-NLS-1$
 	protected static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String BACKSLASH_REGEX = "\\\\"; //$NON-NLS-1$
 	private static final String BACKSLASH_ESCAPE = "\\\\\\\\"; //$NON-NLS-1$
-	private final Pattern pathMatchPattern = Pattern.compile(//
-			"(CompilationDatabase:\\s*)(" + COMPILATION_DATABASE_VALUE_PATTERN + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-	private final Pattern pathGroupPattern = Pattern.compile(//
-			".*CompilationDatabase:\\s*(" + COMPILATION_DATABASE_VALUE_PATTERN + ").*"); //$NON-NLS-1$ //$NON-NLS-2$
+	// matches the value of CompilationDatabase if the value is followed by either end-of-string,
+	// newline sequence or ','
+	private final Pattern pathGroupPattern = Pattern.compile(".*CompilationDatabase:\\s*\\{?\\s*([^,}\\r\\n]*).*"); //$NON-NLS-1$
 
 	/**
 	 * Schedules an update that writes the managed {@code CompilationDatabase} entry to the project's
@@ -99,38 +96,6 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	}
 
 	/**
-	 * Schedules removal of the managed {@code CompilationDatabase} entry from the project's
-	 * {@value #CLANGD_CONFIG_FILE_NAME} file.
-	 *
-	 * @param project project whose managed compilation database entry should be removed
-	 * @return the scheduled workspace job, or an empty optional when the project has no
-	 *         {@value #CLANGD_CONFIG_FILE_NAME} file
-	 */
-	public Optional<WorkspaceJob> clearCompilationDatabase(IProject project) {
-		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
-		if (!configFile.exists()) {
-			return Optional.empty();
-		}
-		var clearClangdJob = new WorkspaceJob("Clear .clangd CompilationDatabase") { //$NON-NLS-1$
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-				try {
-					clearCompilationDatabase(configFile, project.getDefaultCharset(), monitor);
-				} catch (CoreException e) {
-					Platform.getLog(getClass()).log(e.getStatus());
-				} catch (IOException | IllegalArgumentException e) {
-					Platform.getLog(getClass()).error(e.getMessage(), e);
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		clearClangdJob.setRule(configFile);
-		clearClangdJob.setSystem(true);
-		clearClangdJob.schedule();
-		return Optional.of(clearClangdJob);
-	}
-
-	/**
 	 * Loads the current {@value #CLANGD_CONFIG_FILE_NAME} content and updates the first matching
 	 * {@code CompilationDatabase} entry or inserts a new one when no entry exists yet.
 	 */
@@ -147,8 +112,11 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
 				if (pathGroupMatcher.matches()) {
 					hasCompilationDatabase = true;
-					if (!databaseDirectoryPath.contentEquals(normalizedCompilationDatabasePath(pathGroupMatcher.group(1)))) {
-						lines.set(i, replaceCompilationDatabasePath(line, databaseDirectoryPath));
+					var currentPath = pathGroupMatcher.group(1).trim();
+					if (!databaseDirectoryPath.trim().contentEquals(currentPath)) {
+						var updatedLine = line.substring(0, pathGroupMatcher.start(1)) + escaped(databaseDirectoryPath)
+								+ line.substring(pathGroupMatcher.end(1));
+						lines.set(i, updatedLine);
 						changed = true;
 					}
 					break;
@@ -180,7 +148,8 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 					String prefix = line.substring(0, closingBracket).stripTrailing();
 					String suffix = line.substring(closingBracket);
 					String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$
-					lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " + escaped(databaseDirectoryPath) + suffix); //$NON-NLS-1$ //$NON-NLS-2$
+					lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " //$NON-NLS-1$ //$NON-NLS-2$
+							+ escaped(databaseDirectoryPath) + suffix);
 					return true;
 				}
 			} else if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*$")) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -197,114 +166,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	}
 
 	/**
-	 * Replaces the first matching {@code CompilationDatabase} value while preserving whether the
-	 * original value was wrapped in braces.
-	 */
-	private String replaceCompilationDatabasePath(String line, String databaseDirectoryPath) {
-		Matcher matcher = pathMatchPattern.matcher(line);
-		if (!matcher.find()) {
-			return line;
-		}
-		String currentValue = matcher.group(2).trim();
-		String replacement = isBraceWrapped(currentValue) ? "{" + escaped(databaseDirectoryPath) + "}" //$NON-NLS-1$ //$NON-NLS-2$
-				: escaped(databaseDirectoryPath);
-		return matcher.replaceFirst(Matcher.quoteReplacement(matcher.group(1) + replacement));
-	}
-
-	/**
-	 * Normalizes the extracted {@code CompilationDatabase} value for comparisons.
-	 */
-	private String normalizedCompilationDatabasePath(String path) {
-		String normalized = path.trim();
-		if (isBraceWrapped(normalized)) {
-			return normalized.substring(1, normalized.length() - 1).trim();
-		}
-		return normalized;
-	}
-
-	/**
-	 * Returns whether the value is wrapped in a single pair of braces.
-	 */
-	private boolean isBraceWrapped(String value) {
-		return value.startsWith("{") && value.endsWith("}"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	/**
 	 * Escapes backslashes so Windows-style paths remain valid in YAML.
 	 */
 	private String escaped(String databaseDirectoryPath) {
 		return databaseDirectoryPath.replaceAll(BACKSLASH_REGEX, BACKSLASH_ESCAPE);
-	}
-
-	/**
-	 * Removes the managed {@code CompilationDatabase} entry from the current
-	 * {@value #CLANGD_CONFIG_FILE_NAME} content and persists the change when needed.
-	 */
-	private void clearCompilationDatabase(IFile configFile, String charset, IProgressMonitor monitor)
-			throws CoreException, IOException {
-		var lines = readClangdConfigFile(configFile);
-		if (removeCompilationDatabase(lines)) {
-			writeClangdConfigFile(configFile, charset, lines, monitor);
-		}
-	}
-
-	/**
-	 * Removes the first managed {@code CompilationDatabase} entry from either block-style or inline
-	 * {@code CompileFlags} content.
-	 */
-	private boolean removeCompilationDatabase(List<String> lines) {
-		for (int i = 0; i < lines.size(); i++) {
-			String line = lines.get(i);
-			String trimmed = line.trim();
-			if (trimmed.startsWith(COMPILATION_DATABASE_PREFIX)) {
-				lines.remove(i);
-				removeEmptyCompileFlagsHeader(lines, i - 1);
-				return true;
-			}
-			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{.*" //$NON-NLS-1$ //$NON-NLS-2$
-					+ Pattern.quote(COMPILATTION_DATABASE) + ":.*\\}\\s*$")) {
-				String updated = line
-						.replaceFirst(
-								Pattern.quote(COMPILATTION_DATABASE) + ":\\s*" + COMPILATION_DATABASE_VALUE_PATTERN + "\\s*,\\s*", "") //$NON-NLS-1$ //$NON-NLS-2$
-						.replaceFirst(
-								",\\s*" + Pattern.quote(COMPILATTION_DATABASE) + ":\\s*" + COMPILATION_DATABASE_VALUE_PATTERN, "") //$NON-NLS-1$ //$NON-NLS-2$
-						.replaceFirst(
-								Pattern.quote(COMPILATTION_DATABASE) + ":\\s*" + COMPILATION_DATABASE_VALUE_PATTERN, ""); //$NON-NLS-1$ //$NON-NLS-2$
-				updated = updated.replace("{,", "{").replace(", }", " }"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				if (updated.trim().equals(COMPILE_FLAGS_PREFIX + " {}") || updated.trim().equals(COMPILE_FLAGS_PREFIX + " { }") //$NON-NLS-1$ //$NON-NLS-2$
-						|| updated.trim().equals(COMPILE_FLAGS_PREFIX + "{}")) { //$NON-NLS-1$
-					lines.remove(i);
-				} else {
-					lines.set(i, updated);
-				}
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Removes a now-empty block-style {@code CompileFlags:} header after its managed
-	 * {@code CompilationDatabase} child entry was deleted.
-	 */
-	private void removeEmptyCompileFlagsHeader(List<String> lines, int headerIndex) {
-		if (headerIndex < 0 || headerIndex >= lines.size()) {
-			return;
-		}
-		if (!lines.get(headerIndex).trim().equals(COMPILE_FLAGS_PREFIX)) {
-			return;
-		}
-		for (int i = headerIndex + 1; i < lines.size(); i++) {
-			String trimmed = lines.get(i).trim();
-			if (trimmed.isBlank()) {
-				continue;
-			}
-			if (lines.get(i).startsWith(INDENT)) {
-				return;
-			}
-			break;
-		}
-		lines.remove(headerIndex);
 	}
 
 	/**

@@ -33,6 +33,7 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus.Source;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetterBase;
@@ -59,6 +60,7 @@ final class ClangdCompilationDatabaseSetterTest {
 	private static final String RELATIVE_DIR_PATH_BUILD_CUSTOM = "build" + File.separator + "custom";
 	private static final String WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\debug"; //$NON-NLS-1$
 	private static final String WINDOWS_ESCAPED_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\\\debug"; //$NON-NLS-1$
+	private static final String ANCESTORS_COMPILATION_DATABASE = "Ancestors"; //$NON-NLS-1$
 	private static final String BRACED_CDB_SETTING = "CompileFlags: {CompilationDatabase: {%s}}";
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
 	private static final String EXPANDED_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags: {Add: -ferror-limit=500, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
@@ -335,7 +337,7 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	@Test
-	void testManualCompilationDatabaseOverrideWins()
+	void testCustomCompilationDatabaseOverrideWins()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		TestUtils.setCompilationDatabaseOverride(project, RELATIVE_DIR_PATH_BUILD_CUSTOM);
 		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
@@ -364,7 +366,7 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	@Test
-	void testSupportSynchronizePrefersManualOverride()
+	void testSupportSynchronizePrefersCustomOverride()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		TestUtils.setCompilationDatabaseOverride(project, RELATIVE_DIR_PATH_BUILD_CUSTOM);
 		var support = new ClangdCompilationDatabaseSupport();
@@ -377,14 +379,15 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	@Test
-	void testSupportSynchronizeClearsStaleCompilationDatabase()
+	void testSupportSynchronizeUsesAncestorsWhenNoCompilationDatabaseIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		assertTrue(optJob.isPresent(), "No update job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals("", Files.readString(configFile.getLocation().toFile().toPath())); //$NON-NLS-1$
+		assertEquals(String.format(DEFAULT_CDB_SETTING, ANCESTORS_COMPILATION_DATABASE).replaceAll("\\R", "\n"),
+				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	@Test
@@ -400,40 +403,50 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	@Test
-	void testSupportSynchronizeClearsManagedCompilationDatabaseFromCompileFlagsBlock()
+	void testSupportSynchronizeUpdatesManagedCompilationDatabaseToAncestorsInCompileFlagsBlock()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(BLOCK_CDB_SETTING_WITH_DATABASE, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		assertTrue(optJob.isPresent(), "No update job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(BLOCK_CDB_SETTING_WITHOUT_DATABASE.replaceAll("\\R", "\n"),
+		assertEquals(String.format(BLOCK_CDB_SETTING_WITH_DATABASE, ANCESTORS_COMPILATION_DATABASE).replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	@Test
-	void testSupportSynchronizeClearsInlineCompilationDatabaseWithOtherSettings()
+	void testSupportSynchronizeUpdatesInlineCompilationDatabaseToAncestorsWithOtherSettings()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		assertTrue(optJob.isPresent(), "No update job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(EXPANDED_CDB_SETTING_WITHOUT_DATABASE.replaceAll("\\R", "\n"),
+		assertEquals(String.format(EXPANDED_CDB_SETTING, ANCESTORS_COMPILATION_DATABASE).replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	@Test
-	void testSupportSynchronizeClearsManagedInlineCompilationDatabaseAndKeepsTrailingSettings()
+	void testSupportSynchronizeUpdatesManagedInlineCompilationDatabaseToAncestorsAndKeepsTrailingSettings()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION,
 				RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No clear job has been created!");
+		assertTrue(optJob.isPresent(), "No update job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(INLINE_TRAILING_OPTION_ONLY.replaceAll("\\R", "\n"),
+		assertEquals(String.format(INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION, ANCESTORS_COMPILATION_DATABASE)
+				.replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
+	}
+
+	@Test
+	void testSupportStatusUsesAncestorsWhenNoCompilationDatabaseIsDetected() {
+		var support = new ClangdCompilationDatabaseSupport();
+		var status = support.status(project, true, ""); //$NON-NLS-1$
+		assertEquals(Source.ANCESTORS, status.source());
+		assertEquals(ANCESTORS_COMPILATION_DATABASE, status.configuredDirectory());
+		assertEquals("", status.compileCommandsPath()); //$NON-NLS-1$
 	}
 
 	/**

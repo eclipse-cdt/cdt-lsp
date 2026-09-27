@@ -17,7 +17,8 @@ package org.eclipse.cdt.lsp.clangd.internal.config;
  * Immutable snapshot of the effective compilation database state shown in the clangd project
  * properties page.
  *
- * @param source whether the state comes from automatic detection, a custom override, or neither
+ * @param source whether the state comes from automatic detection, a custom override, the
+ *            {@code Ancestors} fallback, or neither
  * @param configuredDirectory effective directory used to resolve {@code compile_commands.json}
  * @param compileCommandsPath resolved absolute path to {@code compile_commands.json}
  * @param buildConfiguration active workspace build configuration name
@@ -32,15 +33,9 @@ public record ClangdCompilationDatabaseStatus(Source source, String configuredDi
 	 * Identifies which input currently determines the effective compilation database location.
 	 */
 	public enum Source {
+		ANCESTORS,
 		AUTOMATIC,
-		MANUAL,
+		CUSTOM,
 		NONE
-	}
-
-	/**
-	 * Returns whether a directory is currently configured for the project.
-	 */
-	boolean hasConfiguredDirectory() {
-		return configuredDirectory != null && !configuredDirectory.isBlank();
 	}
 }

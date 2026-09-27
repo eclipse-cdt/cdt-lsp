@@ -68,7 +68,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
 	private final Text compilationDatabaseOverride;
 	private final Button compilationDatabaseOverrideBrowse;
-	private final Label compilationDatabaseStatus;
+	private final Text compilationDatabaseStatus;
 	private final Label compilationDatabaseSource;
 	private final Label compilationDatabaseLocation;
 	private final Label compilationDatabaseBuildConfiguration;
@@ -121,7 +121,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		if (isProjectScope) {
 			Group compilationDatabaseGroup = createGroup(composite,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_group, 3);
-			this.compilationDatabaseStatus = createStatusValue(compilationDatabaseGroup,
+			this.compilationDatabaseStatus = createStatusTextValue(compilationDatabaseGroup,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status);
 			this.compilationDatabaseSource = createStatusValue(compilationDatabaseGroup,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source);
@@ -198,7 +198,8 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		return createText(meta, composite, multiLine, columns - 1);
 	}
 
-	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine, int horizontalSpan) {
+	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine,
+			int horizontalSpan) {
 		Label label = new Label(composite, SWT.NONE);
 		label.setText(meta.name());
 		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
@@ -231,8 +232,20 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		Label label = new Label(composite, SWT.NONE);
 		label.setText(labelText);
 		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
-		Label value = new Label(composite, SWT.WRAP);
+		Label value = new Label(composite, SWT.NONE);
 		value.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1).create());
+		return value;
+	}
+
+	private Text createStatusTextValue(Composite composite, String labelText) {
+		Label label = new Label(composite, SWT.NONE);
+		label.setText(labelText);
+		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
+		Text value = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		value.setEditable(false);
+		value.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1).create());
+		((GridData) value.getLayoutData()).heightHint = value.getLineHeight() * 3;
+		value.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		return value;
 	}
 
@@ -285,11 +298,16 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 				setCompilationDatabase.getSelection(),
 				compilationDatabaseOverride != null ? compilationDatabaseOverride.getText() : ""); //$NON-NLS-1$
 		compilationDatabaseStatus.setText(status.message());
-		compilationDatabaseSource.setText(sourceLabel(status));
-		compilationDatabaseLocation
-				.setText(status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath()); //$NON-NLS-1$
-		compilationDatabaseBuildConfiguration
-				.setText(status.buildConfiguration().isBlank() ? "-" : status.buildConfiguration()); //$NON-NLS-1$
+		compilationDatabaseStatus.setToolTipText(status.message());
+		String sourceLabel = sourceLabel(status);
+		compilationDatabaseSource.setText(sourceLabel);
+		compilationDatabaseSource.setToolTipText(sourceLabel);
+		String compileCommandsPath = status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath(); //$NON-NLS-1$
+		compilationDatabaseLocation.setText(compileCommandsPath);
+		compilationDatabaseLocation.setToolTipText(compileCommandsPath);
+		String buildConfiguration = status.buildConfiguration().isBlank() ? "-" : status.buildConfiguration(); //$NON-NLS-1$
+		compilationDatabaseBuildConfiguration.setText(buildConfiguration);
+		compilationDatabaseBuildConfiguration.setToolTipText(buildConfiguration);
 		compilationDatabaseStatus.getParent().layout(true, true);
 	}
 
@@ -297,8 +315,11 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		if (!status.automaticManagementEnabled()) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_disabled;
 		}
-		if (status.source() == Source.MANUAL) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_manual;
+		if (status.source() == Source.CUSTOM) {
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_custom;
+		}
+		if (status.source() == Source.ANCESTORS) {
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_ancestors;
 		}
 		if (status.source() == Source.AUTOMATIC) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_automatic;

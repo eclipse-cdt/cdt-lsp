@@ -169,7 +169,7 @@ public interface ClangdMetadata extends ConfigurationMetadata {
 				LspEditorUiMessages.LspEditorPreferencePage_set_compilation_database_description);
 
 		/**
-		 * Returns the metadata for the manual compilation database directory override.
+		 * Returns the metadata for the custom compilation database directory override.
 		 *
 		 * @see ClangdOptions#compilationDatabaseOverride()
 		 *
