@@ -55,8 +55,10 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	private final Text additional;
 	private final Button logToConsole;
 	private final Button validateOptions;
+	private final Button setCompilationDatabase;
 	private final Group group;
 	private ControlEnableState enableState;
+	private ControlEnableState compilationDatabaseEnableState;
 
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private final Map<PreferenceMetadata<String>, Combo> combos;
@@ -89,9 +91,12 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		if (!isProjectScope) {
 			this.logToConsole = createButton(ClangdMetadata.Predefined.logToConsole, group, SWT.CHECK, 0);
 			this.validateOptions = createButton(ClangdMetadata.Predefined.validateClangdOptions, group, SWT.CHECK, 0);
+			this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite,
+					SWT.CHECK, 0);
 		} else {
 			this.logToConsole = null;
 			this.validateOptions = null;
+			this.setCompilationDatabase = null;
 		}
 	}
 
@@ -107,6 +112,12 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 			enableState = null;
 		} else {
 			enableState = ControlEnableState.disable(group);
+		}
+		if (compilationDatabaseEnableState != null) {
+			compilationDatabaseEnableState.restore();
+		}
+		if (setCompilationDatabase != null) {
+			compilationDatabaseEnableState = enable ? null : ControlEnableState.disable(setCompilationDatabase);
 		}
 	}
 
@@ -200,6 +211,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		if (validateOptions != null) {
 			validateOptions.setSelection(options.validateClangdOptions());
 		}
+		if (setCompilationDatabase != null) {
+			setCompilationDatabase.setSelection(options.setCompilationDatabase());
+		}
 		enablePreferenceContent(enable);
 	}
 
@@ -223,6 +237,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		list.add(ClangdMetadata.Predefined.useBackgroundIndex.identifer());
 		list.add(ClangdMetadata.Predefined.useTidy.identifer());
 		list.add(ClangdMetadata.Predefined.validateClangdOptions.identifer());
+		if (setCompilationDatabase != null) {
+			list.add(ClangdMetadata.Predefined.setCompilationDatabase.identifer());
+		}
 		return list;
 	}
 
@@ -241,7 +258,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
 						.equals(additional.getText())
 				|| (logToConsole != null && options.logToConsole() != logToConsole.getSelection())
-				|| (validateOptions != null && options.validateClangdOptions() != validateOptions.getSelection());
+				|| (validateOptions != null && options.validateClangdOptions() != validateOptions.getSelection())
+				|| (setCompilationDatabase != null
+						&& options.setCompilationDatabase() != setCompilationDatabase.getSelection());
 	}
 
 }
