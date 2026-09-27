@@ -59,7 +59,6 @@ final class ClangdCompilationDatabaseSetterTest {
 	private static final String RELATIVE_DIR_PATH_BUILD_DEBUG = "build" + File.separator + "debug";
 	private static final String RELATIVE_DIR_PATH_BUILD_CUSTOM = "build" + File.separator + "custom";
 	private static final String WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\debug"; //$NON-NLS-1$
-	private static final String WINDOWS_ESCAPED_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\\\debug"; //$NON-NLS-1$
 	private static final String ANCESTORS_COMPILATION_DATABASE = "Ancestors"; //$NON-NLS-1$
 	private static final String BRACED_CDB_SETTING = "CompileFlags: {CompilationDatabase: {%s}}";
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
@@ -155,13 +154,8 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Test whether a new .clangd file will be created in the given project directory with the given
-	 * configuration database (cdb) directory path (build/default) when the file does not exist.
-	 *
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws InterruptedException
-	 * @throws OperationCanceledException
+	 * Verifies that the listener creates a new project-local .clangd file when none exists and uses
+	 * the builder working directory as the managed CompilationDatabase value.
 	 */
 	@Test
 	void testCreateClangdConfigFileInProject()
@@ -186,12 +180,8 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Test whether the new configuration database (cdb) directory path (build/debug) will be written to an existing but empty .clangd file
-	 *
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws InterruptedException
-	 * @throws OperationCanceledException
+	 * Verifies that an existing but blank .clangd file is overwritten with the default managed
+	 * CompileFlags structure for the detected compilation database directory.
 	 */
 	@Test
 	void testEmptyClangdConfigFileInProject()
@@ -212,12 +202,8 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Test whether the new configuration database (cdb) directory path (build/debug) will be written to an existing .clangd file
-	 *
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws InterruptedException
-	 * @throws OperationCanceledException
+	 * Verifies that the listener first creates and then updates the managed CompilationDatabase entry
+	 * when the active builder directory changes between invocations.
 	 */
 	@Test
 	void testUpdateClangdConfigFileInProject()
@@ -256,12 +242,8 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Test whether the new configuration database (cdb) directory path (build/debug) will be written to an existing expanded .clangd file
-	 *
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws InterruptedException
-	 * @throws OperationCanceledException
+	 * Verifies that an expanded inline CompileFlags section is updated in place when the builder
+	 * starts reporting a different compilation database directory.
 	 */
 	@Test
 	void testUpdateExpandedClangdConfigFileInProject()
@@ -280,6 +262,10 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that brace-wrapped CompilationDatabase values remain supported when the managed path
+	 * is updated.
+	 */
 	@Test
 	void testUpdateBraceWrappedCompilationDatabaseInProject()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -294,6 +280,10 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that a missing CompilationDatabase entry is inserted into an existing block-style
+	 * CompileFlags section without disturbing the other keys in the file.
+	 */
 	@Test
 	void testInsertCompilationDatabaseIntoExistingCompileFlagsBlock()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -308,6 +298,10 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that inline CompileFlags declarations without a separating space before '{' are
+	 * updated instead of causing a second CompileFlags section to be appended.
+	 */
 	@Test
 	void testInsertCompilationDatabaseIntoInlineCompileFlagsBlockWithoutSpace()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -322,6 +316,10 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that a new CompileFlags section is appended when the file has no existing
+	 * CompilationDatabase location to update.
+	 */
 	@Test
 	void testAppendCompilationDatabaseBlockWhenMissing()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -336,6 +334,10 @@ final class ClangdCompilationDatabaseSetterTest {
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that a configured custom compilation database override takes precedence over the
+	 * automatically detected builder directory.
+	 */
 	@Test
 	void testCustomCompilationDatabaseOverrideWins()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -350,8 +352,12 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that Windows-style backslashes are written to .clangd as plain backslashes when a
+	 * CompilationDatabase entry is inserted into an existing block.
+	 */
 	@Test
-	void testInsertCompilationDatabaseIntoExistingCompileFlagsBlockEscapesBackslashes()
+	void testInsertCompilationDatabaseIntoExistingCompileFlagsBlockKeepsBackslashesUnescaped()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		TestUtils.setCompilationDatabaseOverride(project, WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG);
 		var configFile = createConfigFile(BLOCK_CDB_SETTING_WITHOUT_DATABASE, ""); //$NON-NLS-1$
@@ -360,11 +366,34 @@ final class ClangdCompilationDatabaseSetterTest {
 		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
 		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		var expectedContent = String.format(BLOCK_CDB_SETTING_WITH_DATABASE, WINDOWS_ESCAPED_RELATIVE_DIR_PATH_BUILD_DEBUG);
+		var expectedContent = String.format(BLOCK_CDB_SETTING_WITH_DATABASE, WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG);
 		var modifiedContent = Files.readString(configFile.getLocation().toFile().toPath());
 		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that updating an existing CompilationDatabase entry with a Windows-style custom
+	 * directory does not introduce doubled backslashes in the written YAML.
+	 */
+	@Test
+	void testUpdateCompilationDatabaseWithWindowsPathKeepsBackslashesUnescaped()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		TestUtils.setCompilationDatabaseOverride(project, WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG);
+		var configFile = createConfigFile(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
+		cwdBuilder = new Path(project.getLocation().append(RELATIVE_DIR_PATH_BUILD_DEFAULT).toPortableString());
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
+		assertTrue(optJob.isPresent(), "No 'Update .clangd' job has been created!");
+		optJob.get().join(5000, new NullProgressMonitor());
+		var expectedContent = String.format(DEFAULT_CDB_SETTING, WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG);
+		var modifiedContent = Files.readString(configFile.getLocation().toFile().toPath());
+		assertEquals(expectedContent.replaceAll("\\R", "\n"), modifiedContent.replaceAll("\\R", "\n"));
+	}
+
+	/**
+	 * Verifies that synchronize(...) prefers the custom override over an automatically detected
+	 * directory when both values are available.
+	 */
 	@Test
 	void testSupportSynchronizePrefersCustomOverride()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -378,6 +407,10 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that synchronize(...) writes the Ancestors fallback instead of removing the managed
+	 * CompilationDatabase entry when no directory can be detected.
+	 */
 	@Test
 	void testSupportSynchronizeUsesAncestorsWhenNoCompilationDatabaseIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -390,6 +423,10 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that automatic management can be disabled completely, leaving an existing .clangd
+	 * file untouched and skipping the background update job.
+	 */
 	@Test
 	void testSupportSynchronizeDoesNotAlterClangdWhenAutomaticManagementIsDisabled()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -402,6 +439,10 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that a block-style CompilationDatabase entry is rewritten to the Ancestors fallback
+	 * while preserving the remaining CompileFlags content.
+	 */
 	@Test
 	void testSupportSynchronizeUpdatesManagedCompilationDatabaseToAncestorsInCompileFlagsBlock()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -414,6 +455,10 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that an inline CompilationDatabase entry is rewritten to Ancestors without removing
+	 * unrelated inline or sibling YAML settings.
+	 */
 	@Test
 	void testSupportSynchronizeUpdatesInlineCompilationDatabaseToAncestorsWithOtherSettings()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -426,6 +471,10 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that an inline managed CompilationDatabase at the start of a CompileFlags map is
+	 * replaced by Ancestors while keeping trailing options intact.
+	 */
 	@Test
 	void testSupportSynchronizeUpdatesManagedInlineCompilationDatabaseToAncestorsAndKeepsTrailingSettings()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
@@ -440,6 +489,10 @@ final class ClangdCompilationDatabaseSetterTest {
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
+	/**
+	 * Verifies that the status model reports the dedicated Ancestors source and omits a resolved
+	 * compile_commands.json path when no concrete database directory is available.
+	 */
 	@Test
 	void testSupportStatusUsesAncestorsWhenNoCompilationDatabaseIsDetected() {
 		var support = new ClangdCompilationDatabaseSupport();
@@ -450,12 +503,8 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Test whether the .clangd won't be created nor updated if its in one of its parent folders when cProjectDescriptionEventHandler gets called.
-	 *
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws InterruptedException
-	 * @throws OperationCanceledException
+	 * Verifies that no project-local .clangd file is created or updated when a parent directory
+	 * already contributes the effective configuration file.
 	 */
 	@Test
 	void testClangdConfigFileInProjectParent()

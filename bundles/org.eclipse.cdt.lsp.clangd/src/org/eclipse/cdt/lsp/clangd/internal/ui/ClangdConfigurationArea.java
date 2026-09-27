@@ -23,11 +23,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus.Source;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
@@ -42,7 +38,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
@@ -62,17 +57,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	private final Button validateOptions;
 	private final Group group;
 	private ControlEnableState enableState;
-	private final Button setCompilationDatabase;
-	private ControlEnableState enableSetDatabaseState;
-	private final IProject project;
-	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
-	private final Text compilationDatabaseOverride;
-	private final Button compilationDatabaseOverrideBrowse;
-	private final Text compilationDatabaseStatus;
-	private final Label compilationDatabaseSource;
-	private final Label compilationDatabaseLocation;
-	private final Label compilationDatabaseBuildConfiguration;
-	private boolean preferenceContentEnabled = true;
 
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private final Map<PreferenceMetadata<String>, Combo> combos;
@@ -83,10 +67,8 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 			LspEditorUiMessages.LspEditorPreferencePage_completion_default };
 	private final Map<String, String> completions;
 
-	public ClangdConfigurationArea(Composite parent, boolean isProjectScope, IProject project) {
+	public ClangdConfigurationArea(Composite parent, boolean isProjectScope) {
 		super(3);
-		this.project = project;
-		this.compilationDatabaseSupport = isProjectScope ? new ClangdCompilationDatabaseSupport() : null;
 		this.texts = new HashMap<>();
 		this.combos = new HashMap<>();
 		this.completions = new HashMap<>();
@@ -111,43 +93,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 			this.logToConsole = null;
 			this.validateOptions = null;
 		}
-		this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite,
-				SWT.CHECK, 0);
-		this.setCompilationDatabase.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
-			updateCompilationDatabaseControls();
-			refreshCompilationDatabaseStatus();
-			changed(e);
-		}));
-		if (isProjectScope) {
-			Group compilationDatabaseGroup = createGroup(composite,
-					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_group, 3);
-			this.compilationDatabaseStatus = createStatusTextValue(compilationDatabaseGroup,
-					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status);
-			this.compilationDatabaseSource = createStatusValue(compilationDatabaseGroup,
-					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source);
-			this.compilationDatabaseLocation = createStatusValue(compilationDatabaseGroup,
-					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_location);
-			this.compilationDatabaseBuildConfiguration = createStatusValue(compilationDatabaseGroup,
-					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_build_configuration);
-			this.compilationDatabaseOverride = createText(ClangdMetadata.Predefined.compilationDatabaseOverride,
-					compilationDatabaseGroup, false, 1);
-			this.compilationDatabaseOverride.addKeyListener(KeyListener.keyReleasedAdapter(e -> {
-				refreshCompilationDatabaseStatus();
-				changed(e);
-			}));
-			this.compilationDatabaseOverrideBrowse = new Button(compilationDatabaseGroup, SWT.NONE);
-			this.compilationDatabaseOverrideBrowse
-					.setText(LspEditorUiMessages.LspEditorPreferencePage_compilation_database_browse_directory);
-			this.compilationDatabaseOverrideBrowse
-					.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::selectCompilationDatabaseDirectory));
-		} else {
-			this.compilationDatabaseStatus = null;
-			this.compilationDatabaseSource = null;
-			this.compilationDatabaseLocation = null;
-			this.compilationDatabaseBuildConfiguration = null;
-			this.compilationDatabaseOverride = null;
-			this.compilationDatabaseOverrideBrowse = null;
-		}
 	}
 
 	void enablePreferenceContent(boolean enable) {
@@ -155,7 +100,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	}
 
 	private void enableClangdOptionsGroup(boolean enable) {
-		preferenceContentEnabled = enable;
 		if (enableState != null) {
 			enableState.restore();
 		}
@@ -164,16 +108,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		} else {
 			enableState = ControlEnableState.disable(group);
 		}
-		if (enableSetDatabaseState != null) {
-			enableSetDatabaseState.restore();
-		}
-		if (enable) {
-			enableSetDatabaseState = null;
-		} else {
-			enableSetDatabaseState = ControlEnableState.disable(setCompilationDatabase);
-		}
-		updateCompilationDatabaseControls();
-		refreshCompilationDatabaseStatus();
 	}
 
 	private Text createFileSelector(PreferenceMetadata<String> meta, Composite composite,
@@ -228,27 +162,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		return combo;
 	}
 
-	private Label createStatusValue(Composite composite, String labelText) {
-		Label label = new Label(composite, SWT.NONE);
-		label.setText(labelText);
-		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
-		Label value = new Label(composite, SWT.NONE);
-		value.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1).create());
-		return value;
-	}
-
-	private Text createStatusTextValue(Composite composite, String labelText) {
-		Label label = new Label(composite, SWT.NONE);
-		label.setText(labelText);
-		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
-		Text value = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
-		value.setEditable(false);
-		value.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1).create());
-		((GridData) value.getLayoutData()).heightHint = value.getLineHeight() * 3;
-		value.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		return value;
-	}
-
 	private void selectClangdExecutable(SelectionEvent e) {
 		String selected = selectFile(path.getText());
 		if (selected != null) {
@@ -266,65 +179,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 			dialog.setFilterPath(file.getParent());
 		}
 		return dialog.open();
-	}
-
-	private void selectCompilationDatabaseDirectory(SelectionEvent event) {
-		DirectoryDialog dialog = new DirectoryDialog(Display.getCurrent().getActiveShell());
-		dialog.setText(LspEditorUiMessages.LspEditorPreferencePage_compilation_database_override);
-		if (!compilationDatabaseOverride.getText().isBlank()) {
-			dialog.setFilterPath(compilationDatabaseOverride.getText());
-		}
-		String selected = dialog.open();
-		if (selected != null) {
-			compilationDatabaseOverride.setText(selected);
-			refreshCompilationDatabaseStatus();
-			changed(event);
-		}
-	}
-
-	private void updateCompilationDatabaseControls() {
-		if (compilationDatabaseOverride != null) {
-			boolean enabled = preferenceContentEnabled && setCompilationDatabase.getSelection();
-			compilationDatabaseOverride.setEnabled(enabled);
-			compilationDatabaseOverrideBrowse.setEnabled(enabled);
-		}
-	}
-
-	private void refreshCompilationDatabaseStatus() {
-		if (project == null || compilationDatabaseSupport == null) {
-			return;
-		}
-		ClangdCompilationDatabaseStatus status = compilationDatabaseSupport.status(project,
-				setCompilationDatabase.getSelection(),
-				compilationDatabaseOverride != null ? compilationDatabaseOverride.getText() : ""); //$NON-NLS-1$
-		compilationDatabaseStatus.setText(status.message());
-		compilationDatabaseStatus.setToolTipText(status.message());
-		String sourceLabel = sourceLabel(status);
-		compilationDatabaseSource.setText(sourceLabel);
-		compilationDatabaseSource.setToolTipText(sourceLabel);
-		String compileCommandsPath = status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath(); //$NON-NLS-1$
-		compilationDatabaseLocation.setText(compileCommandsPath);
-		compilationDatabaseLocation.setToolTipText(compileCommandsPath);
-		String buildConfiguration = status.buildConfiguration().isBlank() ? "-" : status.buildConfiguration(); //$NON-NLS-1$
-		compilationDatabaseBuildConfiguration.setText(buildConfiguration);
-		compilationDatabaseBuildConfiguration.setToolTipText(buildConfiguration);
-		compilationDatabaseStatus.getParent().layout(true, true);
-	}
-
-	private String sourceLabel(ClangdCompilationDatabaseStatus status) {
-		if (!status.automaticManagementEnabled()) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_disabled;
-		}
-		if (status.source() == Source.CUSTOM) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_custom;
-		}
-		if (status.source() == Source.ANCESTORS) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_ancestors;
-		}
-		if (status.source() == Source.AUTOMATIC) {
-			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_automatic;
-		}
-		return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_not_detected;
 	}
 
 	@Override
@@ -345,10 +199,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		}
 		if (validateOptions != null) {
 			validateOptions.setSelection(options.validateClangdOptions());
-		}
-		setCompilationDatabase.setSelection(options.setCompilationDatabase());
-		if (compilationDatabaseOverride != null) {
-			compilationDatabaseOverride.setText(options.compilationDatabaseOverride());
 		}
 		enablePreferenceContent(enable);
 	}
@@ -373,8 +223,6 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		list.add(ClangdMetadata.Predefined.useBackgroundIndex.identifer());
 		list.add(ClangdMetadata.Predefined.useTidy.identifer());
 		list.add(ClangdMetadata.Predefined.validateClangdOptions.identifer());
-		list.add(ClangdMetadata.Predefined.setCompilationDatabase.identifer());
-		list.add(ClangdMetadata.Predefined.compilationDatabaseOverride.identifer());
 		return list;
 	}
 
@@ -393,10 +241,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
 						.equals(additional.getText())
 				|| (logToConsole != null && options.logToConsole() != logToConsole.getSelection())
-				|| (validateOptions != null && options.validateClangdOptions() != validateOptions.getSelection())
-				|| options.setCompilationDatabase() != setCompilationDatabase.getSelection()
-				|| (compilationDatabaseOverride != null
-						&& !options.compilationDatabaseOverride().equals(compilationDatabaseOverride.getText()));
+				|| (validateOptions != null && options.validateClangdOptions() != validateOptions.getSelection());
 	}
 
 }

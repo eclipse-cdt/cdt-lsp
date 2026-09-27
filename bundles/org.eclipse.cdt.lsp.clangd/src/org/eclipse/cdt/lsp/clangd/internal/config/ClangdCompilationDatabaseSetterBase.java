@@ -52,7 +52,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private static final String INDENT = "  "; //$NON-NLS-1$
 	protected static final String SET_COMPILATION_DB = COMPILE_FLAGS + ": {" + COMPILATTION_DATABASE + ": %s}"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String BACKSLASH_REGEX = "\\\\"; //$NON-NLS-1$
-	private static final String BACKSLASH_ESCAPE = "\\\\\\\\"; //$NON-NLS-1$
+	private static final String BACKSLASH = "\\"; //$NON-NLS-1$
 	// matches the value of CompilationDatabase if the value is followed by either end-of-string,
 	// newline sequence or ','
 	private final Pattern pathGroupPattern = Pattern.compile(".*CompilationDatabase:\\s*\\{?\\s*([^,}\\r\\n]*).*"); //$NON-NLS-1$
@@ -112,9 +112,9 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
 				if (pathGroupMatcher.matches()) {
 					hasCompilationDatabase = true;
-					var currentPath = pathGroupMatcher.group(1).trim();
+					var currentPath = removeEscaped(pathGroupMatcher.group(1).trim());
 					if (!databaseDirectoryPath.trim().contentEquals(currentPath)) {
-						var updatedLine = line.substring(0, pathGroupMatcher.start(1)) + escaped(databaseDirectoryPath)
+						var updatedLine = line.substring(0, pathGroupMatcher.start(1)) + databaseDirectoryPath
 								+ line.substring(pathGroupMatcher.end(1));
 						lines.set(i, updatedLine);
 						changed = true;
@@ -149,11 +149,11 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 					String suffix = line.substring(closingBracket);
 					String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$
 					lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " //$NON-NLS-1$ //$NON-NLS-2$
-							+ escaped(databaseDirectoryPath) + suffix);
+							+ databaseDirectoryPath + suffix);
 					return true;
 				}
 			} else if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*$")) { //$NON-NLS-1$ //$NON-NLS-2$
-				lines.add(i + 1, indent + INDENT + COMPILATION_DATABASE_PREFIX + " " + escaped(databaseDirectoryPath)); //$NON-NLS-1$
+				lines.add(i + 1, indent + INDENT + COMPILATION_DATABASE_PREFIX + " " + databaseDirectoryPath); //$NON-NLS-1$
 				return true;
 			}
 		}
@@ -161,15 +161,15 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 			lines.add(""); //$NON-NLS-1$
 		}
 		lines.add(COMPILE_FLAGS_PREFIX);
-		lines.add(INDENT + COMPILATION_DATABASE_PREFIX + " " + escaped(databaseDirectoryPath)); //$NON-NLS-1$
+		lines.add(INDENT + COMPILATION_DATABASE_PREFIX + " " + databaseDirectoryPath); //$NON-NLS-1$
 		return true;
 	}
 
 	/**
-	 * Escapes backslashes so Windows-style paths remain valid in YAML.
+	 * Normalizes legacy escaped backslashes before comparing stored and requested paths.
 	 */
-	private String escaped(String databaseDirectoryPath) {
-		return databaseDirectoryPath.replaceAll(BACKSLASH_REGEX, BACKSLASH_ESCAPE);
+	private String removeEscaped(String databaseDirectoryPath) {
+		return databaseDirectoryPath.replace(BACKSLASH_REGEX, BACKSLASH);
 	}
 
 	/**

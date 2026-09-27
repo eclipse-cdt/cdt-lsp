@@ -1,21 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 ArSysOp.
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation.
  *
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License 2.0
- * which accompanies this distribution, and is available at
- * https://www.eclipse.org/legal/epl-2.0/
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Alexander Fedorov (ArSysOp) - Initial API and implementation
+ *   See git history
  *******************************************************************************/
-
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
-import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
@@ -23,13 +20,13 @@ import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 
-public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
-
-	static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
+/**
+ * Dedicated page for project/workspace compilation database settings.
+ */
+public final class CompilationDatabaseConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
 
 	@Override
 	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
@@ -48,47 +45,40 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 
 	@Override
 	protected ConfigurationArea<ClangdOptions> getConfigurationArea(Composite composite, boolean isProjectScope) {
-		return new ClangdConfigurationArea(composite, isProjectScope);
+		IProject project = isProjectScope ? getElement().getAdapter(IProject.class) : null;
+		return new CompilationDatabaseArea(composite, isProjectScope, project);
 	}
 
 	@Override
 	protected String getPreferenceId() {
-		return PREFERENCE_PAGE_ID;
+		return ClangdConfigurationPage.PREFERENCE_PAGE_ID;
 	}
 
 	@Override
 	public boolean performOk() {
-		var configSettingsChanged = configurationSettingsChanged();
+		var settingsChanged = configurationSettingsChanged();
 		var projectSpecificSettingsChanged = hasProjectSpecificOptions() != useProjectSettings();
 		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
 		var done = super.performOk();
 		IProject project = projectScope().isPresent() ? getElement().getAdapter(IProject.class) : null;
-		if (done && project != null && projectSpecificSettingsChanged) {
+		if (done && project != null && (settingsChanged || projectSpecificSettingsChanged)) {
 			new ClangdCompilationDatabaseSupport().synchronize(project);
 		}
 		if (done && LspUtils.isLsActive()
-				&& (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
+				&& (((!projectScope().isPresent() || useProjectSettings()) && settingsChanged)
 						|| projectOptionsDifferFromWorkspace)) {
 			LspUtils.restartClangd();
 		}
 		return done;
 	}
 
-	/**
-	 * Returns true when the page settings differ from the stored.
-	 * @return
-	 */
 	private boolean configurationSettingsChanged() {
-		return ((ClangdConfigurationArea) area).optionsChanged(configuration.options(getElement()));
+		return ((CompilationDatabaseArea) area).optionsChanged(configuration.options(getElement()));
 	}
 
-	/**
-	 * Returns true when project scope AND the 'Enable project-specific settings' check-box has been modified AND
-	 *  the current project page settings differ from the stored options in workspace preferences.
-	 */
 	private boolean projectOptionsDifferFromWorkspace() {
 		return hasProjectSpecificOptions() != useProjectSettings()
-				&& ((ClangdConfigurationArea) area).optionsChanged(configuration.options(null));
+				&& ((CompilationDatabaseArea) area).optionsChanged(configuration.options(null));
 	}
 
 	@Override
@@ -98,10 +88,4 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 				.filter(ClangdConfigurationPage::hasProjectSpecificOptions)//
 				.isPresent();
 	}
-
-	static boolean hasProjectSpecificOptions(IEclipsePreferences preferences) {
-		return ClangdMetadata.Predefined.defaults.stream().map(meta -> preferences.get(meta.identifer(), null))
-				.anyMatch(value -> value != null);
-	}
-
 }
