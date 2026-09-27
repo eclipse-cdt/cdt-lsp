@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus;
@@ -24,6 +25,7 @@ import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatu
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
@@ -46,6 +48,9 @@ import org.eclipse.swt.widgets.Text;
  * Project/workspace UI for clangd compilation database preferences.
  */
 public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptions> {
+	// Classic CDT managed-build projects do not expose an Eclipse build configuration here even
+	// though their default build folder is "Debug", so use that as the initial custom directory.
+	private static final String DEFAULT_CLASSIC_BUILD_DIRECTORY = "Debug"; //$NON-NLS-1$
 
 	private final Button setCompilationDatabase;
 	private final Group compilationDatabaseGroup;
@@ -57,6 +62,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private final Label compilationDatabaseBuildConfiguration;
 	private final IProject project;
 	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
+	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
+			ClangdConfiguration.class);
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private ControlEnableState enableState;
 	private boolean preferenceContentEnabled = true;
@@ -158,14 +165,25 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		if (enableState != null) {
 			enableState.restore();
 		}
-		enableState = enable ? null : ControlEnableState.disable(compilationDatabaseGroup);
+		enableState = enableCompilationDatabaseGroup() ? null : ControlEnableState.disable(compilationDatabaseGroup);
 		setCompilationDatabase.setEnabled(enable);
 		updateCompilationDatabaseControls();
 		refreshCompilationDatabaseStatus();
 	}
 
+	private boolean enableCompilationDatabaseGroup() {
+		return preferenceContentEnabled
+				&& (setCompilationDatabase.getSelection() || workspaceCompilationDatabaseEnabled());
+	}
+
+	private boolean workspaceCompilationDatabaseEnabled() {
+		boolean[] enabled = new boolean[1];
+		configuration.call(c -> enabled[0] = c.options(null).setCompilationDatabase());
+		return enabled[0];
+	}
+
 	private void updateCompilationDatabaseControls() {
-		boolean enabled = preferenceContentEnabled && setCompilationDatabase.getSelection();
+		boolean enabled = enableCompilationDatabaseGroup();
 		compilationDatabaseOverride.setEnabled(enabled);
 		compilationDatabaseOverrideBrowse.setEnabled(enabled);
 	}
@@ -213,8 +231,18 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	@Override
 	public void load(ClangdOptions options, boolean enable) {
 		setCompilationDatabase.setSelection(options.setCompilationDatabase());
-		compilationDatabaseOverride.setText(options.compilationDatabaseOverride());
+		compilationDatabaseOverride.setText(defaultCompilationDatabaseOverride(options));
 		enablePreferenceContent(enable);
+	}
+
+	private String defaultCompilationDatabaseOverride(ClangdOptions options) {
+		if (!options.compilationDatabaseOverride().isBlank()) {
+			return options.compilationDatabaseOverride();
+		}
+		if (project != null && compilationDatabaseSupport.status(project).buildConfiguration().isBlank()) {
+			return DEFAULT_CLASSIC_BUILD_DIRECTORY;
+		}
+		return options.compilationDatabaseOverride();
 	}
 
 	@Override
@@ -234,6 +262,6 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 
 	public boolean optionsChanged(ClangdOptions options) {
 		return options.setCompilationDatabase() != setCompilationDatabase.getSelection()
-				|| !options.compilationDatabaseOverride().equals(compilationDatabaseOverride.getText());
+				|| !defaultCompilationDatabaseOverride(options).equals(compilationDatabaseOverride.getText());
 	}
 }
