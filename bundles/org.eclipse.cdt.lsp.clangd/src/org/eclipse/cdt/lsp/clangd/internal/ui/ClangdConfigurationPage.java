@@ -95,13 +95,20 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.filter(ClangdConfigurationPage::hasProjectSpecificOptions)//
+				.filter(ClangdConfigurationPage::hasClangdProjectSpecificOptions)//
 				.isPresent();
 	}
 
-	static boolean hasProjectSpecificOptions(IEclipsePreferences preferences) {
-		return ClangdMetadata.Predefined.defaults.stream().map(meta -> preferences.get(meta.identifer(), null))
-				.anyMatch(value -> value != null);
+	static boolean hasClangdProjectSpecificOptions(IEclipsePreferences preferences) {
+		return preferences.get(ClangdMetadata.Predefined.clangdPath.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.useTidy.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.useBackgroundIndex.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.completionStyle.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.prettyPrint.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.queryDriver.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.additionalOptions.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.logToConsole.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.validateClangdOptions.identifer(), null) != null;
 	}
 
 }

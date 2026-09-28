@@ -66,7 +66,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 			ClangdConfiguration.class);
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private ControlEnableState enableState;
-	private boolean preferenceContentEnabled = true;
+	private boolean enableProjectSpecificSettings = true;
 
 	public CompilationDatabaseArea(Composite parent, boolean isProjectScope, IProject project) {
 		super(3);
@@ -78,8 +78,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite, SWT.CHECK, 0);
 		this.setCompilationDatabase.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
-			updateCompilationDatabaseControls();
-			refreshCompilationDatabaseStatus();
+			boolean enabled = updateCompilationDatabaseControls();
+			refreshCompilationDatabaseStatus(enabled);
 			changed(e);
 		}));
 		this.compilationDatabaseGroup = createGroup(composite,
@@ -95,7 +95,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		this.compilationDatabaseOverride = createText(ClangdMetadata.Predefined.compilationDatabaseOverride,
 				compilationDatabaseGroup, false, 1);
 		this.compilationDatabaseOverride.addKeyListener(KeyListener.keyReleasedAdapter(e -> {
-			refreshCompilationDatabaseStatus();
+			refreshCompilationDatabaseStatus(isCompilationDatabaseEnabled());
 			changed(e);
 		}));
 		this.compilationDatabaseOverrideBrowse = new Button(compilationDatabaseGroup, SWT.NONE);
@@ -155,25 +155,29 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		String selected = dialog.open();
 		if (selected != null) {
 			compilationDatabaseOverride.setText(selected);
-			refreshCompilationDatabaseStatus();
+			refreshCompilationDatabaseStatus(isCompilationDatabaseEnabled());
 			changed(event);
 		}
 	}
 
-	private void enablePreferenceContent(boolean enable) {
-		preferenceContentEnabled = enable;
-		if (enableState != null) {
-			enableState.restore();
-		}
-		enableState = enableCompilationDatabaseGroup() ? null : ControlEnableState.disable(compilationDatabaseGroup);
-		setCompilationDatabase.setEnabled(enable);
-		updateCompilationDatabaseControls();
-		refreshCompilationDatabaseStatus();
+	private void enablePreferenceContent(boolean enableProjectSettings) {
+		enableProjectSpecificSettings = enableProjectSettings;
+		setCompilationDatabase.setEnabled(enableProjectSettings);
+		boolean resultingEnable = updateCompilationDatabaseControls();
+		refreshCompilationDatabaseStatus(resultingEnable);
 	}
 
 	private boolean enableCompilationDatabaseGroup() {
-		return preferenceContentEnabled
-				&& (setCompilationDatabase.getSelection() || workspaceCompilationDatabaseEnabled());
+		var enable = isCompilationDatabaseEnabled();
+		if (enableState != null) {
+			enableState.restore();
+		}
+		enableState = enable ? null : ControlEnableState.disable(compilationDatabaseGroup);
+		return enable;
+	}
+
+	private boolean isCompilationDatabaseEnabled() {
+		return (enableProjectSpecificSettings && setCompilationDatabase.getSelection()) || workspaceCompilationDatabaseEnabled();
 	}
 
 	private boolean workspaceCompilationDatabaseEnabled() {
@@ -182,13 +186,14 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		return enabled[0];
 	}
 
-	private void updateCompilationDatabaseControls() {
+	private boolean updateCompilationDatabaseControls() {
 		boolean enabled = enableCompilationDatabaseGroup();
 		compilationDatabaseOverride.setEnabled(enabled);
 		compilationDatabaseOverrideBrowse.setEnabled(enabled);
+		return enabled;
 	}
 
-	private void refreshCompilationDatabaseStatus() {
+	private void refreshCompilationDatabaseStatus(boolean enabled) {
 		if (project == null) {
 			compilationDatabaseStatus.setText(""); //$NON-NLS-1$
 			compilationDatabaseSource.setText(""); //$NON-NLS-1$
@@ -196,8 +201,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 			compilationDatabaseBuildConfiguration.setText(""); //$NON-NLS-1$
 			return;
 		}
-		ClangdCompilationDatabaseStatus status = compilationDatabaseSupport.status(project,
-				setCompilationDatabase.getSelection(), compilationDatabaseOverride.getText());
+		ClangdCompilationDatabaseStatus status = compilationDatabaseSupport.status(project, enabled,
+				compilationDatabaseOverride.getText());
 		compilationDatabaseStatus.setText(status.message());
 		compilationDatabaseStatus.setToolTipText(status.message());
 		String sourceLabel = sourceLabel(status);

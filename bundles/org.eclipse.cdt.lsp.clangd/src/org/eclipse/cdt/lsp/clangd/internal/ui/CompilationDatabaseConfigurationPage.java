@@ -13,6 +13,7 @@
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
+import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
@@ -20,6 +21,7 @@ import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 
@@ -27,6 +29,7 @@ import org.eclipse.ui.IWorkbench;
  * Dedicated page for project/workspace compilation database settings.
  */
 public final class CompilationDatabaseConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
+	private static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
 
 	@Override
 	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
@@ -51,7 +54,7 @@ public final class CompilationDatabaseConfigurationPage extends ConfigurationPag
 
 	@Override
 	protected String getPreferenceId() {
-		return ClangdConfigurationPage.PREFERENCE_PAGE_ID;
+		return PREFERENCE_PAGE_ID;
 	}
 
 	@Override
@@ -85,7 +88,12 @@ public final class CompilationDatabaseConfigurationPage extends ConfigurationPag
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.filter(ClangdConfigurationPage::hasProjectSpecificOptions)//
+				.filter(CompilationDatabaseConfigurationPage::hasCompilationDatabaseProjectSpecificOptions)//
 				.isPresent();
+	}
+
+	private static boolean hasCompilationDatabaseProjectSpecificOptions(IEclipsePreferences preferences) {
+		return preferences.get(ClangdMetadata.Predefined.setCompilationDatabase.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.compilationDatabaseOverride.identifer(), null) != null;
 	}
 }
