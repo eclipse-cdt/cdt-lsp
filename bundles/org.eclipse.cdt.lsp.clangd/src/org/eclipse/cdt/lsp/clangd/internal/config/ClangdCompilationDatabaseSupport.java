@@ -92,7 +92,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (customDirectory.isEmpty() && automaticDirectory.isEmpty() && hasParentClangdConfiguration(project)) {
 			return Optional.empty();
 		}
-		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElse(COMPILATION_DATABASE_ANCESTORS);
+		String configuredDirectory = customDirectory.or(() -> automaticDirectory)
+				.orElse(COMPILATION_DATABASE_ANCESTORS);
 		return Optional.of(setCompilationDatabase(project, configuredDirectory));
 	}
 
@@ -127,7 +128,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		Optional<String> automaticDirectory = automaticManagementEnabled && customDirectory.isEmpty()
 				? automaticDirectory(project)
 				: Optional.empty();
-		boolean parentClangd = customDirectory.isEmpty() && automaticDirectory.isEmpty() && hasParentClangdConfiguration(project);
+		boolean parentClangd = customDirectory.isEmpty() && automaticDirectory.isEmpty()
+				&& hasParentClangdConfiguration(project);
 		Source source = customDirectory.isPresent() ? Source.CUSTOM
 				: automaticDirectory.isPresent() ? Source.AUTOMATIC
 						: automaticManagementEnabled && !parentClangd ? Source.ANCESTORS : Source.NONE;
@@ -137,8 +139,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		boolean exists = !compileCommandsPath.isBlank()
 				&& Files.isRegularFile(Path.fromOSString(compileCommandsPath).toFile().toPath());
 		String buildConfiguration = activeBuildConfiguration(project);
-		String message = message(project, automaticManagementEnabled, customDirectory, automaticDirectory, source, exists,
-				compileCommandsPath, parentClangd);
+		String message = message(project, automaticManagementEnabled, customDirectory, automaticDirectory, source,
+				exists, compileCommandsPath, parentClangd);
 		return new ClangdCompilationDatabaseStatus(source, configuredDirectory, compileCommandsPath, buildConfiguration,
 				automaticManagementEnabled, exists, message);
 	}
@@ -200,8 +202,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	 * Builds the user-facing status message shown in the project properties page.
 	 */
 	private String message(IProject project, boolean automaticManagementEnabled, Optional<String> customDirectory,
-			Optional<String> automaticDirectory, Source source, boolean compileCommandsExists, String compileCommandsPath,
-			boolean parentClangd) {
+			Optional<String> automaticDirectory, Source source, boolean compileCommandsExists,
+			String compileCommandsPath, boolean parentClangd) {
 		if (!automaticManagementEnabled) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_disabled;
 		}
@@ -231,6 +233,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	}
 
 	private boolean hasParentClangdConfiguration(IProject project) {
-		return project.getLocation() != null && DefaultClangdCompilationDatabaseProvider.hasClangdFileInParentFolders(project);
+		return project.getLocation() != null
+				&& DefaultClangdCompilationDatabaseProvider.hasClangdFileInParentFolders(project);
 	}
 }

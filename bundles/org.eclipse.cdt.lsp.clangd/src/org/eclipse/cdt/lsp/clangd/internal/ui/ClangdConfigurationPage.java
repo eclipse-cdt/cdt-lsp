@@ -17,11 +17,9 @@ package org.eclipse.cdt.lsp.clangd.internal.ui;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Composite;
@@ -59,13 +57,8 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	@Override
 	public boolean performOk() {
 		var configSettingsChanged = configurationSettingsChanged();
-		var projectSpecificSettingsChanged = hasProjectSpecificOptions() != useProjectSettings();
 		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
 		var done = super.performOk();
-		IProject project = projectScope().isPresent() ? getElement().getAdapter(IProject.class) : null;
-		if (done && project != null && projectSpecificSettingsChanged) {
-			new ClangdCompilationDatabaseSupport().synchronize(project);
-		}
 		if (done && LspUtils.isLsActive()
 				&& (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
 						|| projectOptionsDifferFromWorkspace)) {

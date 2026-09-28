@@ -15,10 +15,8 @@ package org.eclipse.cdt.lsp.clangd.internal.ui;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
-import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -29,7 +27,7 @@ import org.eclipse.ui.IWorkbench;
  * Dedicated page for project/workspace compilation database settings.
  */
 public final class CompilationDatabaseConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
-	private static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
+	private static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.compilationDatabasePropertyPage"; //$NON-NLS-1$
 
 	@Override
 	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
@@ -55,33 +53,6 @@ public final class CompilationDatabaseConfigurationPage extends ConfigurationPag
 	@Override
 	protected String getPreferenceId() {
 		return PREFERENCE_PAGE_ID;
-	}
-
-	@Override
-	public boolean performOk() {
-		var settingsChanged = configurationSettingsChanged();
-		var projectSpecificSettingsChanged = hasProjectSpecificOptions() != useProjectSettings();
-		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
-		var done = super.performOk();
-		IProject project = projectScope().isPresent() ? getElement().getAdapter(IProject.class) : null;
-		if (done && project != null && (settingsChanged || projectSpecificSettingsChanged)) {
-			new ClangdCompilationDatabaseSupport().synchronize(project);
-		}
-		if (done && LspUtils.isLsActive()
-				&& (((!projectScope().isPresent() || useProjectSettings()) && settingsChanged)
-						|| projectOptionsDifferFromWorkspace)) {
-			LspUtils.restartClangd();
-		}
-		return done;
-	}
-
-	private boolean configurationSettingsChanged() {
-		return ((CompilationDatabaseArea) area).optionsChanged(configuration.options(getElement()));
-	}
-
-	private boolean projectOptionsDifferFromWorkspace() {
-		return hasProjectSpecificOptions() != useProjectSettings()
-				&& ((CompilationDatabaseArea) area).optionsChanged(configuration.options(null));
 	}
 
 	@Override

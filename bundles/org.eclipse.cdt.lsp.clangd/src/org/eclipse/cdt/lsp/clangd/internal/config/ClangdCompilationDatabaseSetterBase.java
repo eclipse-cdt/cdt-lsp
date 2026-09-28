@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -34,6 +35,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 /**
  * Shared helper for reading, writing, inserting, and updating the managed
@@ -57,6 +60,8 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	// newline sequence or ','
 	private final Pattern pathGroupPattern = Pattern.compile(".*CompilationDatabase:\\s*\\{?\\s*([^,}\\r\\n]*).*"); //$NON-NLS-1$
 
+	private boolean hasClangdFileWritten = false;
+
 	/**
 	 * Schedules an update that writes the managed {@code CompilationDatabase} entry to the project's
 	 * {@value #CLANGD_CONFIG_FILE_NAME} file.
@@ -73,6 +78,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	 */
 	public WorkspaceJob setCompilationDatabase(IProject project, String databaseDirectoryPath) {
 		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
+		hasClangdFileWritten = false;
 		var updateClangdJob = new WorkspaceJob("Update .clangd") { //$NON-NLS-1$
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
@@ -80,7 +86,8 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 					if (createClangdConfigFile(configFile, project.getDefaultCharset(), databaseDirectoryPath, false)) {
 						return Status.OK_STATUS;
 					}
-					updateClangdConfigFile(configFile, project.getDefaultCharset(), databaseDirectoryPath, monitor);
+					hasClangdFileWritten = updateClangdConfigFile(configFile, project.getDefaultCharset(),
+							databaseDirectoryPath, monitor);
 				} catch (CoreException e) {
 					Platform.getLog(getClass()).log(e.getStatus());
 				} catch (IOException | IllegalArgumentException e) {
@@ -89,6 +96,14 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				return Status.OK_STATUS;
 			}
 		};
+		updateClangdJob.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				if (hasClangdFileWritten && LspUtils.isLsActive()) {
+					LspUtils.restartClangd();
+				}
+			}
+		});
 		updateClangdJob.setRule(configFile.exists() ? configFile : project);
 		updateClangdJob.setSystem(true);
 		updateClangdJob.schedule();
@@ -98,8 +113,9 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	/**
 	 * Loads the current {@value #CLANGD_CONFIG_FILE_NAME} content and updates the first matching
 	 * {@code CompilationDatabase} entry or inserts a new one when no entry exists yet.
+	 * Returns true when the file was updated, false when no changes were necessary.
 	 */
-	private void updateClangdConfigFile(IFile configFile, String charset, String databaseDirectoryPath,
+	private boolean updateClangdConfigFile(IFile configFile, String charset, String databaseDirectoryPath,
 			IProgressMonitor monitor) throws CoreException, IOException {
 		if (configFile.getLocation() != null) {
 			var lines = readClangdConfigFile(configFile);
@@ -129,8 +145,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				createClangdConfigFile(configFile, charset, databaseDirectoryPath, true);
 			} else if (changed) {
 				writeClangdConfigFile(configFile, charset, lines, monitor);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	/**
