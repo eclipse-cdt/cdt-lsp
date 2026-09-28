@@ -39,6 +39,8 @@ image:lsp_clangd_prefs.png[width=550]
 |Additional                    |Miscellaneous `clangd` command-line arguments.
 |===
 
+For project-specific settings, the page also shows a _Compilation database_ status section. It reports the active source used for `compile_commands.json`, the resolved file location, and the active build configuration. When automatic detection is not suitable, use the _Manual compilation database directory override_ to point clangd at the directory containing `compile_commands.json`.
+
 Related concepts:
 
 * xref:lsp_cpp_editor.adoc[C/C++ editor (LSP)]

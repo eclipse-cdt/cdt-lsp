@@ -21,12 +21,13 @@ import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 
 public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
 
-	private final String id = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
+	static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
 
 	@Override
 	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
@@ -50,7 +51,7 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 
 	@Override
 	protected String getPreferenceId() {
-		return id;
+		return PREFERENCE_PAGE_ID;
 	}
 
 	@Override
@@ -87,8 +88,20 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(ClangdMetadata.Predefined.clangdPath.identifer(), null))//
+				.filter(ClangdConfigurationPage::hasClangdProjectSpecificOptions)//
 				.isPresent();
+	}
+
+	static boolean hasClangdProjectSpecificOptions(IEclipsePreferences preferences) {
+		return preferences.get(ClangdMetadata.Predefined.clangdPath.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.useTidy.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.useBackgroundIndex.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.completionStyle.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.prettyPrint.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.queryDriver.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.additionalOptions.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.logToConsole.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.validateClangdOptions.identifer(), null) != null;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 ArSysOp.
+ * Copyright (c) 2023, 2026 ArSysOp.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,10 +55,10 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	private final Text additional;
 	private final Button logToConsole;
 	private final Button validateOptions;
+	private final Button setCompilationDatabase;
 	private final Group group;
 	private ControlEnableState enableState;
-	private final Button setCompilationDatabase;
-	private ControlEnableState enableSetDatabaseState;
+	private ControlEnableState compilationDatabaseEnableState;
 
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private final Map<PreferenceMetadata<String>, Combo> combos;
@@ -91,12 +91,13 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		if (!isProjectScope) {
 			this.logToConsole = createButton(ClangdMetadata.Predefined.logToConsole, group, SWT.CHECK, 0);
 			this.validateOptions = createButton(ClangdMetadata.Predefined.validateClangdOptions, group, SWT.CHECK, 0);
+			this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite,
+					SWT.CHECK, 0);
 		} else {
 			this.logToConsole = null;
 			this.validateOptions = null;
+			this.setCompilationDatabase = null;
 		}
-		this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite,
-				SWT.CHECK, 0);
 	}
 
 	void enablePreferenceContent(boolean enable) {
@@ -112,13 +113,11 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		} else {
 			enableState = ControlEnableState.disable(group);
 		}
-		if (enableSetDatabaseState != null) {
-			enableSetDatabaseState.restore();
+		if (compilationDatabaseEnableState != null) {
+			compilationDatabaseEnableState.restore();
 		}
-		if (enable) {
-			enableSetDatabaseState = null;
-		} else {
-			enableSetDatabaseState = ControlEnableState.disable(setCompilationDatabase);
+		if (setCompilationDatabase != null) {
+			compilationDatabaseEnableState = enable ? null : ControlEnableState.disable(setCompilationDatabase);
 		}
 	}
 
@@ -141,13 +140,18 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 	}
 
 	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine) {
+		return createText(meta, composite, multiLine, columns - 1);
+	}
+
+	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine,
+			int horizontalSpan) {
 		Label label = new Label(composite, SWT.NONE);
 		label.setText(meta.name());
 		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
 		Text text = new Text(composite, multiLine ? SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL : SWT.BORDER);
 		text.setToolTipText(meta.description());
 		text.setData(meta);
-		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(columns - 1, 1)
+		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).span(horizontalSpan, 1)
 				.hint(SWT.DEFAULT, multiLine ? 3 * text.getLineHeight() : SWT.DEFAULT).create());
 		texts.put(meta, text);
 		text.addKeyListener(KeyListener.keyReleasedAdapter(this::changed));
@@ -201,14 +205,16 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		pretty.setSelection(options.prettyPrint());
 		driver.setText(options.queryDriver());
 		additional.setText(options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator())));
-		enablePreferenceContent(enable);
 		if (logToConsole != null) {
 			logToConsole.setSelection(options.logToConsole());
 		}
 		if (validateOptions != null) {
 			validateOptions.setSelection(options.validateClangdOptions());
 		}
-		setCompilationDatabase.setSelection(options.setCompilationDatabase());
+		if (setCompilationDatabase != null) {
+			setCompilationDatabase.setSelection(options.setCompilationDatabase());
+		}
+		enablePreferenceContent(enable);
 	}
 
 	@Override
@@ -221,7 +227,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 
 	@Override
 	public List<String> getPreferenceKeys() {
-		var list = new ArrayList<String>(9);
+		var list = new ArrayList<String>(10);
 		list.add(ClangdMetadata.Predefined.additionalOptions.identifer());
 		list.add(ClangdMetadata.Predefined.clangdPath.identifer());
 		list.add(ClangdMetadata.Predefined.completionStyle.identifer());
@@ -231,7 +237,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 		list.add(ClangdMetadata.Predefined.useBackgroundIndex.identifer());
 		list.add(ClangdMetadata.Predefined.useTidy.identifer());
 		list.add(ClangdMetadata.Predefined.validateClangdOptions.identifer());
-		list.add(ClangdMetadata.Predefined.setCompilationDatabase.identifer());
+		if (setCompilationDatabase != null) {
+			list.add(ClangdMetadata.Predefined.setCompilationDatabase.identifer());
+		}
 		return list;
 	}
 
@@ -250,7 +258,9 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 				|| !options.additionalOptions().stream().collect(Collectors.joining(System.lineSeparator()))
 						.equals(additional.getText())
 				|| (logToConsole != null && options.logToConsole() != logToConsole.getSelection())
-				|| (validateOptions != null && options.validateClangdOptions() != validateOptions.getSelection());
+				|| (validateOptions != null && options.validateClangdOptions() != validateOptions.getSelection())
+				|| (setCompilationDatabase != null
+						&& options.setCompilationDatabase() != setCompilationDatabase.getSelection());
 	}
 
 }
