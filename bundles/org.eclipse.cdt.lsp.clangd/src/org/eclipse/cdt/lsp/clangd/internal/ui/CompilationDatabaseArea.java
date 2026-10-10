@@ -61,6 +61,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private final Label compilationDatabaseLocation;
 	private final Label compilationDatabaseBuildConfiguration;
 	private final IProject project;
+	private final boolean isProjectScope;
 	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
 	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
 			ClangdConfiguration.class);
@@ -70,6 +71,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 
 	public CompilationDatabaseArea(Composite parent, boolean isProjectScope, IProject project) {
 		super(3);
+		this.isProjectScope = isProjectScope;
 		this.project = project;
 		this.compilationDatabaseSupport = new ClangdCompilationDatabaseSupport();
 		this.texts = new HashMap<>();
@@ -84,14 +86,21 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		}));
 		this.compilationDatabaseGroup = createGroup(composite,
 				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_group, 3);
-		this.compilationDatabaseStatus = createStatusTextValue(compilationDatabaseGroup,
-				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status);
-		this.compilationDatabaseSource = createStatusValue(compilationDatabaseGroup,
-				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source);
-		this.compilationDatabaseLocation = createStatusValue(compilationDatabaseGroup,
-				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_location);
-		this.compilationDatabaseBuildConfiguration = createStatusValue(compilationDatabaseGroup,
-				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_build_configuration);
+		if (isProjectScope) {
+			this.compilationDatabaseStatus = createStatusTextValue(compilationDatabaseGroup,
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status);
+			this.compilationDatabaseSource = createStatusValue(compilationDatabaseGroup,
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source);
+			this.compilationDatabaseLocation = createStatusValue(compilationDatabaseGroup,
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_location);
+			this.compilationDatabaseBuildConfiguration = createStatusValue(compilationDatabaseGroup,
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_build_configuration);
+		} else {
+			this.compilationDatabaseStatus = null;
+			this.compilationDatabaseSource = null;
+			this.compilationDatabaseLocation = null;
+			this.compilationDatabaseBuildConfiguration = null;
+		}
 		this.compilationDatabaseOverride = createText(ClangdMetadata.Predefined.compilationDatabaseOverride,
 				compilationDatabaseGroup, false, 1);
 		this.compilationDatabaseOverride.addKeyListener(KeyListener.keyReleasedAdapter(e -> {
@@ -103,12 +112,6 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 				.setText(LspEditorUiMessages.LspEditorPreferencePage_compilation_database_browse_directory);
 		this.compilationDatabaseOverrideBrowse
 				.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::selectCompilationDatabaseDirectory));
-		if (!isProjectScope) {
-			compilationDatabaseStatus.setEnabled(false);
-			compilationDatabaseSource.setEnabled(false);
-			compilationDatabaseLocation.setEnabled(false);
-			compilationDatabaseBuildConfiguration.setEnabled(false);
-		}
 	}
 
 	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine, int horizontalSpan) {
@@ -177,6 +180,9 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	}
 
 	private boolean isCompilationDatabaseEnabled() {
+		if (!isProjectScope) {
+			return setCompilationDatabase.getSelection();
+		}
 		return (enableProjectSpecificSettings && setCompilationDatabase.getSelection()) || workspaceCompilationDatabaseEnabled();
 	}
 
@@ -195,10 +201,6 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 
 	private void refreshCompilationDatabaseStatus(boolean enabled) {
 		if (project == null) {
-			compilationDatabaseStatus.setText(""); //$NON-NLS-1$
-			compilationDatabaseSource.setText(""); //$NON-NLS-1$
-			compilationDatabaseLocation.setText(""); //$NON-NLS-1$
-			compilationDatabaseBuildConfiguration.setText(""); //$NON-NLS-1$
 			return;
 		}
 		ClangdCompilationDatabaseStatus status = compilationDatabaseSupport.status(project, enabled,

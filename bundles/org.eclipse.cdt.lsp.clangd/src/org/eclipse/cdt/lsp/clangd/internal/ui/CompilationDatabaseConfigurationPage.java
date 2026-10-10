@@ -12,13 +12,18 @@
  *******************************************************************************/
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
+import org.eclipse.cdt.core.CProjectNature;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
@@ -27,7 +32,9 @@ import org.eclipse.ui.IWorkbench;
  * Dedicated page for project/workspace compilation database settings.
  */
 public final class CompilationDatabaseConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
-	private static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.compilationDatabasePropertyPage"; //$NON-NLS-1$
+	private static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.compilationDatabasePreferencePage"; //$NON-NLS-1$
+	private final ServiceCaller<ClangdCompilationDatabaseSupport> support = new ServiceCaller<>(getClass(),
+			ClangdCompilationDatabaseSupport.class);
 
 	@Override
 	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
@@ -53,6 +60,34 @@ public final class CompilationDatabaseConfigurationPage extends ConfigurationPag
 	@Override
 	protected String getPreferenceId() {
 		return PREFERENCE_PAGE_ID;
+	}
+
+	@Override
+	public boolean performOk() {
+		var settingsChanged = configurationSettingsChanged();
+		var done = super.performOk();
+		if (done && !projectScope().isPresent() && settingsChanged) {
+			synchronizeWorkspaceProjects();
+		}
+		return done;
+	}
+
+	private boolean configurationSettingsChanged() {
+		return ((CompilationDatabaseArea) area).optionsChanged(configuration.options(getElement()));
+	}
+
+	private void synchronizeWorkspaceProjects() {
+		support.call(service -> {
+			for (IProject project : workspace.getRoot().getProjects()) {
+				try {
+					if (project.isAccessible() && project.hasNature(CProjectNature.C_NATURE_ID)) {
+						service.synchronize(project);
+					}
+				} catch (CoreException e) {
+					Platform.getLog(getClass()).error(e.getMessage(), e);
+				}
+			}
+		});
 	}
 
 	@Override
