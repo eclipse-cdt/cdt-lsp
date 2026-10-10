@@ -41,6 +41,7 @@ import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -94,6 +95,10 @@ final class ClangdCompilationDatabaseSetterTest {
 	@BeforeEach
 	public void setUp(TestInfo testInfo) throws CoreException {
 		var projectName = TestUtils.getName(testInfo);
+		var existingProject = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		if (existingProject.exists()) {
+			TestUtils.deleteProject(existingProject);
+		}
 		project = TestUtils.createCProject(projectName);
 		TestUtils.setLspPreferred(project, true);
 		when(event.getProject()).thenReturn(project);
