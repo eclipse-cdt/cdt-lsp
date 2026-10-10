@@ -243,15 +243,15 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	@Override
 	public void load(ClangdOptions options, boolean enable) {
 		setCompilationDatabase.setSelection(options.setCompilationDatabase());
-		compilationDatabaseOverride.setText(defaultCompilationDatabaseOverride(options));
+		compilationDatabaseOverride.setText(defaultCompilationDatabaseOverride(options, enable));
 		enablePreferenceContent(enable);
 	}
 
-	private String defaultCompilationDatabaseOverride(ClangdOptions options) {
+	private String defaultCompilationDatabaseOverride(ClangdOptions options, boolean enableProjectSettings) {
 		if (!options.compilationDatabaseOverride().isBlank()) {
 			return options.compilationDatabaseOverride();
 		}
-		if (project != null && compilationDatabaseSupport.status(project).buildConfiguration().isBlank()) {
+		if (project != null && enableProjectSettings && compilationDatabaseSupport.status(project).buildConfiguration().isBlank()) {
 			return DEFAULT_CLASSIC_BUILD_DIRECTORY;
 		}
 		return options.compilationDatabaseOverride();
@@ -274,6 +274,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 
 	public boolean optionsChanged(ClangdOptions options) {
 		return options.setCompilationDatabase() != setCompilationDatabase.getSelection()
-				|| !defaultCompilationDatabaseOverride(options).equals(compilationDatabaseOverride.getText());
+				|| !defaultCompilationDatabaseOverride(options, enableProjectSpecificSettings)
+						.equals(compilationDatabaseOverride.getText());
 	}
 }
