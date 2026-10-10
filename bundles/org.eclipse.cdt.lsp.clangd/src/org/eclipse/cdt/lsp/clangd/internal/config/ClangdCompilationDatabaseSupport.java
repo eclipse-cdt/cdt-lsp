@@ -146,7 +146,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	}
 
 	/**
-	 * Reads the project-scoped custom override from preferences.
+	 * Reads the effective custom override from preferences, falling back to the workspace setting
+	 * when the project does not define its own override.
 	 */
 	private Optional<String> customOverride(IProject project) {
 		String[] path = { "" }; //$NON-NLS-1$

@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus;
@@ -25,7 +24,6 @@ import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatu
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
@@ -40,7 +38,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -53,7 +50,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private static final String DEFAULT_CLASSIC_BUILD_DIRECTORY = "Debug"; //$NON-NLS-1$
 
 	private final Button setCompilationDatabase;
-	private final Group compilationDatabaseGroup;
+	private final Composite compilationDatabaseComposite;
 	private final Text compilationDatabaseOverride;
 	private final Button compilationDatabaseOverrideBrowse;
 	private final Text compilationDatabaseStatus;
@@ -63,10 +60,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private final IProject project;
 	private final boolean isProjectScope;
 	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
-	private final ServiceCaller<ClangdConfiguration> configuration = new ServiceCaller<>(getClass(),
-			ClangdConfiguration.class);
 	private final Map<PreferenceMetadata<String>, Text> texts;
-	private ControlEnableState enableState;
+	private ControlEnableState groupEnableState;
 	private boolean enableProjectSpecificSettings = true;
 
 	public CompilationDatabaseArea(Composite parent, boolean isProjectScope, IProject project) {
@@ -80,20 +75,19 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
 		this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite, SWT.CHECK, 0);
 		this.setCompilationDatabase.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
-			boolean enabled = updateCompilationDatabaseControls();
-			refreshCompilationDatabaseStatus(enabled);
+			updateCompilationDatabaseControls();
+			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
 			changed(e);
 		}));
-		this.compilationDatabaseGroup = createGroup(composite,
-				LspEditorUiMessages.LspEditorPreferencePage_compilation_database_group, 3);
+		this.compilationDatabaseComposite = createCompilationDatabaseComposite(composite);
 		if (isProjectScope) {
-			this.compilationDatabaseStatus = createStatusTextValue(compilationDatabaseGroup,
+			this.compilationDatabaseStatus = createStatusTextValue(compilationDatabaseComposite,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status);
-			this.compilationDatabaseSource = createStatusValue(compilationDatabaseGroup,
+			this.compilationDatabaseSource = createStatusValue(compilationDatabaseComposite,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source);
-			this.compilationDatabaseLocation = createStatusValue(compilationDatabaseGroup,
+			this.compilationDatabaseLocation = createStatusValue(compilationDatabaseComposite,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_location);
-			this.compilationDatabaseBuildConfiguration = createStatusValue(compilationDatabaseGroup,
+			this.compilationDatabaseBuildConfiguration = createStatusValue(compilationDatabaseComposite,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_build_configuration);
 		} else {
 			this.compilationDatabaseStatus = null;
@@ -102,16 +96,27 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 			this.compilationDatabaseBuildConfiguration = null;
 		}
 		this.compilationDatabaseOverride = createText(ClangdMetadata.Predefined.compilationDatabaseOverride,
-				compilationDatabaseGroup, false, 1);
+				compilationDatabaseComposite, false, 1);
 		this.compilationDatabaseOverride.addKeyListener(KeyListener.keyReleasedAdapter(e -> {
-			refreshCompilationDatabaseStatus(isCompilationDatabaseEnabled());
+			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
 			changed(e);
 		}));
-		this.compilationDatabaseOverrideBrowse = new Button(compilationDatabaseGroup, SWT.NONE);
+		this.compilationDatabaseOverrideBrowse = new Button(compilationDatabaseComposite, SWT.NONE);
 		this.compilationDatabaseOverrideBrowse
 				.setText(LspEditorUiMessages.LspEditorPreferencePage_compilation_database_browse_directory);
 		this.compilationDatabaseOverrideBrowse
 				.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::selectCompilationDatabaseDirectory));
+	}
+
+	private Composite createCompilationDatabaseComposite(Composite parent) {
+		if (isProjectScope) {
+			return createGroup(parent, LspEditorUiMessages.LspEditorPreferencePage_compilation_database_group, 3);
+		}
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
+		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		return composite;
 	}
 
 	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine, int horizontalSpan) {
@@ -158,7 +163,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		String selected = dialog.open();
 		if (selected != null) {
 			compilationDatabaseOverride.setText(selected);
-			refreshCompilationDatabaseStatus(isCompilationDatabaseEnabled());
+			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
 			changed(event);
 		}
 	}
@@ -166,34 +171,34 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private void enablePreferenceContent(boolean enableProjectSettings) {
 		enableProjectSpecificSettings = enableProjectSettings;
 		setCompilationDatabase.setEnabled(enableProjectSettings);
-		boolean resultingEnable = updateCompilationDatabaseControls();
-		refreshCompilationDatabaseStatus(resultingEnable);
+		updateCompilationDatabaseControls();
+		refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
 	}
 
-	private boolean enableCompilationDatabaseGroup() {
-		var enable = isCompilationDatabaseEnabled();
-		if (enableState != null) {
-			enableState.restore();
-		}
-		enableState = enable ? null : ControlEnableState.disable(compilationDatabaseGroup);
-		return enable;
-	}
-
-	private boolean isCompilationDatabaseEnabled() {
+	private void updateCompilationDatabaseGroupEnablement() {
 		if (!isProjectScope) {
-			return setCompilationDatabase.getSelection();
+			return;
 		}
-		return (enableProjectSpecificSettings && setCompilationDatabase.getSelection()) || workspaceCompilationDatabaseEnabled();
+		if (groupEnableState != null) {
+			groupEnableState.restore();
+		}
+		groupEnableState = enableProjectSpecificSettings ? null : ControlEnableState.disable(compilationDatabaseComposite);
 	}
 
-	private boolean workspaceCompilationDatabaseEnabled() {
-		boolean[] enabled = new boolean[1];
-		configuration.call(c -> enabled[0] = c.options(null).setCompilationDatabase());
-		return enabled[0];
+	private boolean effectiveCompilationDatabaseEnabled() {
+		return setCompilationDatabase.getSelection();
+	}
+
+	private boolean areCompilationDatabaseControlsEnabled() {
+		if (!isProjectScope) {
+			return effectiveCompilationDatabaseEnabled();
+		}
+		return enableProjectSpecificSettings && effectiveCompilationDatabaseEnabled();
 	}
 
 	private boolean updateCompilationDatabaseControls() {
-		boolean enabled = enableCompilationDatabaseGroup();
+		updateCompilationDatabaseGroupEnablement();
+		boolean enabled = areCompilationDatabaseControlsEnabled();
 		compilationDatabaseOverride.setEnabled(enabled);
 		compilationDatabaseOverrideBrowse.setEnabled(enabled);
 		return enabled;
