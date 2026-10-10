@@ -223,9 +223,15 @@ public abstract class ConfigurationPage<C extends Configuration, O> extends Prop
 		if (projectScope().isPresent()) {
 			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
 			if (!useProjectSettings()) {
+				// Remove project specific settings since we are using the workspace settings instead.
+				// But only those which are defined in the area.
+				// Otherwise we may remove some project specific settings from other pages.
+				var preferenceKeys = area.getPreferenceKeys();
 				try {
 					for (String key : prefs.keys()) {
-						prefs.remove(key);
+						if (preferenceKeys.contains(key)) {
+							prefs.remove(key);
+						}
 					}
 				} catch (BackingStoreException e) {
 					Platform.getLog(getClass()).error("Unable to reset project preferences.", e); //$NON-NLS-1$
