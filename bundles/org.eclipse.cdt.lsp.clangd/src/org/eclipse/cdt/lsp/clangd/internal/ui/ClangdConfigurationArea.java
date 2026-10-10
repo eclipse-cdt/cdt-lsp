@@ -213,7 +213,7 @@ public final class ClangdConfigurationArea extends ConfigurationArea<ClangdOptio
 
 	@Override
 	public List<String> getPreferenceKeys() {
-		var list = new ArrayList<String>(10);
+		var list = new ArrayList<String>(9);
 		list.add(ClangdMetadata.Predefined.additionalOptions.identifer());
 		list.add(ClangdMetadata.Predefined.clangdPath.identifer());
 		list.add(ClangdMetadata.Predefined.completionStyle.identifer());

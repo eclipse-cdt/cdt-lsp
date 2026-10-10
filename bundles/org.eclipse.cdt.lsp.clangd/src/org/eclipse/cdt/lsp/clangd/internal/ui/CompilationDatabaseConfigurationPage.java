@@ -79,9 +79,10 @@ public final class CompilationDatabaseConfigurationPage extends ConfigurationPag
 		if (projectScope().isPresent()) {
 			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
 			if (!useProjectSettings()) {
+				var preferenceKeys = area.getPreferenceKeys();
 				try {
 					for (String key : prefs.keys()) {
-						if (area.getPreferenceKeys().contains(key)) {
+						if (preferenceKeys.contains(key)) {
 							prefs.remove(key);
 						}
 					}
