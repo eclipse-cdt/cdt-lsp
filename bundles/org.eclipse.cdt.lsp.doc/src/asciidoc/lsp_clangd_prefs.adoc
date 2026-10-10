@@ -39,6 +39,8 @@ image:lsp_clangd_prefs.png[width=550]
 |Additional                    |Miscellaneous `clangd` command-line arguments.
 |===
 
+Compilation database management is configured on the _Compilation Database_ page below _clangd_. On the workspace page, use _Set compilation database path in .clangd file_ together with _Custom compilation database directory_ to define a workspace-wide default for the directory containing `compile_commands.json`. On the project properties page, the same page also shows a _Compilation database_ status section with the active source, the resolved path to `compile_commands.json`, and the active build configuration.
+
 Related concepts:
 
 * xref:lsp_cpp_editor.adoc[C/C++ editor (LSP)]

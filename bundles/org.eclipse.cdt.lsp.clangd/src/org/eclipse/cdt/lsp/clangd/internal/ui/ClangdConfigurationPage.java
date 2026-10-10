@@ -21,12 +21,16 @@ import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.cdt.lsp.util.LspUtils;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
+import org.osgi.service.prefs.BackingStoreException;
 
 public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfiguration, ClangdOptions> {
 
-	private final String id = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
+	static final String PREFERENCE_PAGE_ID = "org.eclipse.cdt.lsp.clangd.editor.preferencePage"; //$NON-NLS-1$
 
 	@Override
 	protected ClangdConfiguration getConfiguration(IWorkbench workbench) {
@@ -50,20 +54,52 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 
 	@Override
 	protected String getPreferenceId() {
-		return id;
+		return PREFERENCE_PAGE_ID;
 	}
 
 	@Override
 	public boolean performOk() {
 		var configSettingsChanged = configurationSettingsChanged();
 		var projectOptionsDifferFromWorkspace = projectOptionsDifferFromWorkspace();
-		var done = super.performOk();
+		var done = persistentConfiguration();
 		if (done && LspUtils.isLsActive()
 				&& (((!projectScope().isPresent() || useProjectSettings()) && configSettingsChanged)
 						|| projectOptionsDifferFromWorkspace)) {
 			LspUtils.restartClangd();
 		}
 		return done;
+	}
+
+	private boolean persistentConfiguration() {
+		IEclipsePreferences prefs;
+		if (projectScope().isPresent()) {
+			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
+			if (!useProjectSettings()) {
+				var preferenceKeys = area.getPreferenceKeys();
+				try {
+					for (String key : prefs.keys()) {
+						if (preferenceKeys.contains(key)) {
+							prefs.remove(key);
+						}
+					}
+				} catch (BackingStoreException e) {
+					Platform.getLog(getClass()).error("Unable to reset project preferences.", e); //$NON-NLS-1$
+				}
+				prefs = null;
+			}
+		} else {
+			prefs = manager.getWorkingCopy(InstanceScope.INSTANCE.getNode(configuration.qualifier()));
+		}
+		if (prefs != null) {
+			area.store(prefs);
+		}
+		try {
+			manager.applyChanges();
+		} catch (BackingStoreException e) {
+			Platform.getLog(getClass()).error("Unable to save preferences.", e); //$NON-NLS-1$
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -87,8 +123,20 @@ public final class ClangdConfigurationPage extends ConfigurationPage<ClangdConfi
 	protected boolean hasProjectSpecificOptions() {
 		return projectScope()//
 				.map(p -> p.getNode(configuration.qualifier()))//
-				.map(n -> n.get(ClangdMetadata.Predefined.clangdPath.identifer(), null))//
+				.filter(ClangdConfigurationPage::hasClangdProjectSpecificOptions)//
 				.isPresent();
+	}
+
+	static boolean hasClangdProjectSpecificOptions(IEclipsePreferences preferences) {
+		return preferences.get(ClangdMetadata.Predefined.clangdPath.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.useTidy.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.useBackgroundIndex.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.completionStyle.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.prettyPrint.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.queryDriver.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.additionalOptions.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.logToConsole.identifer(), null) != null
+				|| preferences.get(ClangdMetadata.Predefined.validateClangdOptions.identifer(), null) != null;
 	}
 
 }
