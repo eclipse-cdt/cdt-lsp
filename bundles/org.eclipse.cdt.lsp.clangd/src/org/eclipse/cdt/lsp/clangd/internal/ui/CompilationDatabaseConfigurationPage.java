@@ -20,15 +20,13 @@ import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSuppo
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.cdt.lsp.ui.ConfigurationPage;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
-import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * Dedicated page for project/workspace compilation database settings.
@@ -67,43 +65,11 @@ public final class CompilationDatabaseConfigurationPage extends ConfigurationPag
 	@Override
 	public boolean performOk() {
 		var settingsChanged = configurationSettingsChanged();
-		var done = persistentConfiguration();
+		var done = super.performOk();
 		if (done && !projectScope().isPresent() && settingsChanged) {
 			synchronizeWorkspaceProjects();
 		}
 		return done;
-	}
-
-	private boolean persistentConfiguration() {
-		IEclipsePreferences prefs;
-		if (projectScope().isPresent()) {
-			prefs = manager.getWorkingCopy(projectScope().get().getNode(configuration.qualifier()));
-			if (!useProjectSettings()) {
-				var preferenceKeys = area.getPreferenceKeys();
-				try {
-					for (String key : prefs.keys()) {
-						if (preferenceKeys.contains(key)) {
-							prefs.remove(key);
-						}
-					}
-				} catch (BackingStoreException e) {
-					Platform.getLog(getClass()).error("Unable to reset project preferences.", e); //$NON-NLS-1$
-				}
-				prefs = null;
-			}
-		} else {
-			prefs = manager.getWorkingCopy(InstanceScope.INSTANCE.getNode(configuration.qualifier()));
-		}
-		if (prefs != null) {
-			area.store(prefs);
-		}
-		try {
-			manager.applyChanges();
-		} catch (BackingStoreException e) {
-			Platform.getLog(getClass()).error("Unable to save preferences.", e); //$NON-NLS-1$
-			return false;
-		}
-		return true;
 	}
 
 	private boolean configurationSettingsChanged() {
