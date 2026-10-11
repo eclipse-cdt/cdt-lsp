@@ -45,10 +45,6 @@ import org.eclipse.swt.widgets.Text;
  * Project/workspace UI for clangd compilation database preferences.
  */
 public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptions> {
-	// Classic CDT managed-build projects do not expose an Eclipse build configuration here even
-	// though their default build folder is "Debug", so use that as the initial custom directory.
-	private static final String DEFAULT_CLASSIC_BUILD_DIRECTORY = "Debug"; //$NON-NLS-1$
-
 	private final Button setCompilationDatabase;
 	private final Composite compilationDatabaseComposite;
 	private final Text compilationDatabaseOverride;
@@ -246,18 +242,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	@Override
 	public void load(ClangdOptions options, boolean enable) {
 		setCompilationDatabase.setSelection(options.setCompilationDatabase());
-		compilationDatabaseOverride.setText(defaultCompilationDatabaseOverride(options, enable));
+		compilationDatabaseOverride.setText(options.compilationDatabaseOverride());
 		enablePreferenceContent(enable);
-	}
-
-	private String defaultCompilationDatabaseOverride(ClangdOptions options, boolean enableProjectSettings) {
-		//		if (!options.compilationDatabaseOverride().isBlank()) {
-		//			return options.compilationDatabaseOverride();
-		//		}
-		//		if (project != null && enableProjectSettings && compilationDatabaseSupport.status(project).buildConfiguration().isBlank()) {
-		//			return DEFAULT_CLASSIC_BUILD_DIRECTORY;
-		//		}
-		return options.compilationDatabaseOverride();
 	}
 
 	@Override
@@ -277,7 +263,6 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 
 	public boolean optionsChanged(ClangdOptions options) {
 		return options.setCompilationDatabase() != setCompilationDatabase.getSelection()
-				|| !defaultCompilationDatabaseOverride(options, enableProjectSpecificSettings)
-						.equals(compilationDatabaseOverride.getText());
+				|| !options.compilationDatabaseOverride().equals(compilationDatabaseOverride.getText());
 	}
 }

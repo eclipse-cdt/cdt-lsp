@@ -55,6 +55,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			ClangdCompilationDatabaseSettings.class);
 
 	private static final boolean SKIP_LOCAL_PROJECT = true;
+	private static final boolean DONT_SKIP_LOCAL_PROJECT = false;
 
 	/**
 	 * Synchronizes the managed {@value #CLANGD_CONFIG_FILE_NAME} content with the currently detected
@@ -90,16 +91,18 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			return Optional.empty();
 		}
 		Optional<String> customDirectory = customOverride(project);
-		if (customDirectory.isEmpty() && hasParentClangdConfiguration(project, false)) {
-			return Optional.empty();
-		}
 		Optional<String> automaticDirectory = customDirectory.isPresent() ? Optional.empty()
 				: automaticDirectorySupplier.get();
-		//		if (customDirectory.isEmpty() && automaticDirectory.isEmpty()) {
-		//			return Optional.empty(); // TODO: remove the clangd config file when it was previously managed and now no longer detected?
-		//		}
+		if (customDirectory.isEmpty() && automaticDirectory.isEmpty()
+				&& hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT)) {
+			return Optional.empty();
+		}
+
+		// Check for the special case of a parent .clangd configuration file,
+		// which should be used when there is no customDirectory or automaticDirectory.
+		// If there is no parent .clangd configuration, then the default behavior is to use the "Ancestors" fallback.
 		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElseGet(() -> {
-			return hasParentClangdConfiguration(project, true) ? NONE : COMPILATION_DATABASE_ANCESTORS;
+			return hasParentClangdConfiguration(project, SKIP_LOCAL_PROJECT) ? NONE : COMPILATION_DATABASE_ANCESTORS;
 		});
 		return Optional.of(setCompilationDatabase(project, configuredDirectory));
 	}
@@ -136,12 +139,13 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 				? automaticDirectory(project)
 				: Optional.empty();
 		boolean parentClangd = customDirectory.isEmpty() && automaticDirectory.isEmpty()
-				&& hasParentClangdConfiguration(project, true);
+				&& hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT);
 		Source source = customDirectory.isPresent() ? Source.CUSTOM
 				: automaticDirectory.isPresent() ? Source.AUTOMATIC
 						: automaticManagementEnabled && !parentClangd ? Source.ANCESTORS : Source.NONE;
 		String configuredDirectory = customDirectory.or(() -> automaticDirectory)
 				.orElse(source == Source.ANCESTORS ? COMPILATION_DATABASE_ANCESTORS : ""); //$NON-NLS-1$
+		// TODO: Use current path in .clangd when it's existing, to show the actual path that clangd will use, instead of the configured directory when the settings is disabled.
 		String compileCommandsPath = compileCommandsPath(project, configuredDirectory).orElse(""); //$NON-NLS-1$
 		boolean exists = !compileCommandsPath.isBlank()
 				&& Files.isRegularFile(Path.fromOSString(compileCommandsPath).toFile().toPath());
@@ -234,7 +238,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (source == Source.ANCESTORS) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_ancestors;
 		}
-		if (parentClangd || hasParentClangdConfiguration(project, false)) {
+		if (parentClangd || hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT)) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_parent_clangd;
 		}
 		return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_not_detected;
