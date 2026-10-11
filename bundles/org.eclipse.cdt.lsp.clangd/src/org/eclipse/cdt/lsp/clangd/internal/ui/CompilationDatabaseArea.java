@@ -166,9 +166,10 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private void selectCompilationDatabaseDirectory(SelectionEvent event) {
 		DirectoryDialog dialog = new DirectoryDialog(compilationDatabaseOverride.getShell());
 		dialog.setText(LspEditorUiMessages.LspEditorPreferencePage_compilation_database_override);
-		if (!compilationDatabaseOverride.getText().isBlank() && project != null) {
+		if (!compilationDatabaseOverride.getText().isBlank()) {
 			var directory = Path.fromOSString(compilationDatabaseOverride.getText());
-			var absolute = directory.isAbsolute() ? directory : project.getLocation().append(directory);
+			var absolute = directory.isAbsolute() || project == null ? directory
+					: project.getLocation().append(directory);
 			dialog.setFilterPath(absolute.toOSString());
 		} else if (project != null) {
 			dialog.setFilterPath(project.getLocation().toOSString());
