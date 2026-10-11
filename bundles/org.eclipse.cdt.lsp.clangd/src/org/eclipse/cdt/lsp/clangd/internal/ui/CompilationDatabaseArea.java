@@ -29,6 +29,7 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -165,8 +166,12 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private void selectCompilationDatabaseDirectory(SelectionEvent event) {
 		DirectoryDialog dialog = new DirectoryDialog(compilationDatabaseOverride.getShell());
 		dialog.setText(LspEditorUiMessages.LspEditorPreferencePage_compilation_database_override);
-		if (!compilationDatabaseOverride.getText().isBlank()) {
-			dialog.setFilterPath(compilationDatabaseOverride.getText());
+		if (!compilationDatabaseOverride.getText().isBlank() && project != null) {
+			var directory = Path.fromOSString(compilationDatabaseOverride.getText());
+			var absolute = directory.isAbsolute() ? directory : project.getLocation().append(directory);
+			dialog.setFilterPath(absolute.toOSString());
+		} else if (project != null) {
+			dialog.setFilterPath(project.getLocation().toOSString());
 		}
 		String selected = dialog.open();
 		if (selected != null) {
@@ -258,6 +263,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 						compileCommandsPathFromConfigFile = path;
 						if (!compilationDatabaseOverride.isDisposed()) {
 							compilationDatabaseOverride.setText(path.get());
+							refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
 						}
 					});
 				} catch (Exception e) {

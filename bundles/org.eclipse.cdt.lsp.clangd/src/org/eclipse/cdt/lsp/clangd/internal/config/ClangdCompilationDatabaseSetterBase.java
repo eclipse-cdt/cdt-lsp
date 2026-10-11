@@ -141,9 +141,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private boolean updateClangdConfigFile(IFile configFile, String charset, String databaseDirectoryPath,
 			IProgressMonitor monitor) throws CoreException, IOException {
 		if (configFile.getLocation() != null) {
-			if (configFile.exists() && (databaseDirectoryPath == null || databaseDirectoryPath.isBlank())) {
-				return removeCompilationDatabase(configFile, charset, monitor);
-			}
+			// TODO: Ensure that things like this: `If: {PathMatch: "CompilationDatabase:.*"}` are handled correctly, i.e. not removed when the databaseDirectoryPath is null or blank.
+			//			if (configFile.exists() && (databaseDirectoryPath == null || databaseDirectoryPath.isBlank())) {
+			//				return removeCompilationDatabase(configFile, charset, monitor);
+			//			}
 			var lines = readClangdConfigFile(configFile);
 			var isBlank = true;
 			var changed = false;
