@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
@@ -24,6 +25,12 @@ import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatu
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.ui.ConfigurationArea;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
@@ -59,6 +66,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private ControlEnableState groupEnableState;
 	private boolean enableProjectSpecificSettings = true;
+	private Optional<WorkspaceJob> getCompileCommandsPathJob = Optional.empty();
+	private Optional<String> compileCommandsPathFromConfigFile = Optional.empty();
 
 	public CompilationDatabaseArea(Composite parent, boolean isProjectScope, IProject project) {
 		super(3);
@@ -86,6 +95,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_location);
 			this.compilationDatabaseBuildConfiguration = createStatusValue(compilationDatabaseComposite,
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_build_configuration);
+			this.getCompileCommandsPathJob = getCompileCommandsPathFromConfigFileJob(project);
 		} else {
 			this.compilationDatabaseStatus = null;
 			this.compilationDatabaseSource = null;
@@ -208,19 +218,65 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 			return;
 		}
 		ClangdCompilationDatabaseStatus status = compilationDatabaseSupport.status(project, enabled,
-				compilationDatabaseOverride.getText());
+				compilationDatabaseOverride.getText(), compileCommandsPathFromConfigFile);
 		compilationDatabaseStatus.setText(status.message());
 		compilationDatabaseStatus.setToolTipText(status.message());
 		String sourceLabel = sourceLabel(status);
 		compilationDatabaseSource.setText(sourceLabel);
 		compilationDatabaseSource.setToolTipText(sourceLabel);
 		String compileCommandsPath = status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath(); //$NON-NLS-1$
+		// Schedule a job to read the compile_commands.json path from the .clangd file if it is not already set and the job is available.
+		if (status.compileCommandsPath().isBlank() && getCompileCommandsPathJob.isPresent()) {
+			getCompileCommandsPathJob.get().schedule();
+		}
 		compilationDatabaseLocation.setText(compileCommandsPath);
 		compilationDatabaseLocation.setToolTipText(compileCommandsPath);
 		String buildConfiguration = status.buildConfiguration().isBlank() ? "-" : status.buildConfiguration(); //$NON-NLS-1$
 		compilationDatabaseBuildConfiguration.setText(buildConfiguration);
 		compilationDatabaseBuildConfiguration.setToolTipText(buildConfiguration);
 		compilationDatabaseStatus.getParent().layout(true, true);
+	}
+
+	private Optional<WorkspaceJob> getCompileCommandsPathFromConfigFileJob(IProject project) {
+		if (project == null) {
+			return Optional.empty();
+		}
+		var configFile = project.getFile(".clangd"); //$NON-NLS-1$
+		if (!configFile.exists()) {
+			return Optional.empty();
+		}
+		var updateClangdJob = new WorkspaceJob("Read .clangd") { //$NON-NLS-1$
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+				var path = compilationDatabaseSupport.getCurrentPathInConfigFile(project);
+				if (path.isEmpty()) {
+					return Status.CANCEL_STATUS;
+				}
+				try {
+					var display = compilationDatabaseOverride.getDisplay();
+					display.asyncExec(() -> {
+						compileCommandsPathFromConfigFile = path;
+						if (!compilationDatabaseOverride.isDisposed()) {
+							compilationDatabaseOverride.setText(path.get());
+						}
+					});
+				} catch (Exception e) {
+					Platform.getLog(getClass()).error(e.getMessage(), e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		updateClangdJob.setRule(configFile);
+		updateClangdJob.setSystem(true);
+		return Optional.of(updateClangdJob);
+	}
+
+	@Override
+	public void dispose() {
+		if (getCompileCommandsPathJob.isPresent()) {
+			getCompileCommandsPathJob.get().cancel();
+		}
+		super.dispose();
 	}
 
 	private String sourceLabel(ClangdCompilationDatabaseStatus status) {

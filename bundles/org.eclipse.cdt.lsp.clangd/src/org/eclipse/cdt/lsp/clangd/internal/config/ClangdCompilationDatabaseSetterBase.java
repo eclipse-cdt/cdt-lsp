@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -109,6 +110,27 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		updateClangdJob.setSystem(true);
 		updateClangdJob.schedule();
 		return updateClangdJob;
+	}
+
+	public Optional<String> getCurrentPathInConfigFile(IProject project) {
+		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
+		if (configFile.exists()) {
+			try {
+				var lines = readClangdConfigFile(configFile);
+				for (var line : lines) {
+					Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
+					if (pathGroupMatcher.matches()) {
+						return Optional.of(removeEscaped(pathGroupMatcher.group(1).trim()));
+					}
+				}
+			} catch (CoreException e) {
+				Platform.getLog(getClass()).log(e.getStatus());
+			} catch (IOException | IllegalArgumentException e) {
+				Platform.getLog(getClass()).error(e.getMessage(), e);
+			}
+		}
+		return Optional.empty();
+
 	}
 
 	/**

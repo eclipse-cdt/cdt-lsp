@@ -117,7 +117,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (project == null) {
 			return new ClangdCompilationDatabaseStatus(Source.NONE, "", "", "", false, false, ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		return status(project, isAutomaticManagementEnabled(project), customOverride(project).orElse("")); //$NON-NLS-1$
+		return status(project, isAutomaticManagementEnabled(project), customOverride(project).orElse(""), //$NON-NLS-1$
+				Optional.empty());
 	}
 
 	/**
@@ -129,7 +130,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	 * @return immutable status snapshot used by the UI
 	 */
 	public ClangdCompilationDatabaseStatus status(IProject project, boolean automaticManagementEnabled,
-			String customOverridePath) {
+			String customOverridePath, Optional<String> currentPath) {
 		if (project == null) {
 			return new ClangdCompilationDatabaseStatus(Source.NONE, "", "", "", false, false, ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -139,13 +140,12 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 				? automaticDirectory(project)
 				: Optional.empty();
 		boolean parentClangd = customDirectory.isEmpty() && automaticDirectory.isEmpty()
-				&& hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT);
-		Source source = customDirectory.isPresent() ? Source.CUSTOM
+				&& hasParentClangdConfiguration(project, SKIP_LOCAL_PROJECT);
+		Source source = (customDirectory.isPresent() || currentPath.isPresent()) ? Source.CUSTOM
 				: automaticDirectory.isPresent() ? Source.AUTOMATIC
 						: automaticManagementEnabled && !parentClangd ? Source.ANCESTORS : Source.NONE;
-		String configuredDirectory = customDirectory.or(() -> automaticDirectory)
+		String configuredDirectory = customDirectory.or(() -> automaticDirectory).or(() -> currentPath)
 				.orElse(source == Source.ANCESTORS ? COMPILATION_DATABASE_ANCESTORS : ""); //$NON-NLS-1$
-		// TODO: Use current path in .clangd when it's existing, to show the actual path that clangd will use, instead of the configured directory when the settings is disabled.
 		String compileCommandsPath = compileCommandsPath(project, configuredDirectory).orElse(""); //$NON-NLS-1$
 		boolean exists = !compileCommandsPath.isBlank()
 				&& Files.isRegularFile(Path.fromOSString(compileCommandsPath).toFile().toPath());
