@@ -41,6 +41,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(service = ClangdCompilationDatabaseSupport.class)
 public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDatabaseSetterBase {
+	private static final String NONE = ""; //$NON-NLS-1$
 	private static final String COMPILATION_DATABASE_ANCESTORS = "Ancestors"; //$NON-NLS-1$
 	private static final String COMPILE_COMMANDS_JSON = "compile_commands.json"; //$NON-NLS-1$
 
@@ -52,6 +53,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 
 	private final ServiceCaller<ClangdCompilationDatabaseSettings> settings = new ServiceCaller<>(getClass(),
 			ClangdCompilationDatabaseSettings.class);
+
+	private static final boolean SKIP_LOCAL_PROJECT = true;
 
 	/**
 	 * Synchronizes the managed {@value #CLANGD_CONFIG_FILE_NAME} content with the currently detected
@@ -80,20 +83,24 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	 * Performs the synchronization decision after all inputs were supplied by the caller.
 	 */
 	Optional<WorkspaceJob> synchronize(IProject project, Supplier<Optional<String>> automaticDirectorySupplier) {
-		if (project == null) {
+		if (project == null || !project.isAccessible()) {
 			return Optional.empty();
 		}
 		if (!isAutomaticManagementEnabled(project)) {
 			return Optional.empty();
 		}
 		Optional<String> customDirectory = customOverride(project);
-		Optional<String> automaticDirectory = customDirectory.isPresent() ? Optional.empty()
-				: automaticDirectorySupplier.get();
-		if (customDirectory.isEmpty() && automaticDirectory.isEmpty() && hasParentClangdConfiguration(project)) {
+		if (customDirectory.isEmpty() && hasParentClangdConfiguration(project, false)) {
 			return Optional.empty();
 		}
-		String configuredDirectory = customDirectory.or(() -> automaticDirectory)
-				.orElse(COMPILATION_DATABASE_ANCESTORS);
+		Optional<String> automaticDirectory = customDirectory.isPresent() ? Optional.empty()
+				: automaticDirectorySupplier.get();
+		//		if (customDirectory.isEmpty() && automaticDirectory.isEmpty()) {
+		//			return Optional.empty(); // TODO: remove the clangd config file when it was previously managed and now no longer detected?
+		//		}
+		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElseGet(() -> {
+			return hasParentClangdConfiguration(project, true) ? NONE : COMPILATION_DATABASE_ANCESTORS;
+		});
 		return Optional.of(setCompilationDatabase(project, configuredDirectory));
 	}
 
@@ -129,7 +136,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 				? automaticDirectory(project)
 				: Optional.empty();
 		boolean parentClangd = customDirectory.isEmpty() && automaticDirectory.isEmpty()
-				&& hasParentClangdConfiguration(project);
+				&& hasParentClangdConfiguration(project, true);
 		Source source = customDirectory.isPresent() ? Source.CUSTOM
 				: automaticDirectory.isPresent() ? Source.AUTOMATIC
 						: automaticManagementEnabled && !parentClangd ? Source.ANCESTORS : Source.NONE;
@@ -227,14 +234,14 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (source == Source.ANCESTORS) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_ancestors;
 		}
-		if (parentClangd || hasParentClangdConfiguration(project)) {
+		if (parentClangd || hasParentClangdConfiguration(project, false)) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_parent_clangd;
 		}
 		return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_not_detected;
 	}
 
-	private boolean hasParentClangdConfiguration(IProject project) {
+	private boolean hasParentClangdConfiguration(IProject project, boolean skipLocalProject) {
 		return project.getLocation() != null
-				&& DefaultClangdCompilationDatabaseProvider.hasClangdFileInParentFolders(project);
+				&& DefaultClangdCompilationDatabaseProvider.hasClangdFileInParentFolders(project, skipLocalProject);
 	}
 }

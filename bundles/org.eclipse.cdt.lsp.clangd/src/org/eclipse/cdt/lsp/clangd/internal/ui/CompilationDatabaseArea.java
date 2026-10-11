@@ -73,7 +73,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(columns).create());
-		this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite, SWT.CHECK, 0);
+		this.setCompilationDatabase = createButton(ClangdMetadata.Predefined.setCompilationDatabase, composite,
+				SWT.CHECK, 0);
 		this.setCompilationDatabase.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
 			updateCompilationDatabaseControls();
 			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
@@ -104,8 +105,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		this.compilationDatabaseOverrideBrowse = new Button(compilationDatabaseComposite, SWT.NONE);
 		this.compilationDatabaseOverrideBrowse
 				.setText(LspEditorUiMessages.LspEditorPreferencePage_compilation_database_browse_directory);
-		this.compilationDatabaseOverrideBrowse
-				.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::selectCompilationDatabaseDirectory));
+		this.compilationDatabaseOverrideBrowse.addSelectionListener(
+				SelectionListener.widgetSelectedAdapter(this::selectCompilationDatabaseDirectory));
 	}
 
 	private Composite createCompilationDatabaseComposite(Composite parent) {
@@ -119,7 +120,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		return composite;
 	}
 
-	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine, int horizontalSpan) {
+	private Text createText(PreferenceMetadata<String> meta, Composite composite, boolean multiLine,
+			int horizontalSpan) {
 		Label label = new Label(composite, SWT.NONE);
 		label.setText(meta.name());
 		label.setLayoutData(GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).create());
@@ -182,7 +184,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		if (groupEnableState != null) {
 			groupEnableState.restore();
 		}
-		groupEnableState = enableProjectSpecificSettings ? null : ControlEnableState.disable(compilationDatabaseComposite);
+		groupEnableState = enableProjectSpecificSettings ? null
+				: ControlEnableState.disable(compilationDatabaseComposite);
 	}
 
 	private boolean effectiveCompilationDatabaseEnabled() {
@@ -248,12 +251,12 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	}
 
 	private String defaultCompilationDatabaseOverride(ClangdOptions options, boolean enableProjectSettings) {
-		if (!options.compilationDatabaseOverride().isBlank()) {
-			return options.compilationDatabaseOverride();
-		}
-		if (project != null && enableProjectSettings && compilationDatabaseSupport.status(project).buildConfiguration().isBlank()) {
-			return DEFAULT_CLASSIC_BUILD_DIRECTORY;
-		}
+		//		if (!options.compilationDatabaseOverride().isBlank()) {
+		//			return options.compilationDatabaseOverride();
+		//		}
+		//		if (project != null && enableProjectSettings && compilationDatabaseSupport.status(project).buildConfiguration().isBlank()) {
+		//			return DEFAULT_CLASSIC_BUILD_DIRECTORY;
+		//		}
 		return options.compilationDatabaseOverride();
 	}
 

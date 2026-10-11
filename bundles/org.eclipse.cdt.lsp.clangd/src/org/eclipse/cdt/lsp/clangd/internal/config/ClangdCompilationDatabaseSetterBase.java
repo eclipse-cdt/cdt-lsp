@@ -165,7 +165,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				if (closingBracket >= 0) {
 					String prefix = line.substring(0, closingBracket).stripTrailing();
 					String suffix = line.substring(closingBracket);
-					String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$
+					String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " //$NON-NLS-1$ //$NON-NLS-2$
 							+ databaseDirectoryPath + suffix);
 					return true;
