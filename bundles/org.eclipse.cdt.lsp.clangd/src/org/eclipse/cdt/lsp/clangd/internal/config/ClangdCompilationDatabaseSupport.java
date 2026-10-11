@@ -130,6 +130,20 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	 * @return immutable status snapshot used by the UI
 	 */
 	public ClangdCompilationDatabaseStatus status(IProject project, boolean automaticManagementEnabled,
+			String customOverridePath) {
+		return status(project, automaticManagementEnabled, customOverridePath, Optional.empty());
+	}
+
+	/**
+	 * Returns the compilation database status for explicit UI state that may not be stored yet.
+	 *
+	 * @param project project whose status should be reported
+	 * @param automaticManagementEnabled whether automatic management is currently enabled in the UI
+	 * @param customOverridePath custom override path currently shown in the UI
+	 * @param currentPath current path from .clangd file
+	 * @return immutable status snapshot used by the UI
+	 */
+	public ClangdCompilationDatabaseStatus status(IProject project, boolean automaticManagementEnabled,
 			String customOverridePath, Optional<String> currentPath) {
 		if (project == null) {
 			return new ClangdCompilationDatabaseStatus(Source.NONE, "", "", "", false, false, ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

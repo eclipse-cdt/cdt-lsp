@@ -175,7 +175,15 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		}
 		String selected = dialog.open();
 		if (selected != null) {
-			compilationDatabaseOverride.setText(selected);
+			String selectedValue = selected;
+			if (project != null && project.getLocation() != null) {
+				var selectedPath = Path.fromOSString(selected);
+				var projectLocation = project.getLocation();
+				if (projectLocation.isPrefixOf(selectedPath)) {
+					selectedValue = selectedPath.makeRelativeTo(projectLocation).toOSString();
+				}
+			}
+			compilationDatabaseOverride.setText(selectedValue);
 			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
 			changed(event);
 		}
