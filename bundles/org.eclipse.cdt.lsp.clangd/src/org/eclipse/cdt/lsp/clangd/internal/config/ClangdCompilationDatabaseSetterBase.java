@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -104,10 +105,32 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				}
 			}
 		});
-		updateClangdJob.setRule(configFile.exists() ? configFile : project);
+		boolean removalMayDeleteFile = databaseDirectoryPath == null || databaseDirectoryPath.isBlank();
+		updateClangdJob.setRule(removalMayDeleteFile ? project : (configFile.exists() ? configFile : project));
 		updateClangdJob.setSystem(true);
 		updateClangdJob.schedule();
 		return updateClangdJob;
+	}
+
+	public Optional<String> getCurrentPathInConfigFile(IProject project) {
+		var configFile = project.getFile(CLANGD_CONFIG_FILE_NAME);
+		if (configFile.exists()) {
+			try {
+				var lines = readClangdConfigFile(configFile);
+				for (var line : lines) {
+					Matcher pathGroupMatcher = pathGroupPattern.matcher(line);
+					if (pathGroupMatcher.matches()) {
+						return Optional.of(removeEscaped(pathGroupMatcher.group(1).trim()));
+					}
+				}
+			} catch (CoreException e) {
+				Platform.getLog(getClass()).log(e.getStatus());
+			} catch (IOException | IllegalArgumentException e) {
+				Platform.getLog(getClass()).error(e.getMessage(), e);
+			}
+		}
+		return Optional.empty();
+
 	}
 
 	/**
@@ -118,6 +141,10 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 	private boolean updateClangdConfigFile(IFile configFile, String charset, String databaseDirectoryPath,
 			IProgressMonitor monitor) throws CoreException, IOException {
 		if (configFile.getLocation() != null) {
+			// TODO: Ensure that things like this: `If: {PathMatch: "CompilationDatabase:.*"}` are handled correctly, i.e. not removed when the databaseDirectoryPath is null or blank.
+			//			if (configFile.exists() && (databaseDirectoryPath == null || databaseDirectoryPath.isBlank())) {
+			//				return removeCompilationDatabase(configFile, charset, monitor);
+			//			}
 			var lines = readClangdConfigFile(configFile);
 			var isBlank = true;
 			var changed = false;
@@ -165,7 +192,7 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 				if (closingBracket >= 0) {
 					String prefix = line.substring(0, closingBracket).stripTrailing();
 					String suffix = line.substring(closingBracket);
-					String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$
+					String separator = prefix.endsWith("{") ? "" : ","; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					lines.set(i, prefix + separator + " " + COMPILATTION_DATABASE + ": " //$NON-NLS-1$ //$NON-NLS-2$
 							+ databaseDirectoryPath + suffix);
 					return true;
@@ -181,6 +208,142 @@ public abstract class ClangdCompilationDatabaseSetterBase {
 		lines.add(COMPILE_FLAGS_PREFIX);
 		lines.add(INDENT + COMPILATION_DATABASE_PREFIX + " " + databaseDirectoryPath); //$NON-NLS-1$
 		return true;
+	}
+
+	/**
+	 * Removes the first matching {@code CompilationDatabase} entry and cleans up empty
+	 * {@code CompileFlags} blocks. Deletes the file when no YAML entries remain.
+	 */
+	private boolean removeCompilationDatabase(IFile configFile, String charset, IProgressMonitor monitor)
+			throws CoreException, IOException {
+		if (configFile.getLocation() == null) {
+			return false;
+		}
+		var lines = readClangdConfigFile(configFile);
+		if (lines.isEmpty()) {
+			return false;
+		}
+
+		boolean changed = removeCompilationDatabaseEntry(lines);
+		if (!changed) {
+			return false;
+		}
+
+		cleanupEmptyCompileFlagsSections(lines);
+		if (!hasYamlEntries(lines)) {
+			configFile.delete(IResource.KEEP_HISTORY, monitor);
+		} else {
+			writeClangdConfigFile(configFile, charset, lines, monitor);
+		}
+		return true;
+	}
+
+	/**
+	 * Removes a single {@code CompilationDatabase} key/value from either an inline map or block form.
+	 */
+	private boolean removeCompilationDatabaseEntry(List<String> lines) {
+		for (int i = 0; i < lines.size(); i++) {
+			String line = lines.get(i);
+			String trimmed = line.trim();
+			if (trimmed.startsWith(COMPILATION_DATABASE_PREFIX)) {
+				lines.remove(i);
+				return true;
+			}
+
+			int keyStart = line.indexOf(COMPILATTION_DATABASE + ":"); //$NON-NLS-1$
+			if (keyStart >= 0) {
+				String updated = removeInlineCompilationDatabaseEntry(line, keyStart);
+				if (!updated.contentEquals(line)) {
+					lines.set(i, updated);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private String removeInlineCompilationDatabaseEntry(String line, int keyStart) {
+		int keyEnd = keyStart + COMPILATTION_DATABASE.length() + 1;
+		int valueEnd = keyEnd;
+		while (valueEnd < line.length() && line.charAt(valueEnd) != ',' && line.charAt(valueEnd) != '}') {
+			valueEnd++;
+		}
+
+		int removeStart = keyStart;
+		int removeEnd = valueEnd;
+
+		int next = valueEnd;
+		while (next < line.length() && Character.isWhitespace(line.charAt(next))) {
+			next++;
+		}
+		if (next < line.length() && line.charAt(next) == ',') {
+			removeEnd = next + 1;
+			while (removeEnd < line.length() && Character.isWhitespace(line.charAt(removeEnd))) {
+				removeEnd++;
+			}
+		} else {
+			int prev = keyStart - 1;
+			while (prev >= 0 && Character.isWhitespace(line.charAt(prev))) {
+				prev--;
+			}
+			if (prev >= 0 && line.charAt(prev) == ',') {
+				removeStart = prev;
+			}
+		}
+
+		String updated = line.substring(0, removeStart) + line.substring(removeEnd);
+		updated = updated.replace("{ ", "{").replace(" ,", ","); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		updated = updated.replaceAll("\\{\\s*\\}", "{}"); //$NON-NLS-1$ //$NON-NLS-2$
+		return updated.stripTrailing();
+	}
+
+	private void cleanupEmptyCompileFlagsSections(List<String> lines) {
+		for (int i = lines.size() - 1; i >= 0; i--) {
+			String line = lines.get(i);
+			String trimmed = line.trim();
+			if (trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*\\{\\s*\\}\\s*$")) { //$NON-NLS-1$ //$NON-NLS-2$
+				lines.remove(i);
+				continue;
+			}
+
+			if (!trimmed.matches("^" + Pattern.quote(COMPILE_FLAGS_PREFIX) + "\\s*$")) { //$NON-NLS-1$ //$NON-NLS-2$
+				continue;
+			}
+
+			String indent = line.substring(0, line.indexOf(trimmed));
+			boolean hasEntry = false;
+			int j = i + 1;
+			while (j < lines.size()) {
+				String candidate = lines.get(j);
+				String candidateTrimmed = candidate.trim();
+				if (candidateTrimmed.isBlank()) {
+					j++;
+					continue;
+				}
+				if (!candidate.startsWith(indent + INDENT)) {
+					break;
+				}
+				if (!candidateTrimmed.startsWith("#")) { //$NON-NLS-1$
+					hasEntry = true;
+					break;
+				}
+				j++;
+			}
+
+			if (!hasEntry) {
+				lines.remove(i);
+			}
+		}
+	}
+
+	private boolean hasYamlEntries(List<String> lines) {
+		for (String line : lines) {
+			String trimmed = line.trim();
+			if (!trimmed.isEmpty() && !trimmed.startsWith("#")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
