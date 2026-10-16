@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.OsgiPreferenceMetadataStore;
 import org.eclipse.core.runtime.preferences.PreferenceMetadata;
-import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -65,10 +64,13 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private final boolean isProjectScope;
 	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
 	private final Map<PreferenceMetadata<String>, Text> texts;
-	private ControlEnableState groupEnableState;
 	private boolean enableProjectSpecificSettings = true;
 	private Optional<WorkspaceJob> getCompileCommandsPathJob = Optional.empty();
 	private Optional<String> compileCommandsPathFromConfigFile = Optional.empty();
+	// Read the compile_commands.json path from the .clangd file when refreshing the status.
+	// This is only done once when the UI is created, and not when the user changes the override path.
+	private static final boolean READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE = true;
+	private static final boolean DONT_READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE = false;
 
 	public CompilationDatabaseArea(Composite parent, boolean isProjectScope, IProject project) {
 		super(3);
@@ -83,7 +85,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 				SWT.CHECK, 0);
 		this.setCompilationDatabase.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
 			updateCompilationDatabaseControls();
-			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
+			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled(),
+					DONT_READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE);
 			changed(e);
 		}));
 		this.compilationDatabaseComposite = createCompilationDatabaseComposite(composite);
@@ -106,7 +109,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		this.compilationDatabaseOverride = createText(ClangdMetadata.Predefined.compilationDatabaseOverride,
 				compilationDatabaseComposite, false, 1);
 		this.compilationDatabaseOverride.addKeyListener(KeyListener.keyReleasedAdapter(e -> {
-			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
+			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled(),
+					DONT_READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE);
 			changed(e);
 		}));
 		this.compilationDatabaseOverrideBrowse = new Button(compilationDatabaseComposite, SWT.NONE);
@@ -185,7 +189,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 				}
 			}
 			compilationDatabaseOverride.setText(selectedValue);
-			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
+			refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled(),
+					DONT_READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE);
 			changed(event);
 		}
 	}
@@ -194,18 +199,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		enableProjectSpecificSettings = enableProjectSettings;
 		setCompilationDatabase.setEnabled(enableProjectSettings);
 		updateCompilationDatabaseControls();
-		refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
-	}
-
-	private void updateCompilationDatabaseGroupEnablement() {
-		if (!isProjectScope) {
-			return;
-		}
-		if (groupEnableState != null) {
-			groupEnableState.restore();
-		}
-		groupEnableState = enableProjectSpecificSettings ? null
-				: ControlEnableState.disable(compilationDatabaseComposite);
+		refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled(),
+				READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE);
 	}
 
 	private boolean effectiveCompilationDatabaseEnabled() {
@@ -220,14 +215,13 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	}
 
 	private boolean updateCompilationDatabaseControls() {
-		updateCompilationDatabaseGroupEnablement();
 		boolean enabled = areCompilationDatabaseControlsEnabled();
 		compilationDatabaseOverride.setEnabled(enabled);
 		compilationDatabaseOverrideBrowse.setEnabled(enabled);
 		return enabled;
 	}
 
-	private void refreshCompilationDatabaseStatus(boolean enabled) {
+	private void refreshCompilationDatabaseStatus(boolean enabled, boolean readCompileCommandsPathFromConfigFile) {
 		if (project == null) {
 			return;
 		}
@@ -240,7 +234,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		compilationDatabaseSource.setToolTipText(sourceLabel);
 		String compileCommandsPath = status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath(); //$NON-NLS-1$
 		// Schedule a job to read the compile_commands.json path from the .clangd file if it is not already set and the job is available.
-		if (status.compileCommandsPath().isBlank() && getCompileCommandsPathJob.isPresent()) {
+		if (status.compileCommandsPath().isBlank() && getCompileCommandsPathJob.isPresent()
+				&& readCompileCommandsPathFromConfigFile) {
 			getCompileCommandsPathJob.get().schedule();
 		}
 		compilationDatabaseLocation.setText(compileCommandsPath);
@@ -272,7 +267,8 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 						compileCommandsPathFromConfigFile = path;
 						if (!compilationDatabaseOverride.isDisposed()) {
 							compilationDatabaseOverride.setText(path.get());
-							refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled());
+							refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled(),
+									DONT_READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE);
 						}
 					});
 				} catch (Exception e) {
@@ -303,6 +299,9 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		}
 		if (status.source() == Source.ANCESTORS) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_ancestors;
+		}
+		if (status.source() == Source.FILE) {
+			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_file;
 		}
 		if (status.source() == Source.AUTOMATIC) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_source_automatic;

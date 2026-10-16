@@ -155,9 +155,11 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 				: Optional.empty();
 		boolean parentClangd = customDirectory.isEmpty() && automaticDirectory.isEmpty()
 				&& hasParentClangdConfiguration(project, SKIP_LOCAL_PROJECT);
-		Source source = (customDirectory.isPresent() || currentPath.isPresent()) ? Source.CUSTOM
+		Source source = customDirectory.isPresent() ? Source.CUSTOM
 				: automaticDirectory.isPresent() ? Source.AUTOMATIC
-						: automaticManagementEnabled && !parentClangd ? Source.ANCESTORS : Source.NONE;
+						: currentPath.isPresent() && !COMPILATION_DATABASE_ANCESTORS.equals(currentPath.get())
+								? Source.FILE
+								: automaticManagementEnabled && !parentClangd ? Source.ANCESTORS : Source.NONE;
 		String configuredDirectory = customDirectory.or(() -> automaticDirectory).or(() -> currentPath)
 				.orElse(source == Source.ANCESTORS ? COMPILATION_DATABASE_ANCESTORS : ""); //$NON-NLS-1$
 		String compileCommandsPath = compileCommandsPath(project, configuredDirectory).orElse(""); //$NON-NLS-1$
@@ -236,7 +238,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (customDirectory.isPresent() && !compileCommandsExists) {
 			return org.eclipse.osgi.util.NLS.bind(
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_custom_missing,
-					compileCommandsPath);
+					compileCommandsPath.isBlank() ? customDirectory.get() : compileCommandsPath);
 		}
 		if (customDirectory.isPresent()) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_custom;
@@ -251,6 +253,10 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		}
 		if (source == Source.ANCESTORS) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_ancestors;
+		}
+		if (source == Source.FILE) {
+			return org.eclipse.osgi.util.NLS.bind(
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_file, compileCommandsPath);
 		}
 		if (parentClangd || hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT)) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_parent_clangd;
