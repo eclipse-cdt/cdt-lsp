@@ -65,8 +65,10 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private boolean enableProjectSpecificSettings = true;
+	// Job to read the compile_commands.json path from the .clangd file, if available:
 	private Optional<WorkspaceJob> getCompileCommandsPathJob = Optional.empty();
 	private Optional<String> compileCommandsPathFromConfigFile = Optional.empty();
+	private Optional<ClangdOptions> loadedOptions = Optional.empty();
 	// Read the compile_commands.json path from the .clangd file when refreshing the status.
 	// This is only done once when the UI is created, and not when the user changes the override path.
 	private static final boolean READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE = true;
@@ -221,11 +223,12 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		return enabled;
 	}
 
-	private void refreshCompilationDatabaseStatus(boolean enabled, boolean readCompileCommandsPathFromConfigFile) {
+	private void refreshCompilationDatabaseStatus(boolean automaticManagementEnabled,
+			boolean readCompileCommandsPathFromConfigFile) {
 		if (project == null) {
 			return;
 		}
-		ClangdCompilationDatabaseStatus status = compilationDatabaseSupport.status(project, enabled,
+		ClangdCompilationDatabaseStatus status = compilationDatabaseSupport.status(project, automaticManagementEnabled,
 				compilationDatabaseOverride.getText(), compileCommandsPathFromConfigFile);
 		compilationDatabaseStatus.setText(status.message());
 		compilationDatabaseStatus.setToolTipText(status.message());
@@ -233,8 +236,15 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		compilationDatabaseSource.setText(sourceLabel);
 		compilationDatabaseSource.setToolTipText(sourceLabel);
 		String compileCommandsPath = status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath(); //$NON-NLS-1$
-		// Schedule a job to read the compile_commands.json path from the .clangd file if it is not already set and the job is available.
-		if (status.compileCommandsPath().isBlank() && getCompileCommandsPathJob.isPresent()
+		var noCustomOverrideInPrefs = loadedOptions.map(options -> options.compilationDatabaseOverride().isBlank())
+				.orElse(true);
+		if (noCustomOverrideInPrefs && compilationDatabaseOverride.getText().isBlank()
+				&& compileCommandsPathFromConfigFile.isPresent() && automaticManagementEnabled) {
+			// Use the path from the .clangd file if available and no custom override is set.
+			compilationDatabaseOverride.setText(compileCommandsPathFromConfigFile.get());
+		}
+		// Schedule a job to read the compile_commands.json path from the .clangd file if it's not already set and the job is available.
+		if (status.compileCommandsPath().isBlank() && getCompileCommandsPathJob.isPresent() && noCustomOverrideInPrefs
 				&& readCompileCommandsPathFromConfigFile) {
 			getCompileCommandsPathJob.get().schedule();
 		}
@@ -266,7 +276,6 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 					display.asyncExec(() -> {
 						compileCommandsPathFromConfigFile = path;
 						if (!compilationDatabaseOverride.isDisposed()) {
-							compilationDatabaseOverride.setText(path.get());
 							refreshCompilationDatabaseStatus(effectiveCompilationDatabaseEnabled(),
 									DONT_READ_COMPILE_COMMANDS_PATH_FROM_CONFIG_FILE);
 						}
@@ -311,6 +320,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 
 	@Override
 	public void load(ClangdOptions options, boolean enable) {
+		loadedOptions = Optional.of(options);
 		setCompilationDatabase.setSelection(options.setCompilationDatabase());
 		compilationDatabaseOverride.setText(options.compilationDatabaseOverride());
 		enablePreferenceContent(enable);

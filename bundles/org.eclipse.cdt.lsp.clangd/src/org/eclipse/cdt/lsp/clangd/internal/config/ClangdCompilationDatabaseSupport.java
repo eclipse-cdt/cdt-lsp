@@ -254,9 +254,14 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		if (source == Source.ANCESTORS) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_ancestors;
 		}
-		if (source == Source.FILE) {
+		if (source == Source.FILE && compileCommandsExists) {
 			return org.eclipse.osgi.util.NLS.bind(
 					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_file, compileCommandsPath);
+		}
+		if (source == Source.FILE && !compileCommandsExists) {
+			return org.eclipse.osgi.util.NLS.bind(
+					LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_file_missing,
+					compileCommandsPath);
 		}
 		if (parentClangd || hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT)) {
 			return LspEditorUiMessages.LspEditorPreferencePage_compilation_database_status_parent_clangd;

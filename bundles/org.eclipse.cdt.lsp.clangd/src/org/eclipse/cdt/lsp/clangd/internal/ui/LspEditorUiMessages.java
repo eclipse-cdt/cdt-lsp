@@ -67,6 +67,7 @@ public class LspEditorUiMessages extends NLS {
 	public static String LspEditorPreferencePage_compilation_database_status_custom;
 	public static String LspEditorPreferencePage_compilation_database_status_ancestors;
 	public static String LspEditorPreferencePage_compilation_database_status_file;
+	public static String LspEditorPreferencePage_compilation_database_status_file_missing;
 	public static String LspEditorPreferencePage_compilation_database_status_automatic_missing;
 	public static String LspEditorPreferencePage_compilation_database_status_automatic;
 	public static String LspEditorPreferencePage_compilation_database_status_parent_clangd;
