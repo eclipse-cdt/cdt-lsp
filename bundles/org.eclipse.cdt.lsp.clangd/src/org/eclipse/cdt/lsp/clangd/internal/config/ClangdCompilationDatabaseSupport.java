@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Component;
  * Centralizes the effective compilation database state for a project.
  * <p>
  * This service resolves the active directory from project settings and provider detection, exposes
- * the status shown in the UI, and performs managed {@value #CLANGD_CONFIG_FILE_NAME} updates only
+ * the status shown in the UI, and performs managed .clangd updates only
  * when automatic management is enabled.
  * </p>
  */
@@ -58,7 +58,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	private static final boolean DONT_SKIP_LOCAL_PROJECT = false;
 
 	/**
-	 * Synchronizes the managed {@value #CLANGD_CONFIG_FILE_NAME} content with the currently detected
+	 * Synchronizes the managed .clangd content with the currently detected
 	 * compilation database directory.
 	 *
 	 * @param project project whose managed configuration should be synchronized
@@ -69,7 +69,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	}
 
 	/**
-	 * Synchronizes the managed {@value #CLANGD_CONFIG_FILE_NAME} content using a caller-provided
+	 * Synchronizes the managed .clangd content using a caller-provided
 	 * automatically detected directory.
 	 *
 	 * @param project project whose managed configuration should be synchronized
@@ -91,19 +91,13 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			return Optional.empty();
 		}
 		Optional<String> customDirectory = customOverride(project);
-		Optional<String> automaticDirectory = customDirectory.isPresent() ? Optional.empty()
-				: automaticDirectorySupplier.get();
-		if (customDirectory.isEmpty() && automaticDirectory.isEmpty()
-				&& hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT)) {
+		Optional<String> automaticDirectory = automaticDirectorySupplier.get();
+		if (customDirectory.isEmpty() && automaticDirectory.isEmpty()) {
 			return Optional.empty();
 		}
 
-		// Check for the special case of a parent .clangd configuration file,
-		// which should be used when there is no customDirectory or automaticDirectory.
-		// If there is no parent .clangd configuration, then the default behavior is to use the "Ancestors" fallback.
-		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElseGet(() -> {
-			return hasParentClangdConfiguration(project, SKIP_LOCAL_PROJECT) ? NONE : COMPILATION_DATABASE_ANCESTORS;
-		});
+		String configuredDirectory = customDirectory.filter(value -> !value.isBlank()).or(() -> automaticDirectory)
+				.orElse(NONE);
 		return Optional.of(setCompilationDatabase(project, configuredDirectory));
 	}
 
@@ -179,7 +173,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	private Optional<String> customOverride(IProject project) {
 		String[] path = { "" }; //$NON-NLS-1$
 		configuration.call(c -> path[0] = c.options(project).compilationDatabaseOverride());
-		return Optional.ofNullable(path[0]).map(String::trim).filter(value -> !value.isBlank());
+		return Optional.ofNullable(path[0]).map(String::trim);
 	}
 
 	/**

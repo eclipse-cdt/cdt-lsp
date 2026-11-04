@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
 import org.eclipse.cdt.lsp.clangd.ClangdOptions;
@@ -62,6 +63,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 	private final Label compilationDatabaseBuildConfiguration;
 	private final IProject project;
 	private final boolean isProjectScope;
+	private AtomicBoolean initDatabaseOverrideText = new AtomicBoolean(false);
 	private final ClangdCompilationDatabaseSupport compilationDatabaseSupport;
 	private final Map<PreferenceMetadata<String>, Text> texts;
 	private boolean enableProjectSpecificSettings = true;
@@ -238,10 +240,12 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		String compileCommandsPath = status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath(); //$NON-NLS-1$
 		var noCustomOverrideInPrefs = loadedOptions.map(options -> options.compilationDatabaseOverride().isBlank())
 				.orElse(true);
-		if (noCustomOverrideInPrefs && compilationDatabaseOverride.getText().isBlank()
-				&& compileCommandsPathFromConfigFile.isPresent() && automaticManagementEnabled) {
+		if (noCustomOverrideInPrefs && status.buildConfiguration().isBlank() && !initDatabaseOverrideText.get()
+				&& compilationDatabaseOverride.getText().isBlank() && compileCommandsPathFromConfigFile.isPresent()
+				&& automaticManagementEnabled) {
 			// Use the path from the .clangd file if available and no custom override is set.
 			compilationDatabaseOverride.setText(compileCommandsPathFromConfigFile.get());
+			initDatabaseOverrideText.set(true);
 		}
 		// Schedule a job to read the compile_commands.json path from the .clangd file if it's not already set and the job is available.
 		if (status.compileCommandsPath().isBlank() && getCompileCommandsPathJob.isPresent() && noCustomOverrideInPrefs
@@ -323,6 +327,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		loadedOptions = Optional.of(options);
 		setCompilationDatabase.setSelection(options.setCompilationDatabase());
 		compilationDatabaseOverride.setText(options.compilationDatabaseOverride());
+		initDatabaseOverrideText.set(false);
 		enablePreferenceContent(enable);
 	}
 
