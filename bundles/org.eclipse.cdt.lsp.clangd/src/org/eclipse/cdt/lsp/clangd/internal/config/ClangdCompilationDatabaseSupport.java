@@ -96,6 +96,10 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			return Optional.empty();
 		}
 
+		if (hasParentClangdConfiguration(project, SKIP_LOCAL_PROJECT)) {
+			return Optional.empty();
+		}
+
 		String configuredDirectory = customDirectory.filter(value -> !value.isBlank()).or(() -> automaticDirectory)
 				.orElse(NONE);
 		return Optional.of(setCompilationDatabase(project, configuredDirectory));

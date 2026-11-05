@@ -33,10 +33,10 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.internal.core.settings.model.CConfigurationDescriptionCache;
 import org.eclipse.cdt.lsp.clangd.ClangdConfiguration;
 import org.eclipse.cdt.lsp.clangd.ClangdMetadata;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus.Source;
-import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetter;
 import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSetterBase;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseStatus.Source;
+import org.eclipse.cdt.lsp.clangd.internal.config.ClangdCompilationDatabaseSupport;
 import org.eclipse.cdt.lsp.clangd.tests.TestUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -61,16 +61,18 @@ final class ClangdCompilationDatabaseSetterTest {
 	private static final String RELATIVE_DIR_PATH_BUILD_CUSTOM = "build" + File.separator + "custom";
 	private static final String WINDOWS_RELATIVE_DIR_PATH_BUILD_DEBUG = "build\\debug"; //$NON-NLS-1$
 	private static final String ANCESTORS_COMPILATION_DATABASE = "Ancestors"; //$NON-NLS-1$
-	private static final String BRACED_CDB_SETTING = "CompileFlags: {CompilationDatabase: {%s}}";
+	private static final String BRACED_CDB_SETTING = "CompileFlags: {CompilationDatabase: %s, Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String EXPANDED_CDB_SETTING = "CompileFlags: {Add: -ferror-limit=500, CompilationDatabase: %s, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
 	private static final String EXPANDED_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags: {Add: -ferror-limit=500, Compiler: g++}\nDiagnostics:\n  ClangTidy: {Add: modernize*, Remove: modernize-use-trailing-return-type}";
 	private static final String INLINE_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags:{Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String INLINE_CDB_SETTING_WITH_DATABASE = "CompileFlags:{Add: -ferror-limit=500, CompilationDatabase: %s}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION = "CompileFlags: {CompilationDatabase: %s, Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
+	private static final String INLINE_MANAGED_CDB_SETTING_WITHOUT_TRAILING_OPTION = "CompileFlags: {Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String INLINE_TRAILING_OPTION_ONLY = "CompileFlags: {Add: -ferror-limit=500}\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String DEFAULT_CDB_SETTING = "CompileFlags: {CompilationDatabase: %s}";
 	private static final String BLOCK_CDB_SETTING_WITHOUT_DATABASE = "CompileFlags:\n  Add: -ferror-limit=500\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String BLOCK_CDB_SETTING_WITH_DATABASE = "CompileFlags:\n  CompilationDatabase: %s\n  Add: -ferror-limit=500\nDiagnostics:\n  ClangTidy: modernize*";
+	private static final String BLOCK_CDB_SETTING_WITH_REMOVED_DATABASE = "CompileFlags:\n  \n  Add: -ferror-limit=500\nDiagnostics:\n  ClangTidy: modernize*";
 	private static final String NO_COMPILE_FLAGS_SETTING = "Diagnostics:\n  ClangTidy: modernize*";
 	private static final String APPENDED_COMPILE_FLAGS_SETTING = "Diagnostics:\n  ClangTidy: modernize*\n\nCompileFlags:\n  CompilationDatabase: %s";
 	private final ClangdCompilationDatabaseSetter clangdCompilationDatabaseSetter = new ClangdCompilationDatabaseSetter();
@@ -413,19 +415,20 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Verifies that synchronize(...) writes the Ancestors fallback instead of removing the managed
-	 * CompilationDatabase entry when no directory can be detected.
+	 * Verifies that synchronize(...) removes a .clangd file when neither
+	 * a custom override nor an automatically detected directory is available. Then the Ancestors fallback is used.
+	 * clangd will seach in ancestral directories for a compile_commands.json file.
 	 */
 	@Test
-	void testSupportSynchronizeUsesAncestorsWhenNoCompilationDatabaseIsDetected()
+	void testSupportSynchronizeDoesUpdateCompilationDatabaseWhenNoDirectoryIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No update job has been created!");
+		assertTrue(optJob.isPresent(), "No update job should be created when no directory can be resolved!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(String.format(DEFAULT_CDB_SETTING, ANCESTORS_COMPILATION_DATABASE).replaceAll("\\R", "\n"),
-				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
+		assertTrue(!configFile.exists(),
+				"The .clangd file should have been removed when no directory can be resolved!");
 	}
 
 	/**
@@ -445,52 +448,53 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Verifies that a block-style CompilationDatabase entry is rewritten to the Ancestors fallback
-	 * while preserving the remaining CompileFlags content.
+	 * Verifies that synchronize(...) removes CompilationDatabase entry from block-style content when no
+	 * custom override or automatic directory is available.
 	 */
 	@Test
-	void testSupportSynchronizeUpdatesManagedCompilationDatabaseToAncestorsInCompileFlagsBlock()
+	void testSupportSynchronizeDoesUpdateManagedCompilationDatabaseInCompileFlagsBlockWhenNoDirectoryIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(BLOCK_CDB_SETTING_WITH_DATABASE, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No update job has been created!");
+		assertTrue(optJob.isPresent(),
+				"An update job should be created when no directory can be resolved to remove the database entry!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(String.format(BLOCK_CDB_SETTING_WITH_DATABASE, ANCESTORS_COMPILATION_DATABASE).replaceAll("\\R", "\n"),
+		assertEquals(BLOCK_CDB_SETTING_WITHOUT_DATABASE.replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	/**
-	 * Verifies that an inline CompilationDatabase entry is rewritten to Ancestors without removing
-	 * unrelated inline or sibling YAML settings.
+	 * Verifies that synchronize(...) removes inline CompilationDatabase content and keeps sibling settings
+	 * unchanged when no effective directory can be resolved.
 	 */
 	@Test
-	void testSupportSynchronizeUpdatesInlineCompilationDatabaseToAncestorsWithOtherSettings()
+	void testSupportSynchronizeDoesNotUpdateInlineCompilationDatabaseWithOtherSettingsWhenNoDirectoryIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No update job has been created!");
+		assertTrue(optJob.isPresent(), "Update job should be created when no directory can be resolved!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(String.format(EXPANDED_CDB_SETTING, ANCESTORS_COMPILATION_DATABASE).replaceAll("\\R", "\n"),
+		assertEquals(EXPANDED_CDB_SETTING_WITHOUT_DATABASE.replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	/**
-	 * Verifies that an inline managed CompilationDatabase at the start of a CompileFlags map is
-	 * replaced by Ancestors while keeping trailing options intact.
+	 * Verifies that an inline managed CompilationDatabase at the start of a CompileFlags map will be removed and the trailing settings will be kept
 	 */
 	@Test
-	void testSupportSynchronizeUpdatesManagedInlineCompilationDatabaseToAncestorsAndKeepsTrailingSettings()
+	void testSupportSynchronizeDoesNotUpdateManagedInlineCompilationDatabaseAndKeepsTrailingSettingsWhenNoDirectoryIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION,
 				RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No update job has been created!");
+		assertTrue(optJob.isPresent(), "Update job should be created when no directory can be resolved!");
 		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(String.format(INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION, ANCESTORS_COMPILATION_DATABASE)
-				.replaceAll("\\R", "\n"),
+		assertEquals(
+				String.format(INLINE_MANAGED_CDB_SETTING_WITHOUT_TRAILING_OPTION, RELATIVE_DIR_PATH_BUILD_DEFAULT)
+						.replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
