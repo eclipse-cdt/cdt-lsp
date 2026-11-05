@@ -240,7 +240,7 @@ public final class CompilationDatabaseArea extends ConfigurationArea<ClangdOptio
 		String compileCommandsPath = status.compileCommandsPath().isBlank() ? "-" : status.compileCommandsPath(); //$NON-NLS-1$
 		var noCustomOverrideInPrefs = loadedOptions.map(options -> options.compilationDatabaseOverride().isBlank())
 				.orElse(true);
-		if (noCustomOverrideInPrefs && status.buildConfiguration().isBlank() && !initDatabaseOverrideText.get()
+		if (noCustomOverrideInPrefs && status.source() == Source.FILE && !initDatabaseOverrideText.get()
 				&& compilationDatabaseOverride.getText().isBlank() && compileCommandsPathFromConfigFile.isPresent()
 				&& automaticManagementEnabled) {
 			// Use the path from the .clangd file if available and no custom override is set.
