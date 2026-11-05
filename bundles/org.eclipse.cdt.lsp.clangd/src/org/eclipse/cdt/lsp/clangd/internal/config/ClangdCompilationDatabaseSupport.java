@@ -96,7 +96,9 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			return Optional.empty();
 		}
 
-		if (hasParentClangdConfiguration(project, SKIP_LOCAL_PROJECT)) {
+		// Skip synchronization when a parent project has a .clangd file, but only if the current project does not have its own .clangd file.
+		// This allows the removal of a ComilationDatabse entry.
+		if (hasParentClangdConfiguration(project, DONT_SKIP_LOCAL_PROJECT)) {
 			return Optional.empty();
 		}
 
