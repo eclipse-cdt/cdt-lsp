@@ -46,7 +46,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	@Override
 	public IEditorDescriptor[] overrideEditors(IEditorInput editorInput, IContentType contentType,
 			IEditorDescriptor[] editorDescriptors) {
-		if (isNoCElement(contentType)) {
+		if (!isCElement(contentType)) {
 			return editorDescriptors;
 		}
 		if (isEnabledFor(editorInput, contentType)) {
@@ -115,11 +115,11 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		wsJob.schedule();
 	}
 
-	private boolean isNoCElement(IContentType contentType) {
+	private boolean isCElement(IContentType contentType) {
 		if (contentType == null) {
-			return true;
+			return false;
 		}
-		return !LspUtils.isCContentType(contentType.getId());
+		return LspUtils.isCContentType(contentType.getId());
 	}
 
 	private IEditorDescriptor[] editorFilter(String editorId, IEditorDescriptor[] editorDescriptors) {
@@ -138,15 +138,11 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	}
 
 	private IEditorDescriptor getEditorDescriptor(IEditorInput editorInput, IContentType contentType) {
-		if (isNoCElement(contentType))
-			return null;
-
-		if (isEnabledFor(editorInput, contentType)) {
+		if (isCElement(contentType) && isEnabledFor(editorInput, contentType)) {
 			return getEditorDescriptorById(editorInput.getName(), LspPlugin.LSP_C_EDITOR_ID, contentType); // return LSP based C/C++ Editor
 		}
-		// TODO: return null; when either https://github.com/eclipse-cdt/cdt/pull/310 or
-		// https://github.com/eclipse/tm4e/pull/500 has been merged.
-		return getEditorDescriptorById(editorInput.getName(), LspPlugin.C_EDITOR_ID, contentType); // return C/C++ Editor
+
+		return null;
 	}
 
 	private IEditorDescriptor getEditorDescriptorById(String fileName, String editorId, IContentType contentType) {
