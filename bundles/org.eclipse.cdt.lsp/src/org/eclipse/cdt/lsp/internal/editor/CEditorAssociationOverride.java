@@ -86,15 +86,14 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 		if (cLanguageServerProvider == null)
 			return false;
 		IResource resource = editorInput.getAdapter(IResource.class);
-		if (resource != null) {
-			boolean enabled = cLanguageServerProvider.isEnabledFor(resource.getProject());
-			if (enabled) {
-				deleteCodanMarkers(resource);
-			}
-			return enabled;
+		var project = resource != null ? resource.getProject() : null;
+		boolean enabled = cLanguageServerProvider.isEnabledFor(project);
+
+		if (enabled && resource != null) {
+			deleteCodanMarkers(resource);
 		}
-		// When resource == null it's an external file: Check if the file is already opened, if not check the active editor:
-		return LspUtils.isFileOpenedInLspEditor(editorInput, contentType);
+
+		return enabled;
 	}
 
 	private void deleteCodanMarkers(IResource resource) {
