@@ -19,7 +19,7 @@ jobs:
           maven-version: 3.9.9
       - name: Download clangd
         run: |
-          curl -L https://github.com/clangd/clangd/releases/download/15.0.6/clangd-linux-15.0.6.zip > clangd.zip
+          curl -L https://github.com/clangd/clangd/releases/download/23.1.0/clangd-linux-23.1.0.zip > clangd.zip
           unzip clangd.zip
       - name: Build with Maven
         run: |
