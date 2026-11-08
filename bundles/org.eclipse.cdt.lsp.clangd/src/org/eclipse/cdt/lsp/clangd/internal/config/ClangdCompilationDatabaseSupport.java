@@ -102,8 +102,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			return Optional.empty();
 		}
 
-		String configuredDirectory = customDirectory.filter(value -> !value.isBlank()).or(() -> automaticDirectory)
-				.orElse(NONE);
+		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElse(NONE);
 		return Optional.of(setCompilationDatabase(project, configuredDirectory));
 	}
 
@@ -179,7 +178,7 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 	private Optional<String> customOverride(IProject project) {
 		String[] path = { "" }; //$NON-NLS-1$
 		configuration.call(c -> path[0] = c.options(project).compilationDatabaseOverride());
-		return Optional.ofNullable(path[0]).map(String::trim);
+		return Optional.ofNullable(path[0]).map(String::trim).filter(value -> !value.isBlank());
 	}
 
 	/**

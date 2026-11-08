@@ -415,20 +415,18 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Verifies that synchronize(...) removes a .clangd file when neither
-	 * a custom override nor an automatically detected directory is available. Then the Ancestors fallback is used.
-	 * clangd will seach in ancestral directories for a compile_commands.json file.
+	 * Verifies that synchronize(...) does not remove a .clangd file when neither
+	 * a custom override nor an automatically detected directory is available.
 	 */
 	@Test
-	void testSupportSynchronizeDoesUpdateCompilationDatabaseWhenNoDirectoryIsDetected()
+	void testSupportSynchronizeDoesNotUpdateCompilationDatabaseWhenNoDirectoryIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "No update job should be created when no directory can be resolved!");
-		optJob.get().join(5000, new NullProgressMonitor());
-		assertTrue(!configFile.exists(),
-				"The .clangd file should have been removed when no directory can be resolved!");
+		assertTrue(optJob.isEmpty(), "No update job should be created when no directory can be resolved!");
+		assertEquals(String.format(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT).replaceAll("\\R", "\n"),
+				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	/**
@@ -448,24 +446,24 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
-	 * Verifies that synchronize(...) removes CompilationDatabase entry from block-style content when no
+	 * Verifies that synchronize(...) does not modify CompilationDatabase entry from block-style content when no
 	 * custom override or automatic directory is available.
 	 */
 	@Test
-	void testSupportSynchronizeDoesUpdateManagedCompilationDatabaseInCompileFlagsBlockWhenNoDirectoryIsDetected()
+	void testSupportSynchronizeDoesNotUpdateManagedCompilationDatabaseInCompileFlagsBlockWhenNoDirectoryIsDetected()
 			throws IOException, CoreException, OperationCanceledException, InterruptedException {
 		var configFile = createConfigFile(BLOCK_CDB_SETTING_WITH_DATABASE, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(),
-				"An update job should be created when no directory can be resolved to remove the database entry!");
-		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(BLOCK_CDB_SETTING_WITHOUT_DATABASE.replaceAll("\\R", "\n"),
+		assertTrue(optJob.isEmpty(),
+				"An update job should not be created when no directory can be resolved to remove the database entry!");
+		assertEquals(
+				String.format(BLOCK_CDB_SETTING_WITH_DATABASE, RELATIVE_DIR_PATH_BUILD_DEFAULT).replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	/**
-	 * Verifies that synchronize(...) removes inline CompilationDatabase content and keeps sibling settings
+	 * Verifies that synchronize(...) does not remove inline CompilationDatabase content and keeps sibling settings
 	 * unchanged when no effective directory can be resolved.
 	 */
 	@Test
@@ -474,14 +472,13 @@ final class ClangdCompilationDatabaseSetterTest {
 		var configFile = createConfigFile(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "Update job should be created when no directory can be resolved!");
-		optJob.get().join(5000, new NullProgressMonitor());
-		assertEquals(EXPANDED_CDB_SETTING_WITHOUT_DATABASE.replaceAll("\\R", "\n"),
+		assertTrue(optJob.isEmpty(), "Update job should not be created when no directory can be resolved!");
+		assertEquals(String.format(EXPANDED_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT).replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
 
 	/**
-	 * Verifies that an inline managed CompilationDatabase at the start of a CompileFlags map will be removed and the trailing settings will be kept
+	 * Verifies that an inline managed CompilationDatabase at the start of a CompileFlags will not be removed when no effective directory can be resolved and that trailing settings are kept.
 	 */
 	@Test
 	void testSupportSynchronizeDoesNotUpdateManagedInlineCompilationDatabaseAndKeepsTrailingSettingsWhenNoDirectoryIsDetected()
@@ -490,10 +487,9 @@ final class ClangdCompilationDatabaseSetterTest {
 				RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isPresent(), "Update job should be created when no directory can be resolved!");
-		optJob.get().join(5000, new NullProgressMonitor());
+		assertTrue(optJob.isEmpty(), "Update job should not be created when no directory can be resolved!");
 		assertEquals(
-				String.format(INLINE_MANAGED_CDB_SETTING_WITHOUT_TRAILING_OPTION, RELATIVE_DIR_PATH_BUILD_DEFAULT)
+				String.format(INLINE_MANAGED_CDB_SETTING_WITH_TRAILING_OPTION, RELATIVE_DIR_PATH_BUILD_DEFAULT)
 						.replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
