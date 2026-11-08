@@ -92,7 +92,8 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 		}
 		Optional<String> customDirectory = customOverride(project);
 		Optional<String> automaticDirectory = automaticDirectorySupplier.get();
-		if (customDirectory.isEmpty() && automaticDirectory.isEmpty()) {
+		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElse(NONE);
+		if (configuredDirectory.isBlank()) {
 			return Optional.empty();
 		}
 
@@ -102,7 +103,6 @@ public final class ClangdCompilationDatabaseSupport extends ClangdCompilationDat
 			return Optional.empty();
 		}
 
-		String configuredDirectory = customDirectory.or(() -> automaticDirectory).orElse(NONE);
 		return Optional.of(setCompilationDatabase(project, configuredDirectory));
 	}
 

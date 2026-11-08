@@ -415,6 +415,18 @@ final class ClangdCompilationDatabaseSetterTest {
 	}
 
 	/**
+	 * Verifies that synchronize(...) does not update the .clangd file when an automatically detected directory returns a blank string.
+	 */
+	@Test
+	void testSupportSynchronizeDoesNotUpdateOnBlankAutomaticallyDetectedPath()
+			throws IOException, CoreException, OperationCanceledException, InterruptedException {
+		cwdBuilder = new Path("  	");
+		when(setting.getBuilderCWD()).thenReturn(cwdBuilder);
+		var optJob = clangdCompilationDatabaseSetter.cProjectDescriptionEventHandler(event);
+		assertTrue(optJob.isEmpty(), "An update job should not be created when automatic directory is blank!");
+	}
+
+	/**
 	 * Verifies that synchronize(...) does not remove a .clangd file when neither
 	 * a custom override nor an automatically detected directory is available.
 	 */
@@ -424,7 +436,7 @@ final class ClangdCompilationDatabaseSetterTest {
 		var configFile = createConfigFile(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT);
 		var support = new ClangdCompilationDatabaseSupport();
 		var optJob = support.synchronize(project, java.util.Optional.empty());
-		assertTrue(optJob.isEmpty(), "No update job should be created when no directory can be resolved!");
+		assertTrue(optJob.isEmpty(), "An update job should not be created when no directory can be resolved!");
 		assertEquals(String.format(DEFAULT_CDB_SETTING, RELATIVE_DIR_PATH_BUILD_DEFAULT).replaceAll("\\R", "\n"),
 				Files.readString(configFile.getLocation().toFile().toPath()).replaceAll("\\R", "\n"));
 	}
