@@ -116,11 +116,19 @@ public class DefaultClangdCompilationDatabaseProvider implements ClangdCompilati
 	 * @return true if .clangd is not in project root directory and in one of its parent folders.
 	 */
 	private boolean isClangdFileInParentFolders(IProject project) {
-		return hasClangdFileInParentFolders(project);
+		return hasClangdFileInParentFolders(project, false);
 	}
 
-	static boolean hasClangdFileInParentFolders(IProject project) {
-		if (project.getFile(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME).exists()) {
+	/**
+	 * Check if .clangd file is not in the project root but in one of its parent folders.
+	 * All parent folders until the root directory of the file system are being searched.
+	 * This covers the use case that the .clangd file is located in a projects parent folder.
+	 * @param project
+	 * @param skipProject if true, the project root folder is not checked for .clangd file.
+	 * @return true if .clangd is not in project root directory and in one of its parent folders.
+	 */
+	static boolean hasClangdFileInParentFolders(IProject project, boolean skipProject) {
+		if (!skipProject && project.getFile(ClangdCompilationDatabaseSetterBase.CLANGD_CONFIG_FILE_NAME).exists()) {
 			return false;
 		}
 		//Okay, lets start in parent folder, if it exists, to look for .clangd:

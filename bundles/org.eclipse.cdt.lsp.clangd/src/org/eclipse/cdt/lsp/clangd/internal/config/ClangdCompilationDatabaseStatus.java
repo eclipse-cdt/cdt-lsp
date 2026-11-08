@@ -33,9 +33,6 @@ public record ClangdCompilationDatabaseStatus(Source source, String configuredDi
 	 * Identifies which input currently determines the effective compilation database location.
 	 */
 	public enum Source {
-		ANCESTORS,
-		AUTOMATIC,
-		CUSTOM,
-		NONE
+		ANCESTORS, FILE, AUTOMATIC, CUSTOM, NONE
 	}
 }
