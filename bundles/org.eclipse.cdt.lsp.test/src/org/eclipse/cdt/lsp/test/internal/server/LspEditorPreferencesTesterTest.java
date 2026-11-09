@@ -27,6 +27,7 @@ import org.eclipse.cdt.lsp.server.ICLanguageServerProvider;
 import org.eclipse.cdt.lsp.test.TestUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.ui.ide.IDE;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -289,12 +290,18 @@ public final class LspEditorPreferencesTesterTest {
 		//WHEN an external header file shall be opened in the C/C++ Editor:
 		File externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		externalFile.createNewFile();
-		//THEN the LS will be enabled for the external file, because we assume that is opened via hyperlink from the opened main.c:
+
+		//THEN it will be opened in the C/C++ Editor (LSP), because it is opened while workspace active page editor was C/C++ Editor (LSP) for main.c:
+		String externalFileEditorId = IDE.getEditorDescriptor(externalFile.toURI().toString(), true, false).getId();
+		var externalFileEditorPart = TestUtils.openInEditor(externalFile.toURI(), externalFileEditorId);
+		assertEquals(LspPlugin.LSP_C_EDITOR_ID, externalFileEditorPart.getEditorSite().getId());
+
+		//THEN the LS will be enabled for the external file, because it is now open in the C/C++ Editor (LSP)
 		assertTrue(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
 
 		//clean-up:
 		TestUtils.closeEditor(lspEditorPart, false);
+		TestUtils.closeEditor(externalFileEditorPart, false);
 		externalFile.delete();
 	}
-
 }

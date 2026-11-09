@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.lsp4e.LSPEclipseUtils;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorRegistry;
@@ -75,6 +76,16 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 	@Override
 	public IEditorDescriptor overrideDefaultEditor(String fileName, IContentType contentType,
 			IEditorDescriptor editorDescriptor) {
+		if (!isCElement(contentType)) {
+			return editorDescriptor;
+		}
+		// this method is used to override default editor while opening via URI
+		// continue opening file in LSP C/C++ editor:
+		// - if file is already open in LSP C/C++ editor, or
+		// - if LSP C/C++ editor is active (happens while opening a hyperlink from LSP C/C++ editor)
+		if (LspUtils.isFileOpenedInLspEditorOrLspEditorIsActive(LSPEclipseUtils.toUri(fileName))) {
+			return getEditorDescriptorById(fileName, LspPlugin.LSP_C_EDITOR_ID, contentType); // return LSP based C/C++ Editor
+		}
 		IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(fileName);
 		if (resource != null && resource instanceof IFile) {
 			return overrideDefaultEditor(new FileEditorInput((IFile) resource), contentType, editorDescriptor);
