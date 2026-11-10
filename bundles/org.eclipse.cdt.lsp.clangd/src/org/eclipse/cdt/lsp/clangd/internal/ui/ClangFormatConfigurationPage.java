@@ -12,8 +12,10 @@
 
 package org.eclipse.cdt.lsp.clangd.internal.ui;
 
+import org.eclipse.cdt.core.model.ICProject;
 import org.eclipse.cdt.lsp.clangd.ClangFormatFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferencePageContainer;
@@ -45,7 +47,17 @@ public final class ClangFormatConfigurationPage extends PropertyPage implements 
 	@Override
 	public void setContainer(IPreferencePageContainer container) {
 		super.setContainer(container);
-		project = (IProject) getElement();
+		project = resolveProject(getElement());
+	}
+
+	private IProject resolveProject(IAdaptable element) {
+		if (element instanceof IProject selectedProject) {
+			return selectedProject;
+		}
+		if (element instanceof ICProject cProject) {
+			return cProject.getProject();
+		}
+		return element != null ? element.getAdapter(IProject.class) : null;
 	}
 
 	@Override
