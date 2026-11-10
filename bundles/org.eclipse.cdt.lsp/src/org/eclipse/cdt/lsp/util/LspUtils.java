@@ -50,7 +50,7 @@ public class LspUtils {
 		return (id.startsWith("org.eclipse.cdt.core.c") && (id.endsWith("Source") || id.endsWith("Header"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	public static boolean isFileOpenedInLspEditor(URI uri) {
+	public static boolean isFileOpenedInLspEditorOrLspEditorIsActive(URI uri) {
 		if (uri == null) {
 			return false;
 		}
@@ -58,7 +58,7 @@ public class LspUtils {
 		if (!editors.isEmpty()) {
 			for (IEditorReference editor : editors) {
 				IEditorInput editorInput = null;
-				URI editorUnputURI = null;
+				URI editorInputURI = null;
 				try {
 					editorInput = editor.getEditorInput();
 				} catch (PartInitException e) {
@@ -67,12 +67,12 @@ public class LspUtils {
 				}
 
 				if (editorInput instanceof IURIEditorInput) {
-					editorUnputURI = ((IURIEditorInput) editorInput).getURI();
+					editorInputURI = ((IURIEditorInput) editorInput).getURI();
 				} else if (editorInput instanceof FileEditorInput) {
-					editorUnputURI = ((FileEditorInput) editorInput).getFile().getLocationURI();
+					editorInputURI = ((FileEditorInput) editorInput).getFile().getLocationURI();
 				}
 
-				if (uri.equals(editorUnputURI)) {
+				if (uri.equals(editorInputURI)) {
 					// should return false when an external header file with same URI is opened in a LSP editor
 					// and non LSP editor and tab switching from a non LSP editor to the tab with the file in the non LSP editor:
 					return LspPlugin.LSP_C_EDITOR_ID.equals(editor.getId()) && isLspEditorActive();
@@ -81,7 +81,7 @@ public class LspUtils {
 			// the file has not been opened yet -> goto definition/declaration case
 			return isLspEditorActive();
 		}
-		return true; // we're lazy here
+		return false;
 	}
 
 	public static Map<Integer, URI> getFilesInLspBasedEditor() {
