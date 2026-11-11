@@ -83,8 +83,14 @@ class HasLanguageServerPropertyTesterTest {
 		//AND is an external file which is not opened:
 		externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		//WHEN the file is not opened,
-		//THEN the hasLanguageServerPropertyTester.test returns TRUE for the given file URI:
-		assertTrue(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
+
+		// Note currently it is assumed that language server provider cannot handle non-project resource
+		// thus it will not see workspace-wide configuration properties and ignore that LSP is preferred
+		// for workspace.
+		// Therefore property tester would return false if no LSP editor is open, which is the case here.
+
+		//THEN the hasLanguageServerPropertyTester.test returns FALSE for the given file URI:
+		assertFalse(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
 	}
 
 	/**

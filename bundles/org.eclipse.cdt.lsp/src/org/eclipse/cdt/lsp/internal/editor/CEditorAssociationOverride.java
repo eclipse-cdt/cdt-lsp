@@ -98,7 +98,7 @@ public class CEditorAssociationOverride implements IEditorAssociationOverride {
 			return false;
 		IResource resource = editorInput.getAdapter(IResource.class);
 		var project = resource != null ? resource.getProject() : null;
-		boolean enabled = cLanguageServerProvider.isEnabledFor(project);
+		boolean enabled = project != null ? cLanguageServerProvider.isEnabledFor(project) : false;
 
 		if (enabled && resource != null) {
 			deleteCodanMarkers(resource);
