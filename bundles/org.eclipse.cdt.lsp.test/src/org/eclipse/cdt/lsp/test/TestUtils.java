@@ -39,6 +39,13 @@ import org.junit.jupiter.api.TestInfo;
 
 public class TestUtils {
 
+	// set for workspace
+	public static void setWorkspaceLspPreferred(boolean value) {
+		ServiceCaller.callOnce(TestUtils.class, EditorConfiguration.class, //
+				cc -> cc.storage(null).save(value, EditorMetadata.Predefined.preferLspEditor));
+	}
+
+	// set for project
 	public static void setLspPreferred(IProject project, boolean value) {
 		ServiceCaller.callOnce(TestUtils.class, EditorConfiguration.class, //
 				cc -> cc.storage(project).save(value, EditorMetadata.Predefined.preferLspEditor));

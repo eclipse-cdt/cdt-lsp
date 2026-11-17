@@ -56,16 +56,41 @@ class HasLanguageServerPropertyTesterTest {
 	}
 
 	/**
-	 * Tests whether LS enable test returns true for an external file when no (LSP) editor is opened.
+	 * Tests whether LS enable test returns false for an external file when no (LSP) editor is opened
+	 * with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
 	 * @throws IOException
 	 */
 	@Test
-	public void testLsNotEnabledForExternalFile_NoEditorOpen() throws CoreException, IOException {
-		//GIVEN is an external file which is not opened:
+	public void testWorkspaceLsNotEnabledForExternalFile_NoEditorOpen() throws CoreException, IOException {
+		//GIVEN is a workspace with DISABLED "Prefer C/C++ Editor (LSP)" in the preferences:
+		TestUtils.setWorkspaceLspPreferred(false);
+		//AND is an external file which is not opened:
 		externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
 		//WHEN the file is not opened,
-		//THEN the hasLanguageServerPropertyTester.test returns TRUE for the given file URI:
-		assertTrue(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
+		//THEN the hasLanguageServerPropertyTester.test returns FALSE for the given file URI:
+		assertFalse(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
+	}
+
+	/**
+	 * Tests whether LS enable test returns false for an external file when no (LSP) editor is opened
+	 * with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
+	 * @throws IOException
+	 */
+	@Test
+	public void testWorkspaceLsIsEnabledForExternalFile_OpenedInCEditor() throws CoreException, IOException {
+		//GIVEN is a workspace with ENABLED "Prefer C/C++ Editor (LSP)" in the preferences:
+		TestUtils.setWorkspaceLspPreferred(true);
+		//AND is an external file which is not opened:
+		externalFile = new File(TEMP_DIR, EXTERNAL_HEADER_HPP);
+		//WHEN the file is not opened,
+
+		// Note currently it is assumed that language server provider cannot handle non-project resource
+		// thus it will not see workspace-wide configuration properties and ignore that LSP is preferred
+		// for workspace.
+		// Therefore property tester would return false if no LSP editor is open, which is the case here.
+
+		//THEN the hasLanguageServerPropertyTester.test returns FALSE for the given file URI:
+		assertFalse(new HasLanguageServerPropertyTester().test(externalFile.toURI(), null, null, null));
 	}
 
 	/**

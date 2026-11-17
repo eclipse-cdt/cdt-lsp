@@ -95,6 +95,6 @@ public class HasLanguageServerPropertyTester extends PropertyTester {
 		fetchProject(uri);
 		//FIXME: AF: consider changing signature here from IProject to Object
 		return project.map(cLanguageServerProvider::isEnabledFor) //
-				.orElseGet(() -> LspUtils.isFileOpenedInLspEditor(uri));
+				.orElseGet(() -> LspUtils.isFileOpenedInLspEditorOrLspEditorIsActive(uri));
 	}
 }
